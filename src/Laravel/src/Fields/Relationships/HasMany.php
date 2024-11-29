@@ -351,9 +351,9 @@ class HasMany extends ModelRelationField implements HasFieldsContract
             // If the HasMany resource has $with or $modifyBuilder specified,
             // it is necessary to re-execute the query to retrieve all items of the current HasMany.
 
-            $casted = $this->getRelatedModel();
-            $relation = $casted?->{$this->getRelationName()}();
             if(! \is_null($this->modifyBuilder)) {
+                $casted = $this->getRelatedModel();
+                $relation = $casted?->{$this->getRelationName()}();
                 $resource->customQueryBuilder(value($this->modifyBuilder, $relation, true));
             }
             $items = $resource->getItems();
