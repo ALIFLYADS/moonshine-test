@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Fields\Relationships;
 
+use App\Models\Base\Comment;
 use Closure;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Database\Eloquent\Model;
@@ -340,13 +341,25 @@ class HasMany extends ModelRelationField implements HasFieldsContract
      */
     protected function getTablePreview(): TableBuilderContract
     {
-        $items = $this->toValue();
+        $resource = $this->getResource();
+
+        if(\is_null($this->modifyBuilder) && $resource->getWith() === []) {
+            $items = $this->toValue();
+        } else {
+            // In the preview mode of the parent resource on the IndexPage, when retrieving elements,
+            // the $with and $modifyBuilder of the current HasMany resource are not taken into account.
+            // If the HasMany resource has $with or $modifyBuilder specified,
+            // it is necessary to re-execute the query to retrieve all items of the current HasMany.
+
+            $casted = $this->getRelatedModel();
+            $relation = $casted?->{$this->getRelationName()}();
+            $resource->customQueryBuilder(value($this->modifyBuilder, $relation, true));
+            $items = $resource->getItems();
+        }
 
         if (filled($items)) {
             $items = $items->take($this->getLimit());
         }
-
-        $resource = $this->getResource();
 
         return TableBuilder::make(items: $items)
             ->fields($this->getFieldsOnPreview())
@@ -529,7 +542,7 @@ class HasMany extends ModelRelationField implements HasFieldsContract
         $resource->customQueryBuilder(
             \is_null($this->modifyBuilder)
                 ? $relation
-                : value($this->modifyBuilder, $relation)
+                : value($this->modifyBuilder, $relation, false)
         );
 
         $items = $resource->getItems();
