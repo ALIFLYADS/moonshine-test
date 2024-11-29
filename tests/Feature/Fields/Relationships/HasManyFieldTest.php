@@ -185,6 +185,14 @@ it('modify builder', function () {
     ]);
 
     asAdmin()
+        ->get($this->moonshineCore->getRouter()->getEndpoints()->toPage(page: IndexPage::class, resource: $resource))
+        ->assertOk()
+        ->assertSee('Comments title')
+        ->assertSee($commentFirst->content)
+        ->assertDontSee($commentLast->content)
+    ;
+
+    asAdmin()
         ->get($this->moonshineCore->getRouter()->getEndpoints()->toPage(page: FormPage::class, resource: $resource, params: ['resourceItem' => $item->id]))
         ->assertOk()
         ->assertSee('Comments title')
