@@ -353,7 +353,9 @@ class HasMany extends ModelRelationField implements HasFieldsContract
 
             $casted = $this->getRelatedModel();
             $relation = $casted?->{$this->getRelationName()}();
-            $resource->customQueryBuilder(value($this->modifyBuilder, $relation, true));
+            if(! \is_null($this->modifyBuilder)) {
+                $resource->customQueryBuilder(value($this->modifyBuilder, $relation, true));
+            }
             $items = $resource->getItems();
         }
 
