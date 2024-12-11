@@ -55,13 +55,13 @@ trait WithLink
      * @param  string|(Closure(string $value, static $ctx): string)  $name
      */
     public function link(
-        string|Closure $link,
+        null|string|Closure $link,
         string|Closure $name = '',
         ?string $icon = null,
         bool $withoutIcon = false,
         bool $blank = false,
     ): static {
-        $this->isLink = true;
+        $this->isLink = !is_null($link);
 
         $this->linkIcon = $icon;
         $this->withoutIcon = $withoutIcon;
