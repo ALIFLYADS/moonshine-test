@@ -6,7 +6,7 @@
 ])
 @if($tabs !== [])
     <!-- Tabs -->
-    <div {{ $attributes->class(['tabs']) }}
+    <div {{ $attributes->class(['tabs form-group']) }}
         x-data="tabs(
             '{{ $active ?? array_key_first($tabs) }}',
             {{ $isVertical ? 'true' : 'false' }}
