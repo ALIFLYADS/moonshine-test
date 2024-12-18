@@ -7,7 +7,7 @@
     'title',
 ])
 <div
-    {{ $attributes->class(['accordion']) }}
+    {{ $attributes->class(['accordion form-group']) }}
     x-data="
         @if($persist)
             collapse($persist({{ $open ? 'true' : 'false' }}).as($id('collapse')))
@@ -18,7 +18,6 @@
 >
     <div
         class="accordion-item"
-        :class="open ? 'mt-5' : 'my-5'"
     >
 
         <h2 class="accordion-header">
