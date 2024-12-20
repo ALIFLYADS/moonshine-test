@@ -28,7 +28,7 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
-        "@alpinejs/mask": "3.13.2",
+        "@alpinejs/mask": "3.14.7",
         "@alpinejs/persist": "3.13.2",
         "@popperjs/core": "^2.11.8",
         "alpinejs": "3.13.2",
