@@ -32,7 +32,7 @@
         "@alpinejs/persist": "3.13.2",
         "@popperjs/core": "^2.11.8",
         "alpinejs": "3.13.2",
-        "choices.js": "^10.2.0",
+        "choices.js": "^11.0.2",
         "codeflask": "^1.4.1",
         "sortablejs": "^1.15.0",
         "tippy.js": "^6.3.7"
