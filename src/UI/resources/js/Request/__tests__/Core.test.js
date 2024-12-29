@@ -57,16 +57,16 @@ describe('request function', () => {
     expect(MoonShine.ui.toast).not.toHaveBeenCalled() // No error toast
   })
 
-  /*  test('should call beforeRequest if specified', () => {
-    const componentRequestData = new ComponentRequestData().withBeforeRequest();
-    jest.spyOn(componentRequestData, 'hasBeforeRequest').mockReturnValueOnce(true);
-    MoonShine.callbacks.beforeRequest = jest.fn();
+  test('should call beforeRequest if specified', () => {
+    const componentRequestData = new ComponentRequestData().withBeforeRequest('testCallback')
+    jest.spyOn(componentRequestData, 'hasBeforeRequest').mockReturnValueOnce(true)
+    MoonShine.callbacks.testCallback = jest.fn()
 
-    request(t, '/test-url', 'get', {}, {}, componentRequestData);
+    request(t, '/test-url', 'get', {}, {}, componentRequestData)
 
-    expect(componentRequestData.hasBeforeRequest).toHaveBeenCalled();
-    expect(MoonShine.callbacks.beforeRequest).toHaveBeenCalledWith(t.$el, t);
-  });*/
+    expect(componentRequestData.hasBeforeRequest).toHaveBeenCalled()
+    expect(MoonShine.callbacks.testCallback).toHaveBeenCalledWith(t.$el, t)
+  })
 
   test('should handle successful axios response', async () => {
     const componentRequestData = new ComponentRequestData()
