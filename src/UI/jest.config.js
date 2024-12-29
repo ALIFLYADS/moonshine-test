@@ -6,7 +6,7 @@ export default {
     '^.+\\.m?[jt]sx?$': 'babel-jest',
   },
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
-  roots: ['__tests__'],
+  roots: ['resources/js'],
   collectCoverage: true,
   collectCoverageFrom: ['<rootDir>/src/**/*.{js,ts,jsx,tsx}'],
   coverageDirectory: '<rootDir>/coverage',

@@ -1,7 +1,8 @@
-import request from '../../resources/js/Request/Core.js';
-import { ComponentRequestData } from '../../resources/js/DTOs/ComponentRequestData';
+import request from '../Core.js';
+import { ComponentRequestData } from '../../DTOs/ComponentRequestData.js';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import {afterEach, beforeEach, describe, expect, jest, test} from '@jest/globals'
 
 // Mock global objects and functions
 global.MoonShine = {
@@ -103,17 +104,32 @@ describe('request function', () => {
   });
 
   test('should handle attachments in response', async () => {
-    mockAxios.onGet('/test-url').reply(200, 'File content', {
-      'content-disposition': 'attachment; filename="file.txt"',
-    });
+    global.URL.createObjectURL = jest.fn();
+
+    const filename = 'file.txt'
+    const data = 'File content'
+    const createObjectURLSpy = jest.spyOn(window.URL, 'createObjectURL').mockReturnValue('mock-url');
 
     const createElementSpy = jest.spyOn(document, 'createElement').mockReturnValue({
-      click: jest.fn(),
       style: {},
+      href: '',
+      download: '',
+      click: jest.fn(),
+    });
+
+    mockAxios.onGet('/test-url').reply(200, data, {
+      'content-disposition': `attachment; filename=${filename}`,
     });
 
     await request(t, '/test-url');
 
+    const anchorElement = createElementSpy.mock.results[0].value;
+    expect(createObjectURLSpy).toHaveBeenCalledWith(new Blob([data]));
+
+    expect(createElementSpy).toHaveBeenCalledWith('a');
+    expect(anchorElement.style.display).toBe('none');
+    expect(anchorElement.href).toBe('mock-url');
+    expect(anchorElement.download).toBe(filename);
     expect(createElementSpy).toHaveBeenCalledWith('a');
   });
 
