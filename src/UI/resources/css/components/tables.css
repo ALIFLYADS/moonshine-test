@@ -85,6 +85,11 @@ table {
     }
   }
 
+  td,
+  th {
+    @apply bg-inherit;
+  }
+
   &[data-click-action] {
     tbody {
       tr {
@@ -121,5 +126,20 @@ table {
 
   & > table > thead {
     @apply sticky -top-1 z-1 bg-slate-50 dark:bg-dark-700;
+  }
+}
+
+/* Sticky Columns */
+th,
+td {
+  &.sticky-col--right,
+  &.sticky-col--left {
+    @apply sticky backdrop-blur;
+  }
+  &.sticky-col--right {
+    @apply right-0;
+  }
+  &.sticky-col--left {
+    @apply left-0;
   }
 }

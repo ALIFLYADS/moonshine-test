@@ -13,9 +13,14 @@ abstract class MoonShineCommand extends Command
 {
     protected string $stubsDir = __DIR__ . '/../../stubs';
 
-    protected function getDirectory(): string
+    protected function getDirectory(string $path = ''): string
     {
-        return moonshineConfig()->getDir();
+        return moonshineConfig()->getDir($path);
+    }
+
+    protected function getRelativePath(string $path): string
+    {
+        return str_replace(base_path(), '', $path);
     }
 
     public static function addResourceOrPageToProviderFile(string $class, bool $page = false, string $prefix = ''): void
@@ -38,7 +43,7 @@ abstract class MoonShineCommand extends Command
             to: app_path('MoonShine/Layouts/MoonShineLayout.php'),
             isPage: $page,
             between: static fn (Stringable $content): Stringable => $content->betweenFirst("protected function menu(): array", '}'),
-            replace: static fn (Stringable $content, Closure $tab): Stringable => $content->replace("];", "{$tab()}MenuItem::make('{$title}', $class::class),\n{$tab(2)}];"),
+            replace: static fn (Stringable $content, Closure $tab): Stringable => $content->replace("];", "{$tab()}MenuItem::make('$title', $class::class),\n{$tab(2)}];"),
             use: MenuItem::class,
         );
     }
@@ -86,11 +91,16 @@ abstract class MoonShineCommand extends Command
         file_put_contents($to, $content);
     }
 
-    protected function replaceInConfig(string $key, string $value): void
-    {
+    protected function replaceInConfig(
+        string $key,
+        string $value,
+        ?string $classReplace = null
+    ): void {
         $replace = "'$key' => $value,";
 
-        $pattern = "/['\"]" . $key . "['\"]\s*=>\s*[^'\"]+?,/";
+        $pattern = \is_null($classReplace) ?
+            "/['\"]" . $key . "['\"]\s*=>\s*[^'\"]+?,/"
+            : "/['\"]" . $key . "['\"]\s*=>\s*" . $classReplace . "::class,/";
 
         file_put_contents(
             config_path('moonshine.php'),

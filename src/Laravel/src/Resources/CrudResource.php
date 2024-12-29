@@ -75,6 +75,8 @@ abstract class CrudResource extends Resource implements CrudResourceContract
 
     protected bool $isAsync = true;
 
+    protected bool $isLazy = false;
+
     protected bool $isPrecognitive = false;
 
     protected bool $deleteRelationships = false;
@@ -89,6 +91,8 @@ abstract class CrudResource extends Resource implements CrudResourceContract
     protected bool $stickyTable = false;
 
     protected bool $columnSelection = false;
+
+    protected bool $stickyButtons = false;
 
     protected ?string $casterKeyName = null;
 
@@ -210,6 +214,11 @@ abstract class CrudResource extends Resource implements CrudResourceContract
         return $this->isAsync;
     }
 
+    public function isLazy(): bool
+    {
+        return $this->isLazy;
+    }
+
     public function isPrecognitive(): bool
     {
         return $this->isPrecognitive;
@@ -233,6 +242,11 @@ abstract class CrudResource extends Resource implements CrudResourceContract
     public function isColumnSelection(): bool
     {
         return $this->columnSelection;
+    }
+
+    public function isStickyButtons(): bool
+    {
+        return $this->stickyButtons;
     }
 
     public function isSubmitShowWhen(): bool

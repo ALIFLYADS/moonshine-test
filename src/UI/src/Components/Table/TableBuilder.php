@@ -321,7 +321,9 @@ final class TableBuilder extends IterableComponent implements
                         ActionGroup::make($buttons->toArray()),
                     ])->justifyAlign('end'),
                     index: $fields->count() + ($hasBulk ? 1 : 0),
-                    builder: $tdAttributes,
+                    builder: fn (TableCellContract $td): TableCellContract => $tdAttributes(
+                        $td->customAttributes(['class' => $this->isStickyButtons() ? $this->calculateStickyClass(afterCenter: true) : ''])
+                    ),
                 );
 
             $rows->pushRow(
@@ -444,18 +446,23 @@ final class TableBuilder extends IterableComponent implements
         );
 
         if (! $this->isVertical()) {
-            foreach ($this->getPreparedFields()->onlyVisible() as $field) {
+            $fields = $this->getPreparedFields()->onlyVisible();
+            foreach ($fields as $index => $field) {
                 $thContent = $field->isSortable() && ! $this->isPreview()
                     ?
                     (string) Link::make(
                         $field->getSortQuery($this->getAsyncUrl()),
                         $field->getLabel(),
                     )
-                        ->icon(
-                            $field->isSortActive() && $field->sortDirectionIs('desc') ? 'bars-arrow-down'
-                                : 'bars-arrow-up',
+                        ->when(
+                            $field->isSortActive(),
+                            static fn (Link $link): Link => $link->icon(
+                                $field->sortDirectionIs('desc') ? 'bars-arrow-down' : 'bars-arrow-up',
+                            ),
+                            static fn (Link $link): Link => $link->icon('arrows-up-down'),
                         )
                         ->customAttributes([
+                            'class' => $field->isSortActive() ? 'text-primary' : '',
                             '@click.prevent' => $this->isAsync() ? 'asyncRequest' : null,
                         ])
                     : $field->getLabel();
@@ -463,6 +470,7 @@ final class TableBuilder extends IterableComponent implements
                 $cells->push(
                     TableTh::make($thContent, $index)
                         ->customAttributes(['data-column-selection' => $field->getIdentity()])
+                        ->customAttributes(['class' => $field->isStickyColumn() ? $this->calculateStickyClass(afterCenter: $index > ($fields->count() / 2)) : ''])
                         ->customAttributes($tdAttributes($index)),
                 );
 
@@ -471,7 +479,9 @@ final class TableBuilder extends IterableComponent implements
 
             $cells->pushWhen(
                 $this->hasButtons(),
-                static fn (): TableTh => TableTh::make('', $index)->customAttributes($tdAttributes($index)),
+                fn (): TableTh => TableTh::make('', $index)
+                    ->customAttributes($tdAttributes($index))
+                    ->customAttributes(['class' => $this->isStickyButtons() ? $this->calculateStickyClass(afterCenter: true) : '']),
             );
         }
 

@@ -236,6 +236,12 @@ class IndexPage extends CrudPage
             ->when($this->getResource()->isStickyTable(), function (TableBuilderContract $table): void {
                 $table->sticky();
             })
+            ->when($this->getResource()->isStickyButtons(), function (TableBuilderContract $table): void {
+                $table->stickyButtons();
+            })
+            ->when($this->getResource()->isLazy(), function (TableBuilderContract $table): void {
+                $table->lazy()->whenAsync(fn (TableBuilderContract $t): TableBuilderContract => $t->items($this->getResource()->getItems()));
+            })
             ->when($this->getResource()->isColumnSelection(), function (TableBuilderContract $table): void {
                 $table->columnSelection();
             });
@@ -251,7 +257,7 @@ class IndexPage extends CrudPage
             request()->only($this->getResource()->getQueryParamsKeys())
         );
 
-        $items = $this->getResource()->getItems();
+        $items = $this->getResource()->isLazy() ? [] : $this->getResource()->getItems();
         $fields = $this->getResource()->getIndexFields();
 
         return [

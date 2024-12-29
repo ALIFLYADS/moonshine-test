@@ -92,6 +92,7 @@
       }
 
       const events = data.events ?? componentRequestData.events
+
       if (events) {
         dispatchEvents(events, type, t, componentRequestData.extraProperties)
       }
@@ -114,6 +115,8 @@
       }
 
       if (!errorResponse?.response?.data) {
+        console.error(errorResponse.message)
+
         MoonShine.ui.toast('Unknown Error', 'error')
         return
       }

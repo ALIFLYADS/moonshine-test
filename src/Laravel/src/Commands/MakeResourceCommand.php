@@ -13,7 +13,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'moonshine:resource')]
 class MakeResourceCommand extends MoonShineCommand
 {
-    protected $signature = 'moonshine:resource {name?} {--m|model=} {--t|title=} {--test} {--pest}';
+    protected $signature = 'moonshine:resource {name?} {--type=} {--m|model=} {--t|title=} {--test} {--pest} {--p|policy}';
 
     protected $description = 'Create resource';
 
@@ -22,86 +22,85 @@ class MakeResourceCommand extends MoonShineCommand
      */
     public function handle(): int
     {
-        $name = str(
-            text(
-                'Name',
-                'ArticleResource',
-                $this->argument('name') ?? '',
-                required: true,
-            )
+        $name = $this->argument('name') ?? text(
+            'Resource name',
+            'ArticleResource',
+            required: true,
         );
 
-        $dir = $name->ucfirst()
-            ->remove('Resource', false)
-            ->value();
-
-        $name = $name->ucfirst()
-            ->replace(['resource', 'Resource'], '')
+        $name = str($name)
+            ->ucfirst()
+            ->remove('resource', false)
             ->value();
 
         $model = $this->qualifyModel($this->option('model') ?? $name);
         $title = $this->option('title') ?? str($name)->singular()->plural()->value();
+        $resourcesDir = $this->getDirectory('/Resources');
 
-        $resource = $this->getDirectory() . "/Resources/{$name}Resource.php";
+        $resource = "$resourcesDir/{$name}Resource.php";
 
-        if (! is_dir($this->getDirectory() . "/Resources")) {
-            $this->makeDir($this->getDirectory() . "/Resources");
-        }
+        $this->makeDir($resourcesDir);
 
-        $stub = select('Resource type', [
+        $types = [
             'ModelResourceDefault' => 'Default model resource',
             'ModelResourceWithPages' => 'Model resource with pages',
             'Resource' => 'Empty resource',
-        ], 'ModelResourceDefault');
+        ];
 
-        $replaceData = [
+        if ($type = $this->option('type')) {
+            $keys = array_keys($types);
+            $stub = $keys[$type - 1] ?? $keys[0];
+        } else {
+            $stub = select('Resource type', $types, 'ModelResourceDefault');
+        }
+
+        $properties = '';
+
+        if ($this->option('policy')) {
+            $properties .= PHP_EOL . str_repeat(' ', 4) . 'protected bool $withPolicy = true;' . PHP_EOL;
+        }
+
+        $replace = [
             '{namespace}' => moonshineConfig()->getNamespace('\Resources'),
             '{model-namespace}' => $model,
             '{model}' => class_basename($model),
+            '{properties}' => $properties,
             'DummyTitle' => $title,
             'Dummy' => $name,
         ];
 
         if ($this->option('test') || $this->option('pest')) {
             $testStub = $this->option('pest') ? 'pest' : 'test';
-            $testPath = base_path('tests/Feature/') . $name . 'ResourceTest.php';
+            $testPath = base_path("tests/Feature/{$name}ResourceTest.php");
 
-            $this->copyStub($testStub, $testPath, $replaceData);
+            $this->copyStub($testStub, $testPath, $replace);
 
             info('Test file was created');
         }
 
         if ($stub === 'ModelResourceWithPages') {
-            $pageDir = "Pages/$dir";
-
             $this->call(MakePageCommand::class, [
                 'className' => $name,
                 '--crud' => true,
                 '--without-register' => true,
             ]);
 
-            $pageNamespace = static fn (string $name): string => moonshineConfig()->getNamespace(
-                str_replace('/', '\\', "\\$pageDir\\$dir$name")
-            );
+            $pageNamespace = moonshineConfig()->getNamespace("\Pages\\$name\\$name");
 
-            $replaceData = [
-                    '{indexPage}' => "{$dir}IndexPage",
-                    '{formPage}' => "{$dir}FormPage",
-                    '{detailPage}' => "{$dir}DetailPage",
-                    '{index-page-namespace}' => $pageNamespace('IndexPage'),
-                    '{form-page-namespace}' => $pageNamespace('FormPage'),
-                    '{detail-page-namespace}' => $pageNamespace('DetailPage'),
-                ] + $replaceData;
+            $replace += [
+                '{indexPage}' => "{$name}IndexPage",
+                '{formPage}' => "{$name}FormPage",
+                '{detailPage}' => "{$name}DetailPage",
+                '{index-page-namespace}' => "{$pageNamespace}IndexPage",
+                '{form-page-namespace}' => "{$pageNamespace}FormPage",
+                '{detail-page-namespace}' => "{$pageNamespace}DetailPage",
+            ];
         }
 
-        $this->copyStub($stub, $resource, $replaceData);
+        $this->copyStub($stub, $resource, $replace);
 
         info(
-            "{$name}Resource file was created: " . str_replace(
-                base_path(),
-                '',
-                $resource
-            )
+            "{$name}Resource file was created: " . $this->getRelativePath($resource)
         );
 
         self::addResourceOrPageToProviderFile(
@@ -112,6 +111,12 @@ class MakeResourceCommand extends MoonShineCommand
             "{$name}Resource",
             $title
         );
+
+        if ($this->option('policy')) {
+            $this->call(MakePolicyCommand::class, [
+                'className' => class_basename($model),
+            ]);
+        }
 
         return self::SUCCESS;
     }
