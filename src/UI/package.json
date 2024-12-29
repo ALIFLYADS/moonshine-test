@@ -5,7 +5,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "prettier": "npx prettier --write 'resources/**/*.{css,js,yml}' '!**/views' '!**/dist' '!**/vendor'"
+        "prettier": "npx prettier --write 'resources/**/*.{css,js,yml}' '!**/views' '!**/dist' '!**/vendor'",
+        "test": "jest"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.26",
