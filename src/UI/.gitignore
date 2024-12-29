@@ -1,4 +1,4 @@
 node_modules
 dist/hot
 .env
-/coverage/
+resources/js/coverage/

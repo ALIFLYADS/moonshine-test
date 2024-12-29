@@ -8,6 +8,6 @@ export default {
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
   roots: ['resources/js'],
   collectCoverage: true,
-  collectCoverageFrom: ['<rootDir>/src/**/*.{js,ts,jsx,tsx}'],
-  coverageDirectory: '<rootDir>/coverage',
+  collectCoverageFrom: ['<rootDir>/resources/js/**/*.{js,ts,jsx,tsx}'],
+  coverageDirectory: '<rootDir>/resources/js/coverage',
 }
