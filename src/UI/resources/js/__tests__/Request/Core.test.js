@@ -1,4 +1,4 @@
-import request from '../Core.js'
+import request from '../../Request/Core.js'
 import {ComponentRequestData} from '../../DTOs/ComponentRequestData.js'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
