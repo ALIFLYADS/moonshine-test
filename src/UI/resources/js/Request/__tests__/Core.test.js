@@ -2,7 +2,7 @@ import request from '../Core.js'
 import {ComponentRequestData} from '../../DTOs/ComponentRequestData.js'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
-import {afterEach, beforeEach, describe, expect, jest, test} from '@jest/globals'
+import {afterEach, beforeEach, describe, expect, jest, it} from '@jest/globals'
 
 // Mock global objects and functions
 global.MoonShine = {
@@ -38,26 +38,26 @@ describe('request function', () => {
     mockAxios.reset()
   })
 
-  test('should return if url is not provided', () => {
+  it('should return if url is not provided', () => {
     request(t, '')
-    expect(t.loading).toBe(false) // Loading state should not change
+    expect(t.loading).toBe(false)
     expect(MoonShine.ui.toast).toHaveBeenCalledWith('Request URL not set', 'error')
   })
 
-  test('should display an error if offline', () => {
+  it('should display an error if offline', () => {
     jest.spyOn(navigator, 'onLine', 'get').mockReturnValueOnce(false)
     request(t, '/test-url')
-    expect(t.loading).toBe(false) // Loading should be set to false
+    expect(t.loading).toBe(false)
     expect(MoonShine.ui.toast).toHaveBeenCalledWith('No internet connection', 'error')
   })
 
-  test('should instantiate ComponentRequestData if not provided', () => {
+  it('should instantiate ComponentRequestData if not provided', () => {
     const componentRequestData = null
     request(t, '/test-url', 'get', {}, {}, componentRequestData)
     expect(MoonShine.ui.toast).not.toHaveBeenCalled() // No error toast
   })
 
-  test('should call beforeRequest if specified', () => {
+  it('should call beforeRequest if specified', () => {
     const componentRequestData = new ComponentRequestData().withBeforeRequest('testCallback')
     jest.spyOn(componentRequestData, 'hasBeforeRequest').mockReturnValueOnce(true)
     MoonShine.callbacks.testCallback = jest.fn()
@@ -68,7 +68,7 @@ describe('request function', () => {
     expect(MoonShine.callbacks.testCallback).toHaveBeenCalledWith(t.$el, t)
   })
 
-  test('should handle successful axios response', async () => {
+  it('should handle successful axios response', async () => {
     const componentRequestData = new ComponentRequestData()
     mockAxios.onGet('/test-url').reply(200, {message: 'Success'})
 
@@ -78,7 +78,7 @@ describe('request function', () => {
     expect(MoonShine.ui.toast).toHaveBeenCalledWith('Success', 'success') // Show success toast
   })
 
-  test('should handle fields_values in response', async () => {
+  it('should handle fields_values in response', async () => {
     const componentRequestData = new ComponentRequestData()
     mockAxios.onGet('/test-url').reply(200, {
       fields_values: {'#input': 'value'},
@@ -91,7 +91,7 @@ describe('request function', () => {
     expect(document.querySelector).toHaveBeenCalledWith('#input')
   })
 
-  test('should handle redirects in response', async () => {
+  it('should handle redirects in response', async () => {
     delete window.location
     window.location = {assign: jest.fn()}
 
@@ -103,7 +103,7 @@ describe('request function', () => {
     expect(window.location.assign).toHaveBeenCalledWith('/new-location')
   })
 
-  test('should handle attachments in response', async () => {
+  it('should handle attachments in response', async () => {
     global.URL.createObjectURL = jest.fn()
 
     const filename = 'file.txt'
@@ -133,7 +133,7 @@ describe('request function', () => {
     expect(createElementSpy).toHaveBeenCalledWith('a')
   })
 
-  test('should handle errors in axios response', async () => {
+  it('should handle errors in axios response', async () => {
     const componentRequestData = new ComponentRequestData()
     mockAxios.onGet('/test-url').reply(500, {message: 'Error'})
 
@@ -143,7 +143,7 @@ describe('request function', () => {
     expect(MoonShine.ui.toast).toHaveBeenCalledWith('Error', 'error')
   })
 
-  test('should display "Unknown Error" if no error message is present', async () => {
+  it('should display "Unknown Error" if no error message is present', async () => {
     mockAxios.onGet('/test-url').networkError()
 
     await request(t, '/test-url')
