@@ -1,10 +1,9 @@
-import request from '../../Request/Core.js'
+import request, {urlWithQuery} from '../../Request/Core.js'
 import {ComponentRequestData} from '../../DTOs/ComponentRequestData.js'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import {afterEach, beforeEach, describe, expect, jest, it} from '@jest/globals'
 
-// Mock global objects and functions
 global.MoonShine = {
   ui: {
     toast: jest.fn(), // Mock the toast function
@@ -21,13 +20,10 @@ describe('request function', () => {
   let t
 
   beforeEach(() => {
-    // Set up axios mock
     mockAxios = new MockAdapter(axios)
 
-    // Reset mocks
     jest.clearAllMocks()
 
-    // Mock component-like object
     t = {
       $el: {},
       loading: true,
@@ -92,6 +88,7 @@ describe('request function', () => {
   })
 
   it('should handle redirects in response', async () => {
+    const origWindowLocation = window.location
     delete window.location
     window.location = {assign: jest.fn()}
 
@@ -101,10 +98,12 @@ describe('request function', () => {
     await request(t, '/test-url', 'get', {}, {}, componentRequestData)
 
     expect(window.location.assign).toHaveBeenCalledWith('/new-location')
+    window.location = origWindowLocation
   })
 
   it('should handle attachments in response', async () => {
     global.URL.createObjectURL = jest.fn()
+    global.URL.revokeObjectURL = jest.fn()
 
     const filename = 'file.txt'
     const data = 'File content'
@@ -116,6 +115,8 @@ describe('request function', () => {
       download: '',
       click: jest.fn(),
     })
+
+    jest.spyOn(document.body, 'appendChild').mockReturnValue()
 
     mockAxios.onGet('/test-url').reply(200, data, {
       'content-disposition': `attachment; filename=${filename}`,
@@ -149,5 +150,192 @@ describe('request function', () => {
     await request(t, '/test-url')
 
     expect(MoonShine.ui.toast).toHaveBeenCalledWith('Unknown Error', 'error')
+  })
+
+  it('should call beforeHandleResponse if specified', async () => {
+    const beforeHandleResponseMock = jest.fn()
+    const componentRequestData = new ComponentRequestData().withBeforeHandleResponse(
+      beforeHandleResponseMock,
+    )
+    jest.spyOn(componentRequestData, 'hasBeforeHandleResponse').mockReturnValueOnce(true)
+    mockAxios.onGet('/test-url').reply(200, {message: 'Success'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(componentRequestData.hasBeforeHandleResponse).toHaveBeenCalled()
+    expect(beforeHandleResponseMock).toHaveBeenCalledWith({message: 'Success'}, t)
+  })
+
+  it('should handle successful response with responseHandler', async () => {
+    const componentRequestData = new ComponentRequestData().withResponseHandler(
+      'testResponseHandler',
+    )
+    jest.spyOn(componentRequestData, 'hasResponseHandler').mockReturnValueOnce(true)
+    MoonShine.callbacks.testResponseHandler = jest.fn()
+    mockAxios.onGet('/test-url').reply(200, {message: 'Success'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(MoonShine.callbacks.testResponseHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.any(Object),
+        data: {message: 'Success'},
+        headers: expect.any(Object),
+        request: expect.objectContaining({
+          responseURL: '/test-url',
+        }),
+        status: 200,
+      }),
+      {},
+      componentRequestData.events,
+      t,
+    )
+  })
+
+  it('should handle error response with responseHandler', async () => {
+    const componentRequestData = new ComponentRequestData().withResponseHandler(
+      'testResponseHandler',
+    )
+    jest.spyOn(componentRequestData, 'hasResponseHandler').mockReturnValueOnce(true)
+    MoonShine.callbacks.testResponseHandler = jest.fn()
+    mockAxios.onGet('/test-url').reply(500, {error: 'error'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(MoonShine.callbacks.testResponseHandler).toHaveBeenCalledWith(
+      expect.any(Object),
+      {},
+      componentRequestData.events,
+      t,
+    )
+  })
+
+  it('should update elements based on response', async () => {
+    const content = '<div>New Content</div>'
+    const selector = '.test'
+    const componentRequestData = new ComponentRequestData().withSelector(selector)
+    mockAxios.onGet('/test-url').reply(200, {html: content})
+
+    document.querySelectorAll = jest.fn().mockReturnValue([{innerHTML: ''}])
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(document.querySelectorAll).toHaveBeenCalledWith(selector)
+    expect(document.querySelectorAll(selector)[0].innerHTML).toBe(content)
+  })
+
+  it('should handle messages in response', async () => {
+    const componentRequestData = new ComponentRequestData()
+    mockAxios.onGet('/test-url').reply(200, {message: 'Test Message', messageType: 'info'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(MoonShine.ui.toast).toHaveBeenCalledWith('Test Message', 'info')
+  })
+
+  it('should call afterResponse if specified', async () => {
+    const testFn = jest.fn()
+    const componentRequestData = new ComponentRequestData().withAfterResponse(testFn)
+    mockAxios.onGet('/test-url').reply(200, {message: 'Success'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(componentRequestData.hasAfterResponse()).toBe(true)
+    expect(testFn).toHaveBeenCalledWith({message: 'Success'}, 'success', t)
+  })
+
+  it('should handle errors correctly', async () => {
+    const componentRequestData = new ComponentRequestData()
+    mockAxios.onGet('/test-url').reply(500, {message: 'Server Error'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(t.loading).toBe(false)
+    expect(MoonShine.ui.toast).toHaveBeenCalledWith('Server Error', 'error')
+  })
+
+  it('should call errorCallback if specified', async () => {
+    const testFn = jest.fn()
+    const componentRequestData = new ComponentRequestData().withErrorCallback(testFn)
+    jest.spyOn(componentRequestData, 'hasErrorCallback').mockReturnValueOnce(true)
+    mockAxios.onGet('/test-url').reply(500, {message: 'Server Error'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(componentRequestData.hasErrorCallback()).toBe(true)
+    expect(testFn).toHaveBeenCalledWith({message: 'Server Error'}, t)
+  })
+
+  it('should handle unknown errors', async () => {
+    const componentRequestData = new ComponentRequestData()
+    mockAxios.onGet('/test-url').reply(500)
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(t.loading).toBe(false)
+    expect(consoleErrorSpy).toHaveBeenCalled()
+    expect(MoonShine.ui.toast).toHaveBeenCalledWith('Unknown Error', 'error')
+  })
+
+  it('should set loading to false after completion', async () => {
+    const componentRequestData = new ComponentRequestData()
+    mockAxios.onGet('/test-url').reply(200, {message: 'Success'})
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(t.loading).toBe(false)
+  })
+
+  it('should dispatch events if present', async () => {
+    const componentRequestData = new ComponentRequestData()
+    const events = 'testEvent'
+
+    componentRequestData.withEvents(events)
+
+    mockAxios.onGet('/test-url').reply(200, {message: 'Success'})
+
+    t.$dispatch = jest.fn().mockImplementation(() => {})
+
+    const dispatchEventsSpy = jest.spyOn(t, '$dispatch')
+
+    await request(t, '/test-url', 'get', {}, {}, componentRequestData)
+
+    expect(dispatchEventsSpy).toHaveBeenCalled()
+    dispatchEventsSpy.mockRestore()
+  })
+})
+
+describe('url function', () => {
+  it('should append query parameters to the URL', () => {
+    const baseUrl = 'https://example.com/api'
+    const append = 'param1=value1&param2=value2'
+
+    const result = urlWithQuery(baseUrl, append)
+
+    expect(result).toBe('https://example.com/api?param1=value1&param2=value2')
+  })
+
+  it('should append query parameters to the URL, when starts with /', () => {
+    const baseUrl = '/api'
+    const append = 'param1=value1&param2=value2'
+    const originalLocation = window.location
+    delete window.location
+    window.location = {...originalLocation, origin: 'https://example.com'}
+
+    const result = urlWithQuery(baseUrl, append)
+
+    expect(result).toBe('https://example.com/api?param1=value1&param2=value2')
+    window.location = originalLocation
+  })
+
+  it('should call the callback if provided', () => {
+    const baseUrl = 'https://example.com/api'
+    const append = 'param1=value1'
+    const callback = jest.fn()
+
+    const result = urlWithQuery(baseUrl, append, callback)
+
+    expect(callback).toHaveBeenCalled()
+    expect(result).toBe('https://example.com/api?param1=value1')
   })
 })
