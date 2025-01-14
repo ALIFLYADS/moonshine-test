@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Laravel\Traits\Request\HasPageRequest;
 use MoonShine\Laravel\Traits\Request\HasResourceRequest;
+use MoonShine\Support\Enums\HttpMethod;
+use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 
 class MoonShineRequest extends Request
 {
@@ -87,5 +89,19 @@ class MoonShineRequest extends Request
             $this->route()?->gatherMiddleware() ?? [],
             true
         );
+    }
+
+    /**
+     * Get the request method.
+     *
+     * @return HttpMethod
+     */
+    public function method(): HttpMethod
+    {
+        try {
+        return HttpMethod::from(str($this->getMethod())->lower()->toString());
+        } catch (\TypeError $e) {
+            throw new SuspiciousOperationException('Invalid HTTP method', previous: $e);
+        }
     }
 }
