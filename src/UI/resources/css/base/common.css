@@ -189,3 +189,12 @@ div.divider {
 .space-elements {
   @apply space-y-5;
 }
+
+.menu-heading-burger {
+      > button {
+        @apply text-slate-600 hover:text-secondary dark:text-dark-50 dark:hover:text-white;
+        > svg {
+          @apply h-7 w-7;
+        }
+      }
+}
