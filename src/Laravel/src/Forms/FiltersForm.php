@@ -7,6 +7,7 @@ namespace MoonShine\Laravel\Forms;
 use Illuminate\Support\Arr;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Contracts\UI\FormContract;
+use MoonShine\Core\TypeCasts\MixedDataCaster;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Support\AlpineJs;
@@ -58,7 +59,7 @@ final readonly class FiltersForm implements FormContract
 
         return FormBuilder::make($action, FormMethod::GET)
             ->name('filters')
-            ->fillCast($values, $resource->getCaster())
+            ->fillCast($values, new MixedDataCaster())
             ->fields(
                 $filters
                     ->when(
