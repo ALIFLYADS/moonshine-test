@@ -13,10 +13,11 @@ use MoonShine\Laravel\Http\Requests\LoginFormRequest;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Laravel\Pages\LoginPage;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthenticateController extends MoonShineController
 {
-    public function login(): Renderable|RedirectResponse|string
+    public function login(): Renderable|Response|string
     {
         if ($this->auth()->check()) {
             return redirect(
@@ -24,8 +25,13 @@ class AuthenticateController extends MoonShineController
             );
         }
 
-        return moonshineConfig()
-            ->getPage('login', LoginPage::class)
+        $page = moonshineConfig()->getPage('login', LoginPage::class);
+
+        if ($page->isResponseModified()) {
+            return $page->getModifiedResponse();
+        }
+
+        return $page
             ->loaded()
             ->render();
     }

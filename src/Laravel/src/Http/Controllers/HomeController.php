@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Http\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\RedirectResponse;
 use MoonShine\Laravel\Pages\Dashboard;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class HomeController extends MoonShineController
@@ -14,10 +14,15 @@ class HomeController extends MoonShineController
     /**
      * @throws Throwable
      */
-    public function __invoke(): RedirectResponse|Renderable|string
+    public function __invoke(): Response|Renderable|string
     {
-        return moonshineConfig()
-            ->getPage('dashboard', Dashboard::class)
+        $page = moonshineConfig()->getPage('dashboard', Dashboard::class);
+
+        if ($page->isResponseModified()) {
+            return $page->getModifiedResponse();
+        }
+
+        return $page
             ->loaded()
             ->render();
     }
