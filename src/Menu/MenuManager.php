@@ -52,7 +52,7 @@ class MenuManager
                     $this->prepareMenu($item->items())
                 );
 
-                $item->canSee(fn() => $item->items()->count() != 0);
+                $item->canSee(fn(): bool => $item->items()->count() != 0);
             }
 
             return $item->isSee(moonshineRequest());
