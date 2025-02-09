@@ -13,6 +13,9 @@ use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Exceptions\MoonShineComponentException;
 use Throwable;
 
+/**
+ * @method static static make(iterable $components = [], array $items = [])
+ */
 class Tabs extends AbstractWithComponents
 {
     protected string $view = 'moonshine::components.tabs';
