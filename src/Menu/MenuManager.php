@@ -49,10 +49,10 @@ class MenuManager
         return collect($items)->filter(function (MenuElement $item): bool {
             if ($item instanceof MenuGroup) {
                 $item->setItems(
-                    $item->items()->filter(
-                        fn (MenuElement $child): bool => $child->isSee(moonshineRequest())
-                    )
+                    $this->prepareMenu($item->items())
                 );
+
+                $item->canSee(fn() => $item->items()->count() != 0);
             }
 
             return $item->isSee(moonshineRequest());
