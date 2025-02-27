@@ -57,22 +57,82 @@ export default function request(
         selectors.forEach(function (selector) {
           let elements = document.querySelectorAll(selector)
           elements.forEach(element => {
-            element.innerHTML =
-              data.html && typeof data.html === 'object'
-                ? (data.html[selector] ?? data.html)
-                : (data.html ?? data)
+            if (data.outer_html) {
+              element.outerHTML =
+                data.outer_html && typeof data.outer_html === 'object'
+                  ? (data.outer_html[selector] ?? data.outer_html)
+                  : data.outer_html
+            }
+            else {
+              element.innerHTML =
+                data.html && typeof data.html === 'object'
+                  ? (data.html[selector] ?? data.html)
+                  : (data.html ?? data)
+            }
           })
         })
       }
 
-      if (!componentRequestData.selector && typeof data.html === 'object' && data.html !== null) {
-        Object.entries(data.html).forEach(function ([selector, html]) {
-          let elements = document.querySelectorAll(selector)
+      if (!componentRequestData.selector) {
+        if (typeof data.before === 'object' && data.before !== null) {
+          Object.entries(data.before).forEach(function ([selector, before]) {
+            let elements = document.querySelectorAll(selector)
 
-          elements.forEach(element => {
-            element.innerHTML = html
+            elements.forEach(element => {
+              element.before(before)
+            })
           })
-        })
+        }
+
+        if (typeof data.after === 'object' && data.after !== null) {
+          Object.entries(data.after).forEach(function ([selector, after]) {
+            let elements = document.querySelectorAll(selector)
+
+            elements.forEach(element => {
+              element.after(after)
+            })
+          })
+        }
+
+        if (typeof data.prepend === 'object' && data.prepend !== null) {
+          Object.entries(data.prepend).forEach(function ([selector, prepend]) {
+            let elements = document.querySelectorAll(selector)
+
+            elements.forEach(element => {
+              element.prepend(prepend)
+            })
+          })
+        }
+
+        if (typeof data.append === 'object' && data.append !== null) {
+          Object.entries(data.append).forEach(function ([selector, append]) {
+            let elements = document.querySelectorAll(selector)
+
+            elements.forEach(element => {
+              element.append(append)
+            })
+          })
+        }
+
+        if (typeof data.html === 'object' && data.html !== null) {
+          Object.entries(data.html).forEach(function ([selector, html]) {
+            let elements = document.querySelectorAll(selector)
+
+            elements.forEach(element => {
+              element.innerHTML = html
+            })
+          })
+        }
+
+        if (typeof data.outer_html === 'object' && data.outer_html !== null) {
+          Object.entries(data.outer_html).forEach(function ([selector, outer_html]) {
+            let elements = document.querySelectorAll(selector)
+
+            elements.forEach(element => {
+              element.outerHTML = outer_html
+            })
+          })
+        }
       }
 
       if (data.fields_values !== undefined) {
