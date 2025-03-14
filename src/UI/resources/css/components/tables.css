@@ -55,6 +55,16 @@ table {
   }
 }
 
+.table-divider {
+  div.grid {
+    @apply !my-0 border-b py-2 dark:border-dark-400;
+
+    &:last-child {
+      @apply border-b-0 pb-0;
+    }
+  }
+}
+
 .table-list {
   @apply border-separate border-spacing-y-2.5;
 
@@ -111,8 +121,7 @@ table {
 }
 
 .table-responsive {
-  @apply overflow-auto;
-  width: calc(100% + 0.5rem);
+  @apply w-full overflow-auto;
 }
 
 .table-zoom-in {
@@ -130,13 +139,20 @@ table {
 }
 
 /* Sticky Columns */
-th,
-td {
-  &.sticky-col {
-    @apply md:sticky md:backdrop-blur;
+.table-list {
+  thead,
+  tbody {
+    tr {
+      th,
+      td {
+        &.sticky-col {
+          @apply md:sticky md:backdrop-blur;
 
-    &:has(.dropdown-body.visible) {
-      @apply z-1;
+          &:has(.dropdown-body.visible) {
+            @apply z-1;
+          }
+        }
+      }
     }
   }
 }

@@ -16,7 +16,8 @@ final class DatabaseNotification extends Notification
     public function __construct(
         protected string $message,
         protected ?NotificationButtonContract $button = null,
-        protected null|string|Color $color = null
+        protected null|string|Color $color = null,
+        protected ?string $icon = null
     ) {
         $this->color = $this->color instanceof Color ? $this->color->value : $this->color;
     }
@@ -34,11 +35,11 @@ final class DatabaseNotification extends Notification
     {
         return [
             'message' => $this->message,
-            'button' => \is_null($this->button) ? [] : [
-                'label' => $this->button->getLabel(),
-                'link' => $this->button->getLink(),
-            ],
+            'button' => \is_null($this->button)
+                ? []
+                : $this->button->toArray(),
             'color' => $this->color,
+            'icon' => $this->icon,
         ];
     }
 }

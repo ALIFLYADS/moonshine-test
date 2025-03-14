@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 // Modal/OffCanvas async content
 export default async function load(url, id) {
   const {data, status} = await axios.get(url)
@@ -5,7 +7,7 @@ export default async function load(url, id) {
   if (status === 200) {
     let containerElement = document.getElementById(id)
 
-    containerElement.innerHTML = data
+    containerElement.innerHTML = data?.html ?? data
 
     const scriptElements = containerElement.querySelectorAll('script')
 

@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Pages;
 
+use MoonShine\Contracts\UI\ComponentContract;
+use MoonShine\Core\Attributes\Layout;
 use MoonShine\Laravel\Layouts\BlankLayout;
+use MoonShine\MenuManager\Attributes\SkipMenu;
 use MoonShine\UI\Components\FlexibleRender;
 
+#[SkipMenu]
+#[Layout(BlankLayout::class)]
 /**
  * @method static static make(int $code, string $message)
+ * @extends Page<null>
  */
 class ErrorPage extends Page
 {
-    protected ?string $layout = BlankLayout::class;
-
     private int $code;
 
     private string $message;
@@ -32,6 +36,9 @@ class ErrorPage extends Page
         return $this;
     }
 
+    /**
+     * @return list<ComponentContract>
+     */
     protected function components(): iterable
     {
         $logo = moonshineAssets()->getAsset('vendor/moonshine/logo-small.svg');
@@ -48,9 +55,12 @@ class ErrorPage extends Page
             ->getTranslator()
             ->get('moonshine::ui.back');
 
+        /** @var view-string $view */
+        $view = 'moonshine::errors.404';
+
         return [
             FlexibleRender::make(
-                static fn () => view('moonshine::errors.404'),
+                static fn () => view($view),
                 ['code' => $code, 'message' => $message, 'logo' => $logo, 'backUrl' => $backUrl, 'backTitle' => $backTitle]
             ),
         ];

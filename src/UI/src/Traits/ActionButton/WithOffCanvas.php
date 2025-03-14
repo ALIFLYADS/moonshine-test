@@ -15,7 +15,7 @@ use MoonShine\UI\Components\OffCanvas;
 trait WithOffCanvas
 {
     /**
-     * @var ?Closure(mixed, DataWrapperContract, static): ComponentContract
+     * @var null|Closure(mixed, DataWrapperContract, static): ComponentContract
      */
     protected ?Closure $offCanvas = null;
 
@@ -35,7 +35,7 @@ trait WithOffCanvas
         iterable $components = [],
     ): static {
         if (\is_null($name)) {
-            $name = (string) spl_object_id($this);
+            $name = fn (mixed $data, ActionButtonContract $ctx): string => spl_object_id($this) . $ctx->getData()?->getKey();
         }
 
         $async = $this->purgeAsyncTap();

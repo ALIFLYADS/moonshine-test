@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Pages\Crud;
 
-use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
 use MoonShine\Core\Exceptions\ResourceException;
-use MoonShine\Laravel\Buttons\QueryTagButton;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Components\Fragment;
 use MoonShine\Laravel\Contracts\Resource\HasQueryTagsContract;
@@ -19,7 +17,6 @@ use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\Layout\Div;
 use MoonShine\UI\Components\Layout\Flex;
 use MoonShine\UI\Components\Layout\LineBreak;
-use MoonShine\UI\Components\Modal;
 use MoonShine\UI\Components\Table\TableBuilder;
 use Throwable;
 
@@ -86,27 +83,7 @@ class IndexPage extends CrudPage
     {
         $pageComponents = $this->getResource()->getIndexPageComponents();
 
-        if ($this->getResource()->isEditInModal()) {
-            $pageComponents[] = Modal::make(
-                __('moonshine::ui.edit'),
-                components: [
-                    Div::make()->customAttributes(['id' => 'resource-edit-modal']),
-                ]
-            )
-                ->name('resource-edit-modal');
-        }
-
-        if ($this->getResource()->isDetailInModal()) {
-            $pageComponents[] = Modal::make(
-                __('moonshine::ui.show'),
-                components: [
-                    Div::make()->customAttributes(['id' => 'resource-detail-modal']),
-                ]
-            )
-                ->name('resource-detail-modal');
-        }
-
-        return $pageComponents;
+        return array_merge($pageComponents, $this->getEmptyModals());
     }
 
     protected function getMetrics(): ?ComponentContract
@@ -177,10 +154,7 @@ class IndexPage extends CrudPage
                 static function (ActionGroup $group) use ($resource): ActionGroup {
                     foreach ($resource->getQueryTags() as $tag) {
                         $group->add(
-                            QueryTagButton::for($resource, $tag)->when(
-                                $resource->isQueryTagsInDropdown(),
-                                fn (ActionButtonContract $btn): ActionButtonContract => $btn->showInDropdown()
-                            )
+                            $tag->getButton($resource)
                         );
                     }
 
@@ -234,8 +208,10 @@ class IndexPage extends CrudPage
             )
             ->buttons($this->getResource()->getIndexButtons())
             ->clickAction($this->getResource()->getClickAction())
-            ->when($this->getResource()->isAsync(), static function (TableBuilderContract $table): void {
-                $table->async()->pushState();
+            ->when($this->getResource()->isAsync(), function (TableBuilderContract $table): void {
+                $table->async(
+                    url: fn (): string => $this->getRouter()->getEndpoints()->component(name: $table->getName(), additionally: request()->query())
+                )->pushState();
             })
             ->when($this->getResource()->isStickyTable(), function (TableBuilderContract $table): void {
                 $table->sticky();
@@ -248,6 +224,11 @@ class IndexPage extends CrudPage
             })
             ->when($this->getResource()->isColumnSelection(), function (TableBuilderContract $table): void {
                 $table->columnSelection();
+            })
+            ->when(! \is_null($this->getResource()->getItemsResolver()), function (TableBuilderContract $table): void {
+                $table->itemsResolver(
+                    $this->getResource()->getItemsResolver()
+                );
             });
     }
 

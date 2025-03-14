@@ -23,7 +23,7 @@ use MoonShine\UI\Collections\TableCells;
 use MoonShine\UI\Collections\TableRows;
 use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\Components;
-use MoonShine\UI\Components\Heading;
+use MoonShine\UI\Components\FlexibleRender;
 use MoonShine\UI\Components\IterableComponent;
 use MoonShine\UI\Components\Layout\Column;
 use MoonShine\UI\Components\Layout\Div;
@@ -146,7 +146,7 @@ final class TableBuilder extends IterableComponent implements
             ->toArray();
     }
 
-    protected function prepareAsyncUrl(Closure|string|null $url = null): Closure|string|null
+    protected function prepareAsyncUrl(Closure|string|null $url = null): Closure|string
     {
         return $url ?? fn (): string => $this->getCore()->getRouter()->getEndpoints()->component(
             $this->getName(),
@@ -260,7 +260,7 @@ final class TableBuilder extends IterableComponent implements
                 foreach ($fields as $field) {
                     $attributes = $field->getWrapperAttributes()->jsonSerialize();
                     $title = Column::make([
-                        Heading::make($field->getLabel())->h(4),
+                        Div::make([FlexibleRender::make($field->getLabel())])->class('form-label'),
                     ])->columnSpan(\is_int($this->verticalTitleCallback) ? $this->verticalTitleCallback : 2);
 
                     $value = Column::make([
@@ -317,9 +317,13 @@ final class TableBuilder extends IterableComponent implements
                     startIndex: $hasBulk ? 1 : 0,
                 )
                 ->pushCellWhen(
-                    $buttons->isNotEmpty(),
-                    static fn (): string => (string) Flex::make([
-                        ActionGroup::make($buttons->toArray()),
+                    $this->hasButtons() || $buttons->isNotEmpty(),
+                    fn (): string => (string) Flex::make([
+                        ActionGroup::make($buttons->toArray())
+                            ->when(
+                                $this->isStickyButtons(),
+                                fn (ActionGroup $actionGroup): ActionGroup => $actionGroup->customAttributes(['strategy' => 'absolute'])
+                            ),
                     ])->justifyAlign('end'),
                     index: $fields->count() + ($hasBulk ? 1 : 0),
                     builder: fn (TableCellContract $td): TableCellContract => $tdAttributes(
@@ -471,6 +475,7 @@ final class TableBuilder extends IterableComponent implements
                 $cells->push(
                     TableTh::make($thContent, $index)
                         ->customAttributes(['data-column-selection' => $field->getIdentity()])
+                        ->customAttributes(['data-column-selection-hide-on-init' => $field->isColumnHideOnInit()])
                         ->customAttributes(['class' => $field->isStickyColumn() ? $this->getStickyClass() : ''])
                         ->customAttributes($tdAttributes($index)),
                 );

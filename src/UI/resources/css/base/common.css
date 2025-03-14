@@ -163,6 +163,19 @@ ul.tree-list {
   }
 }
 
+/* Checkboxes horizontal */
+ul.horizontal-list {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  @apply grid items-center;
+  li {
+    @apply pb-2 pe-2;
+
+    .form-group {
+      @apply flex-nowrap;
+    }
+  }
+}
+
 /* Images in a row */
 .images-row {
   @apply flex;
@@ -186,8 +199,10 @@ div.divider {
   }
 }
 
-.space-elements {
-  @apply space-y-5;
+.space-elements > :not([hidden], [type='hidden']) ~ :not([hidden], [type='hidden']) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1.25rem * var(--tw-space-y-reverse));
 }
 
 .menu-heading-burger {

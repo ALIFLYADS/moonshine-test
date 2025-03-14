@@ -22,7 +22,7 @@ use MoonShine\UI\Fields\HiddenIds;
 trait WithModal
 {
     /**
-     * @var ?Closure(mixed, DataWrapperContract, static): ComponentContract
+     * @var null|Closure(mixed, DataWrapperContract, static): ComponentContract
      */
     protected ?Closure $modal = null;
 
@@ -41,7 +41,7 @@ trait WithModal
         ?Closure $builder = null,
     ): static {
         if (\is_null($name)) {
-            $name = (string) spl_object_id($this);
+            $name = fn (mixed $data, ActionButtonContract $ctx): string => spl_object_id($this) . $ctx->getData()?->getKey();
         }
 
         $async = $this->purgeAsyncTap();
@@ -49,7 +49,7 @@ trait WithModal
         $this->modal = static fn (mixed $item, ?DataWrapperContract $data, ActionButtonContract $ctx) => Modal::make(
             title: static fn () => value($title, $item, $ctx) ?? $ctx->getLabel(),
             content: static fn () => value($content, $item, $ctx) ?? '',
-            asyncUrl: $async ? $ctx->getUrl($item) : null,
+            asyncUrl: $async ? static fn (): string => $ctx->getUrl($item) : null,
         )
             ->name(value($name, $item, $ctx))
             ->when(
@@ -74,11 +74,16 @@ trait WithModal
         Closure|string|null $button = null,
         Closure|array|null $fields = null,
         HttpMethod $method = HttpMethod::POST,
-        /** @var ?Closure(mixed): FormBuilderContract $formBuilder */
+        /** @var null|Closure(mixed): FormBuilderContract $formBuilder */
         ?Closure $formBuilder = null,
         ?Closure $modalBuilder = null,
         Closure|string|null $name = null,
     ): static {
+        $method = $this->asyncHttpMethod ?: $method;
+        $events = $this->asyncEvents;
+        $callback = $this->asyncCallback;
+        $selector = $this->asyncSelector;
+
         $isDefaultMethods = \in_array($method, [HttpMethod::GET, HttpMethod::POST], true);
         $async = $this->purgeAsyncTap();
 
@@ -112,11 +117,11 @@ trait WithModal
                     ),
                 ])
             )->when(
-                $async && ! $ctx->isAsyncMethod(),
-                static fn (FormBuilderContract $form): FormBuilderContract => $form->async()
+                ! \is_null($selector),
+                static fn (FormBuilderContract $form): FormBuilderContract => $form->asyncSelector($selector)
             )->when(
-                $ctx->isAsyncMethod(),
-                static fn (FormBuilderContract $form): FormBuilderContract => $form->asyncMethod($ctx->getAsyncMethod())
+                $async,
+                static fn (FormBuilderContract $form): FormBuilderContract => $form->async(events: $events, callback: $callback)
             )->submit(
                 \is_null($button)
                     ? $ctx->getCore()->getTranslator()->get('moonshine::ui.confirm')
@@ -125,6 +130,9 @@ trait WithModal
             )->when(
                 ! \is_null($formBuilder),
                 static fn (FormBuilderContract $form): FormBuilderContract => $formBuilder($form, $item)
+            )->when(
+                $ctx->getAttribute('data-async-response-type') !== null,
+                static fn (FormBuilder $form): FormBuilder => $form->download()
             ),
             name: $name,
             builder: $modalBuilder

@@ -7,8 +7,11 @@ namespace MoonShine\Laravel\Components\Layout;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Storage;
+use MoonShine\Contracts\UI\ActionButtonContract;
+use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
 use MoonShine\Laravel\MoonShineAuth;
 use MoonShine\Laravel\Pages\ProfilePage;
+use MoonShine\UI\Collections\ActionButtons;
 use MoonShine\UI\Components\MoonShineComponent;
 use Throwable;
 
@@ -22,6 +25,12 @@ final class Profile extends MoonShineComponent
     protected ?string $defaultAvatar = null;
 
     private readonly ?Authenticatable $user;
+
+    protected ?array $menu = null;
+
+    protected array $translates = [
+        'logout' => 'moonshine::ui.login.logout',
+    ];
 
     public function __construct(
         protected ?string $route = null,
@@ -54,6 +63,70 @@ final class Profile extends MoonShineComponent
         return $this->defaultAvatar ?? moonshineAssets()->getAsset('vendor/moonshine/avatar.jpg');
     }
 
+    private function getDefaultName(): string
+    {
+        $userField = moonshineConfig()->getUserField('name');
+
+        if ($userField === '') {
+            return $this->getDefaultUsername();
+        }
+
+        if ($userField === false) {
+            return '';
+        }
+
+        return $this->user->{$userField} ?? '';
+    }
+
+    private function getDefaultUsername(): string
+    {
+        $userField = moonshineConfig()->getUserField('username', 'email');
+
+        if ($userField === false) {
+            return '';
+        }
+
+        return $this->user->{$userField} ?? '';
+    }
+
+    private function getDefaultAvatar(): string
+    {
+        $userField = moonshineConfig()->getUserField('avatar');
+
+        if ($userField === '') {
+            return $this->getAvatarPlaceholder();
+        }
+
+        if ($userField === false) {
+            return '';
+        }
+
+        $avatar = $this->user?->{$userField};
+
+        return $avatar
+            ? Storage::disk(moonshineConfig()->getDisk())->url($avatar)
+            : $this->getAvatarPlaceholder();
+    }
+
+    /**
+     * @param  list<ActionButtonContract>  $menu
+     */
+    public function menu(array $menu): self
+    {
+        $this->menu = $menu;
+
+        return $this;
+    }
+
+    protected function getMenu(): ?ActionButtonsContract
+    {
+        if (\is_null($this->menu)) {
+            return null;
+        }
+
+        return ActionButtons::make($this->menu);
+    }
+
     /**
      * @return array<string, mixed>
      * @throws Throwable
@@ -74,32 +147,14 @@ final class Profile extends MoonShineComponent
 
         return [
             'route' => $this->route ?? toPage(
-                moonshineConfig()->getPage('profile', ProfilePage::class)
+                moonshineConfig()->getPage('profile', ProfilePage::class),
             ),
-            'logOutRoute' => $this->logOutRoute ?? moonshineRouter()->to('logout'),
+            'logOutRoute' => $this->logOutRoute ?? rescue(fn (): string => moonshineRouter()->to('logout'), '', report: false),
             'avatar' => $avatar,
             'nameOfUser' => $nameOfUser,
             'username' => $username,
             'withBorder' => $this->isWithBorder(),
+            'menu' => $this->getMenu(),
         ];
-    }
-
-    private function getDefaultName(): string
-    {
-        return $this->user?->{moonshineConfig()->getUserField('name')} ?? '';
-    }
-
-    private function getDefaultUsername(): string
-    {
-        return $this->user?->{moonshineConfig()->getUserField('username', 'email')} ?? '';
-    }
-
-    private function getDefaultAvatar(): string
-    {
-        $avatar = $this->user?->{moonshineConfig()->getUserField('avatar')};
-
-        return $avatar
-            ? Storage::disk(moonshineConfig()->getDisk())->url($avatar)
-            : $this->getAvatarPlaceholder();
     }
 }

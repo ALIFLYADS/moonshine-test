@@ -14,6 +14,7 @@ use MoonShine\Contracts\Core\ResourceContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Exceptions\MoonShineNotFoundException;
+use MoonShine\Laravel\Http\Middleware\ChangeLocale;
 use MoonShine\Laravel\Layouts\AppLayout;
 use MoonShine\UI\AbstractLayout;
 use Throwable;
@@ -154,6 +155,16 @@ final class MoonShineConfigurator implements ConfiguratorContract
         return $this->get('locale', 'en');
     }
 
+    public function localeKey(string $name): self
+    {
+        return $this->set('locale_key', $name);
+    }
+
+    public function getLocaleKey(): string
+    {
+        return $this->get('locale_key', ChangeLocale::KEY);
+    }
+
     public function getCacheDriver(): string
     {
         return $this->get('cache', 'file');
@@ -195,6 +206,16 @@ final class MoonShineConfigurator implements ConfiguratorContract
     public function useMigrations(): self
     {
         return $this->set('use_migrations', true);
+    }
+
+    public function isUseProfile(): bool
+    {
+        return $this->get('use_profile', true);
+    }
+
+    public function useProfile(): self
+    {
+        return $this->set('use_profile', true);
     }
 
     public function isUseNotifications(): bool

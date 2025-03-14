@@ -8,6 +8,8 @@ use Closure;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\View\View;
 use MoonShine\Contracts\Core\CrudResourceContract;
+use MoonShine\Contracts\Core\PageContract;
+use MoonShine\Contracts\Core\ResourceContract;
 use MoonShine\Core\Pages\Page as CorePage;
 use MoonShine\Laravel\Contracts\WithResponseModifierContract;
 use MoonShine\Laravel\DependencyInjection\MoonShine;
@@ -15,7 +17,7 @@ use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @template TResource of CrudResourceContract
+ * @template TResource of CrudResourceContract|null
  * @extends CorePage<MoonShine, TResource>
  */
 abstract class Page extends CorePage implements WithResponseModifierContract
@@ -29,9 +31,27 @@ abstract class Page extends CorePage implements WithResponseModifierContract
             oops404();
         }
 
+        $this->simulateRoute();
+    }
+
+    public function simulateRoute(?PageContract $page = null, ?ResourceContract $resource = null): static
+    {
+        $targetPage = $page ?? $this;
+        $targetResource = $resource ?? $targetPage->getResource();
+
         request()
             ->route()
-            ?->setParameter('pageUri', $this->getUriKey());
+            ?->setParameter('pageUri', $targetPage->getUriKey());
+
+        if (! \is_null($targetResource)) {
+            $this->setResource($targetResource);
+
+            request()
+                ->route()
+                ?->setParameter('resourceUri', $targetResource->getUriKey());
+        }
+
+        return $this;
     }
 
     protected function prepareRender(Renderable|Closure|string $view): Renderable|Closure|string
@@ -41,6 +61,11 @@ abstract class Page extends CorePage implements WithResponseModifierContract
             moonshineRequest()->isFragmentLoad(),
             moonshineRequest()->getFragmentLoad(),
         );
+    }
+
+    public function nowOn(): static
+    {
+        return $this;
     }
 
     public function isResponseModified(): bool

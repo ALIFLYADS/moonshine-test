@@ -11,6 +11,8 @@ class HiddenIds extends Field
 {
     protected string $view = 'moonshine::fields.hidden-ids';
 
+    protected bool $hasOld = false;
+
     protected string $type = 'hidden';
 
     public function __construct(
@@ -21,5 +23,10 @@ class HiddenIds extends Field
         $this->customAttributes([
             'data-for-component' => $this->forComponent,
         ]);
+    }
+
+    public function hasWrapper(): bool
+    {
+        return false;
     }
 }

@@ -24,10 +24,15 @@ class File extends Field implements FileableContract, RemovableContract
 
     protected string $view = 'moonshine::fields.file';
 
+    protected bool $hasOld = false;
+
     protected string $type = 'file';
 
     protected string $accept = '*/*';
 
+    /**
+     * @var string[]
+     */
     protected array $propertyAttributes = [
         'type',
         'accept',
@@ -77,7 +82,7 @@ class File extends Field implements FileableContract, RemovableContract
                 $index => new FileItem(
                     fullPath: $path,
                     rawValue: data_get($this->toValue(), $index, $this->toValue()),
-                    name: (string) \call_user_func($this->resolveNames(), $path, $index, $this),
+                    name: \call_user_func($this->resolveNames(), $path, $index, $this),
                     attributes: \call_user_func($this->resolveItemAttributes(), $path, $index, $this),
                     extra: \call_user_func($this->resolveExtraAttributes(), $path, $index, $this),
                 ),
@@ -100,6 +105,7 @@ class File extends Field implements FileableContract, RemovableContract
             'isRemovable' => $this->isRemovable(),
             'removableAttributes' => $this->getRemovableAttributes(),
             'hiddenAttributes' => $this->getHiddenAttributes(),
+            'dropzoneAttributes' => $this->getDropzoneAttributes(),
             'canDownload' => $this->canDownload(),
         ];
     }

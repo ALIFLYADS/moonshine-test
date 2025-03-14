@@ -6,12 +6,14 @@ namespace MoonShine\Laravel\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Validation\ValidationException;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
 use MoonShine\Contracts\UI\TableRowContract;
 use MoonShine\Laravel\Contracts\Notifications\MoonShineNotificationContract;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Laravel\Pages\QuickPage;
+use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Laravel\Traits\Controller\InteractsWithAuth;
 use MoonShine\Laravel\Traits\Controller\InteractsWithUI;
 use MoonShine\Laravel\TypeCasts\ModelCaster;
@@ -57,8 +59,10 @@ abstract class MoonShineController extends BaseController
     {
         report_if(moonshine()->isProduction(), $e);
 
+        $data = [];
         $message = moonshine()->isProduction() ? __('moonshine::ui.saved_error') : $e->getMessage();
         $type = ToastType::ERROR;
+        $status = Response::HTTP_INTERNAL_SERVER_ERROR;
 
         if ($flash = session()->get('toast')) {
             session()->forget(['toast', '_flash.old', '_flash.new']);
@@ -66,11 +70,18 @@ abstract class MoonShineController extends BaseController
             $message = $flash['message'] ?? $message;
         }
 
-        if ($isAjax) {
-            return $this->json(message: __($message), messageType: $type);
+        if ($e instanceof ValidationException) {
+            $status = $e->status;
+            $data = [
+                'errors' => $e->errors(),
+            ];
         }
 
-        throw_if(! moonshine()->isProduction(), $e);
+        if ($isAjax) {
+            return $this->json(message: __($message), data: $data, messageType: $type, status: $status);
+        }
+
+        throw_if(! moonshine()->isProduction() && ! $e instanceof ValidationException, $e);
 
         $this->toast(__($message), $type);
 
@@ -90,6 +101,8 @@ abstract class MoonShineController extends BaseController
             return $table;
         }
 
+        $key = request()->getScalar('_key');
+
         /** @var ModelCaster $cast */
         $cast = $table->getCast();
 
@@ -99,13 +112,22 @@ abstract class MoonShineController extends BaseController
 
         if (! $class instanceof Model) {
             return $table->getRows()->first(
-                static fn (TableRowContract $row): bool => $row->getKey() === request()->getScalar('_key'),
+                static fn (TableRowContract $row): bool => $row->getKey() === $key,
             );
         }
 
-        $item = $class::query()->find(
-            request()->getScalar('_key')
-        );
+        /** @var null|CrudResource $resource */
+        $resource = moonshineRequest()->getResource();
+
+        if ($resource === null) {
+            $item = $class::query()->find($key);
+        }
+
+        if ($resource !== null) {
+            $resource->setItemID($key);
+
+            $item = $resource->findItem();
+        }
 
         if (blank($item)) {
             return '';

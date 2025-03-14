@@ -18,7 +18,7 @@ final readonly class NotificationItem implements NotificationItemContract
 
     public function getId(): int|string|null
     {
-        return $this->notification->id;
+        return $this->notification->getKey();
     }
 
     public function getReadRoute(): string
@@ -50,11 +50,12 @@ final readonly class NotificationItem implements NotificationItemContract
         return new NotificationButton(
             $this->notification->data['button']['label'],
             $this->notification->data['button']['link'],
+            $this->notification->data['button']['attributes'] ?? [],
         );
     }
 
     public function getIcon(): string
     {
-        return 'information-circle';
+        return $this->notification->data['icon'] ?? 'information-circle';
     }
 }

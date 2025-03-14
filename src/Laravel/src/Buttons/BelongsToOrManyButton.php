@@ -17,7 +17,6 @@ use MoonShine\Support\Enums\JsEvent;
 use MoonShine\UI\Components\ActionButton;
 use MoonShine\UI\Components\FormBuilder;
 use MoonShine\UI\Components\Modal;
-use MoonShine\UI\Fields\Hidden;
 use Throwable;
 
 final class BelongsToOrManyButton
@@ -38,15 +37,13 @@ final class BelongsToOrManyButton
 
         $action = $resource->getRoute('crud.store');
 
-        $getFields = static function () use ($resource, $field) {
+        $getFields = static function () use ($resource, $field): array {
             $fields = $resource->getFormFields();
 
             $fields->onlyFields()
                 ->each(static fn (FieldContract $nestedFields): FieldContract => $nestedFields->setParent($field));
 
-            return $fields
-                ->push(Hidden::make('_async_field')->setValue(true))
-                ->toArray();
+            return $fields->toArray();
         };
 
         $actionButton = $button
@@ -59,16 +56,14 @@ final class BelongsToOrManyButton
             ->inModal(
                 title: static fn (): array|string => __('moonshine::ui.create'),
                 content: static fn (?Model $data): string => (string) FormBuilder::make($action)
+                    ->withoutRedirect()
                     ->reactiveUrl(
                         moonshineRouter()->getEndpoints()->reactive($resource->getFormPage(), $resource)
                     )
-                    ->switchFormMode(
-                        true,
-                        [
-                            AlpineJs::event(JsEvent::FRAGMENT_UPDATED, $field->getRelationName()),
-                            AlpineJs::event(JsEvent::FORM_RESET, $resource->getUriKey()),
-                        ]
-                    )
+                    ->async(events: [
+                        AlpineJs::event(JsEvent::FRAGMENT_UPDATED, $field->getRelationName()),
+                        AlpineJs::event(JsEvent::FORM_RESET, $resource->getUriKey()),
+                    ])
                     ->name($resource->getUriKey())
                     ->fillCast(
                         [],

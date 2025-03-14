@@ -109,12 +109,12 @@ class MorphTo extends BelongsTo
     {
         $item = $this->getRelatedModel();
 
-        if (empty(data_get($item, $this->getMorphKey()))) {
-            return parent::getValues();
+        if (blank(data_get($item, $this->getMorphKey()))) {
+            return new Options();
         }
 
         if (\is_null($item)) {
-            return parent::getValues();
+            return new Options();
         }
 
         if (\is_null($this->getFormattedValueCallback())) {
@@ -154,15 +154,25 @@ class MorphTo extends BelongsTo
     {
         $default = Arr::first(array_keys($this->types));
 
-        return old($this->getMorphType()) ?? addslashes(
-            (string) ($this->getRelatedModel()->{$this->getMorphType()}
-            ?? $default)
+        return old(
+            $this->getMorphType()
+        ) ?? (string) (
+            $this->getRelatedModel()->{$this->getMorphType()} ?? $default
         );
     }
 
     protected function resolveValue(): string
     {
+        if (\is_scalar($this->toValue())) {
+            return $this->toValue();
+        }
+
         return (string) $this->getRelatedModel()->{$this->getMorphKey()};
+    }
+
+    public function isReactivitySupported(): bool
+    {
+        return false;
     }
 
     protected function viewData(): array

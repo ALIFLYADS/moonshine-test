@@ -38,7 +38,7 @@ trait WithRelatedLink
 
     public function toRelatedCollection(): Collection
     {
-        return $this->getRelatedModel()?->{$this->getRelationName()} ?? new Collection();
+        return $this->getRelatedModel()->{$this->getRelationName()} ?? new Collection();
     }
 
     protected function isRelatedLink(): bool
@@ -63,7 +63,9 @@ trait WithRelatedLink
             return $this->parentRelationName;
         }
 
-        $relationName = str((string) moonshineRequest()->getResourceUri())
+        $resource = $this->getNowOnResource() ?? moonshineRequest()->getResource();
+
+        $relationName = str((string) $resource?->getUriKey())
             ->remove('-resource')
             ->replace('-', '_');
 

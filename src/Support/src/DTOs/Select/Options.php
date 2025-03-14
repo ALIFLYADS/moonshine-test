@@ -8,21 +8,32 @@ use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
 use JsonException;
+use MoonShine\Support\Enums\ObjectFit;
 use UnitEnum;
 
 final readonly class Options implements Arrayable
 {
+    /**
+     * @param  array<int|string,string|Option|OptionGroup|array<int|string,string>>  $values
+     * @param  mixed|null  $value
+     * @param  array<OptionProperty>|Closure  $properties
+     */
     public function __construct(
         private array $values = [],
         private mixed $value = null,
-        private array|Closure|OptionProperty $properties = []
+        private array|Closure $properties = []
     ) {
     }
 
     public function getValues(): Collection
     {
         return collect($this->values)
+            ->filter()
             ->map(function (array|string|OptionGroup|Option $labelOrValues, int|string $valueOrLabel): OptionGroup|Option {
+                if ($labelOrValues instanceof Option) {
+                    return $labelOrValues;
+                }
+
                 $toOption = fn (string $label, string $value): Option => new Option(
                     label: $label,
                     value: $value,
@@ -47,10 +58,6 @@ final readonly class Options implements Arrayable
                     );
                 }
 
-                if ($labelOrValues instanceof Option) {
-                    return $labelOrValues;
-                }
-
                 return $toOption($labelOrValues, (string) $valueOrLabel);
             });
     }
@@ -68,7 +75,9 @@ final readonly class Options implements Arrayable
             return $properties;
         }
 
-        return new OptionProperty(...$properties ?? []);
+        return new OptionProperty(
+            ...$this->normalizeProperties($properties)
+        );
     }
 
     /**
@@ -115,5 +124,57 @@ final readonly class Options implements Arrayable
     public function toArray(): array
     {
         return $this->getValues()->toArray();
+    }
+
+    /**
+     * @return array{options: array, properties: array}
+     */
+    public function toRaw(): array
+    {
+        $values = $this->getValues();
+
+        $options = $values->mapWithKeys(function (Option|OptionGroup $option): array {
+            if ($option instanceof OptionGroup) {
+                return [$option->getLabel() => collect($option->getValues()->toArray())->pluck('label', 'value')->toArray()];
+            }
+
+            return [$option->getValue() => $option->getLabel()];
+        })->toArray();
+
+        $properties = collect($this->flatten())->pluck('properties', 'value')->toArray();
+
+        return [
+            'options' => $options,
+            'properties' => $properties,
+        ];
+    }
+
+    /**
+     * @param  array{image: OptionImage}  $properties
+     *
+     * @return array
+     */
+    private function normalizeProperties(array $properties): array
+    {
+        if (! isset($properties['image']) || $properties['image'] instanceof OptionImage) {
+            return $properties;
+        }
+
+        $imageData = $properties['image'];
+
+        if (\is_string($imageData)) {
+            $properties['image'] = new OptionImage($imageData);
+
+            return $properties;
+        }
+
+        $properties['image'] = new OptionImage(
+            $imageData['src'] ?? '',
+            $imageData['width'] ?? null,
+            $imageData['height'] ?? null,
+            isset($imageData['objectFit']) ? ObjectFit::from($imageData['objectFit']) : null
+        );
+
+        return $properties;
     }
 }

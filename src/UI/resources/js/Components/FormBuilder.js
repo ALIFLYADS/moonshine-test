@@ -202,7 +202,8 @@ export default (name = '', initData = {}, reactive = {}) => ({
     }
 
     if (method?.toLowerCase() === 'get') {
-      action = action + '?' + new URLSearchParams(formData).toString()
+      action =
+        action + (action.includes('?') ? '&' : '?') + new URLSearchParams(formData).toString()
     }
 
     let componentRequestData = new ComponentRequestData()
@@ -213,6 +214,7 @@ export default (name = '', initData = {}, reactive = {}) => ({
       .withSelector(form.dataset.asyncSelector ?? '')
       .withBeforeRequest(callback.beforeRequest)
       .withResponseHandler(callback.responseHandler)
+      .withResponseType(form.dataset.asyncResponseType ?? null)
       .withEvents(events)
       .withAfterResponse(function (data, type) {
         if (type !== 'error' && t.inModal && t.autoClose) {
@@ -311,9 +313,22 @@ export default (name = '', initData = {}, reactive = {}) => ({
 })
 
 function submitState(form, loading = true, reset = false) {
+  clearErrors(form)
+
+  const button = form.querySelector('.js-form-submit-button')
+  const loader = form.querySelector('.js-form-submit-button-loader')
+
+  if (!button) {
+    return
+  }
+
+  if (!loader) {
+    return
+  }
+
   if (!loading) {
-    form.querySelector('.js-form-submit-button-loader').style.display = 'none'
-    form.querySelector('.js-form-submit-button').removeAttribute('disabled')
+    loader.style.display = 'none'
+    button.removeAttribute('disabled')
     if (reset) {
       form.reset()
     }
@@ -327,20 +342,36 @@ function submitState(form, loading = true, reset = false) {
       })
     }
 
-    form.querySelector('.js-form-submit-button').setAttribute('disabled', 'true')
-    form.querySelector('.js-form-submit-button-loader').style.display = 'block'
+    button.setAttribute('disabled', 'true')
+    loader.style.display = 'block'
   }
+}
+
+function clearErrors(form) {
+  form.querySelectorAll('.form-error').forEach(div => div.remove())
 }
 
 function inputsErrors(data, form) {
   if (!data.errors) {
     return
   }
+
   for (let key in data.errors) {
     let formattedKey = key.replace(/\.(\d+|\w+)/g, '[$1]')
-    const input = form.querySelector(`[name="${formattedKey}"]`)
-    if (input) {
-      input.classList.add('form-invalid')
+    const inputs = form.querySelectorAll(
+      `[name="${formattedKey}"], [data-validation-field="${formattedKey}"]`,
+    )
+    if (inputs.length) {
+      inputs.forEach(input => input.classList.add('form-invalid'))
+
+      const fieldArea = inputs[0].closest('[data-validation-wrapper]') ?? null
+
+      if (fieldArea) {
+        const errorDiv = document.createElement('div')
+        errorDiv.classList.add('form-error')
+        errorDiv.textContent = data.errors[key]
+        fieldArea.after(errorDiv)
+      }
     }
   }
 }

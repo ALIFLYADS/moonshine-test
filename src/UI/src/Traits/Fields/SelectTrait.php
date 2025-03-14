@@ -32,7 +32,13 @@ trait SelectTrait
     public function getValues(): Options
     {
         if ($this->options instanceof Options) {
-            return $this->options;
+            ['options' => $options, 'properties' => $properties] = $this->options->toRaw();
+
+            return new Options(
+                $options,
+                $this->getValue(),
+                $properties
+            );
         }
 
         return new Options(

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Layouts;
 
-use MoonShine\AssetManager\Css;
 use MoonShine\ColorManager\ColorManager;
+use MoonShine\Contracts\AssetManager\AssetElementContract;
 use MoonShine\Contracts\ColorManager\ColorManagerContract;
 use MoonShine\Laravel\Components\Fragment;
-use MoonShine\UI\Components\{Components,
+use MoonShine\UI\Components\{
     Layout\Body,
     Layout\Content,
     Layout\Div,
@@ -19,12 +19,14 @@ use MoonShine\UI\Components\{Components,
 
 class CompactLayout extends AppLayout
 {
+    /**
+     * @return list<AssetElementContract>
+     */
     protected function assets(): array
     {
         return [
             ...parent::assets(),
-
-            Css::make('/vendor/moonshine/assets/minimalistic.css')->defer(),
+            $this->getCompactThemeCss(),
         ];
     }
 
@@ -79,6 +81,16 @@ class CompactLayout extends AppLayout
             ->infoText('179, 220, 255', dark: true);
     }
 
+    protected function withTitle(): bool
+    {
+        return false;
+    }
+
+    protected function withSubTitle(): bool
+    {
+        return false;
+    }
+
     public function build(): Layout
     {
         return Layout::make([
@@ -94,15 +106,11 @@ class CompactLayout extends AppLayout
 
                                 $this->getHeaderComponent(),
 
-                                Content::make([
-                                    Components::make(
-                                        $this->getPage()->getComponents()
-                                    ),
-                                ]),
+                                Content::make($this->getContentComponents()),
 
                                 $this->getFooterComponent(),
                             ])->class('layout-page')->name(self::CONTENT_FRAGMENT_NAME),
-                        ])->class('flex grow')->customAttributes(['id' => self::CONTENT_ID]),
+                        ])->class('flex grow overflow-auto')->customAttributes(['id' => self::CONTENT_ID]),
                     ]),
                 ])->class('theme-minimalistic'),
             ])

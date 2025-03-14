@@ -130,14 +130,15 @@ trait WithAsyncSearch
             $parentName = $this->getParent()?->getColumn();
         }
 
-        $resourceUri = moonshineRequest()->getResourceUri();
+        $resourceUri = $this->getNowOnResource()?->getUriKey() ?? moonshineRequest()->getResourceUri();
+        $itemID = data_get($this->getNowOnQueryParams(), 'resourceItem', moonshineRequest()->getItemID());
 
         return moonshineRouter()->getEndpoints()->withRelation(
             'async-search',
-            resourceItem: moonshineRequest()->getItemID(),
+            resourceItem: $itemID,
             relation: $this->getRelationName(),
             resourceUri: $resourceUri,
-            parentField: $parentName
+            parentField: $parentName,
         );
     }
 
@@ -153,8 +154,8 @@ trait WithAsyncSearch
             label: \is_null($this->getAsyncSearchValueCallback())
                 ? data_get($model, $searchColumn, '')
                 : value($this->getAsyncSearchValueCallback(), $model, $this),
-            value: (string) $model->getKey(),
-            properties: new OptionProperty($this->getImageUrl($model))
+            value: (string)$model->getKey(),
+            properties: new OptionProperty($this->getImageUrl($model)),
         );
     }
 
@@ -206,7 +207,7 @@ trait WithAsyncSearch
 
         return $this->asyncSearch(
             searchQuery: \is_null($searchQuery) ? $defaultQuery : $searchQuery,
-            associatedWith: $column
+            associatedWith: $column,
         );
     }
 

@@ -12,6 +12,7 @@ use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\ComponentAttributesBagContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Contracts\UI\FieldWithComponentContract;
 use MoonShine\Contracts\UI\HasFieldsContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
 use MoonShine\UI\Collections\Fields;
@@ -24,6 +25,7 @@ use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Contracts\DefaultValueTypes\CanBeArray;
 use MoonShine\UI\Contracts\HasDefaultValueContract;
 use MoonShine\UI\Contracts\RemovableContract;
+use MoonShine\UI\Exceptions\FieldException;
 use MoonShine\UI\Traits\Fields\HasVerticalMode;
 use MoonShine\UI\Traits\Fields\WithDefaultValue;
 use MoonShine\UI\Traits\Removable;
@@ -32,9 +34,11 @@ use Throwable;
 
 /**
  * @implements HasFieldsContract<Fields|FieldsContract>
+ * @implements FieldWithComponentContract<TableBuilderContract|FieldsGroup>
  */
 class Json extends Field implements
     HasFieldsContract,
+    FieldWithComponentContract,
     RemovableContract,
     HasDefaultValueContract,
     CanBeArray
@@ -54,8 +58,6 @@ class Json extends Field implements
 
     protected bool $isGroup = true;
 
-    protected bool $hasOld = false;
-
     protected bool $isCreatable = true;
 
     protected ?int $creatableLimit = null;
@@ -73,6 +75,8 @@ class Json extends Field implements
     protected ?Closure $modifyRemoveButton = null;
 
     protected bool $resolveValueOnce = true;
+
+    protected null|TableBuilderContract|FieldsGroup $resolvedComponent = null;
 
     /**
      * @throws Throwable
@@ -135,7 +139,9 @@ class Json extends Field implements
     {
         $this->objectMode = true;
 
-        return $this;
+        return $this->customAttributes([
+            'class' => 'space-elements',
+        ]);
     }
 
     public function isObjectMode(): bool
@@ -148,10 +154,15 @@ class Json extends Field implements
         return $this->keyValue || $this->onlyValue;
     }
 
+    public function isGroup(): bool
+    {
+        return ! $this->isObjectMode() && $this->isGroup;
+    }
+
     public function creatable(
         Closure|bool|null $condition = null,
         ?int $limit = null,
-        ?ActionButtonContract $button = null
+        ?ActionButtonContract $button = null,
     ): static {
         $this->isCreatable = value($condition, $this) ?? true;
 
@@ -259,18 +270,30 @@ class Json extends Field implements
 
     protected function prepareFields(): FieldsContract
     {
+        $fields = $this->getFields()->prepareAttributes();
+
         if ($this->isObjectMode()) {
-            return $this->getFields()
-                ->wrapNames($this->getColumn());
+            $fields = $fields
+                ->map(
+                    fn ($field) => $field
+                        ->customAttributes($this->getReactiveAttributes("{$this->getColumn()}.{$field->getColumn()}"))
+                        ->customAttributes(['data-object-mode' => true])
+                );
         }
 
-        return $this->getFields()
-            ->prepareAttributes()
+        return $fields
             ->prepareReindexNames(parent: $this, before: static function (self $parent, FieldContract $field): void {
-                $field
-                    ->withoutWrapper()
-                    ->setRequestKeyPrefix($parent->getRequestKeyPrefix());
-            });
+                if (! $parent->isObjectMode()) {
+                    $field->withoutWrapper();
+                } else {
+                    $parent->customWrapperAttributes([
+                        'class' => 'inner-json-object-mode',
+                        'data-object-mode' => true,
+                    ]);
+                }
+
+                $field->setRequestKeyPrefix($parent->getRequestKeyPrefix());
+            }, except: fn (FieldContract $parent): bool => $parent instanceof self && $parent->isObjectMode());
     }
 
     protected function resolveRawValue(): mixed
@@ -280,15 +303,16 @@ class Json extends Field implements
 
     protected function resolvePreview(): Renderable|string
     {
-        $value = $this->getValue();
+        $component = $this->getComponent();
 
+        // FieldsGroup component
         if ($this->isObjectMode()) {
-            return $value
+            return $component
                 ->previewMode()
                 ->render();
         }
 
-        return $value
+        return $component
             ->simple()
             ->preview()
             ->render();
@@ -298,7 +322,7 @@ class Json extends Field implements
     {
         if ($this->isKeyOrOnlyValue() && ! $this->isFilterMode()) {
             return collect($data)->map(fn ($data, $key): array => $this->extractKeyValue(
-                $this->isOnlyValue() ? [$data] : [$key => $data]
+                $this->isOnlyValue() ? [$data] : [$key => $data],
             ))->values()->toArray();
         }
 
@@ -335,33 +359,63 @@ class Json extends Field implements
     /**
      * @throws Throwable
      */
-    protected function resolveValue(): mixed
+    public function prepareOnApplyRecursive(iterable $collection): array
     {
+        $collection = $this->prepareOnApply($collection);
+
+        foreach ($this->getFields() as $field) {
+            if ($field instanceof self) {
+                foreach ($collection as $index => $value) {
+                    $column = $field->getColumn();
+                    $collection[$index][$column] = $field->prepareOnApplyRecursive(
+                        $value[$column] ?? []
+                    );
+                }
+            }
+        }
+
+        return $collection;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    protected function resolveOldValue(mixed $old): mixed
+    {
+        return $this->prepareOnApplyRecursive($old);
+    }
+
+    public function getComponent(): ComponentContract
+    {
+        if (! \is_null($this->resolvedComponent)) {
+            return $this->resolvedComponent;
+        }
+
         $value = $this->isPreviewMode()
             ? $this->toFormattedValue()
-            : $this->toValue();
+            : $this->getValue();
 
         $values = Collection::make(
             is_iterable($value)
                 ? $value
-                : []
+                : [],
         );
 
         $fields = $this->getPreparedFields();
 
         if ($this->isObjectMode()) {
             return FieldsGroup::make(
-                $fields
-            )->fill($values->toArray())->mapFields(
+                Fields::make($fields)->fillCloned($values->toArray())
+            )->mapFields(
                 fn (FieldContract $field): FieldContract => $field
                     ->formName($this->getFormName())
-                    ->setParent($this)
+                    ->setParent($this),
             );
         }
 
         $values = $values->when(
             ! $this->isPreviewMode() && ! $this->isCreatable() && blank($values),
-            static fn ($values): Collection => $values->push([null])
+            static fn ($values): Collection => $values->push([null]),
         );
 
         $reorderable = ! $this->isPreviewMode() && $this->isReorderable();
@@ -370,12 +424,12 @@ class Json extends Field implements
             $fields->prepend(
                 Preview::make(
                     column: '__handle',
-                    formatted: static fn () => Icon::make('bars-4')
-                )->customAttributes(['class' => 'handle', 'style' => 'cursor: move'])
+                    formatted: static fn () => Icon::make('bars-4'),
+                )->customAttributes(['class' => 'handle', 'style' => 'cursor: move']),
             );
         }
 
-        return TableBuilder::make($fields, $values)
+        $component = TableBuilder::make($fields, $values)
             ->name('repeater_' . $this->getColumn())
             ->inside('field')
             ->customAttributes(
@@ -385,13 +439,14 @@ class Json extends Field implements
                         $reorderable,
                         static fn (ComponentAttributesBagContract $attr): ComponentAttributesBagContract => $attr->merge([
                             'data-handle' => '.handle',
-                        ])
+                        ]),
                     )
                     ->jsonSerialize()
             )
+            ->customAttributes(['data-validation-wrapper' => true])
             ->when(
                 $reorderable,
-                static fn (TableBuilderContract $table): TableBuilderContract => $table->reorderable()
+                static fn (TableBuilderContract $table): TableBuilderContract => $table->reorderable(),
             )
             ->when(
                 $this->isVertical(),
@@ -405,19 +460,36 @@ class Json extends Field implements
                         ? Column::make()->columnSpan($this->verticalValueSpan)
                         /** @var Column $default */
                         /** @phpstan-ignore-next-line  */
-                        : $default->columnSpan($this->verticalValueSpan) : null,
-                )
+                        : $default->columnSpan($this->verticalValueSpan)->customAttributes(['data-validation-wrapper' => true]) : null,
+                ),
             )
             ->when(
                 ! \is_null($this->modifyTable),
-                fn (TableBuilder $tableBuilder) => value($this->modifyTable, $tableBuilder, $this->isPreviewMode())
+                fn (TableBuilder $tableBuilder) => value($this->modifyTable, $tableBuilder, $this->isPreviewMode()),
             );
+
+        if (! $this->isPreviewMode()) {
+            $component = $component
+                ->editable()
+                ->reindex(prepared: true)
+                ->when(
+                    $this->isCreatable(),
+                    fn (TableBuilderContract $table): TableBuilderContract => $table->creatable(
+                        limit: $this->getCreateLimit(),
+                        button: $this->getCreateButton(),
+                    )->removeAfterClone(),
+                )
+                ->buttons($this->getButtons())
+                ->simple();
+        }
+
+        return $this->resolvedComponent = $component;
     }
 
     /**
      * @throws Throwable
      */
-    protected function prepareOnApply(iterable $collection): array
+    public function prepareOnApply(iterable $collection): array
     {
         $collection = collect($collection);
 
@@ -426,8 +498,8 @@ class Json extends Field implements
             fn ($data): Collection => $data->mapWithKeys(
                 fn ($data, $key): array => $this->isOnlyValue()
                     ? [$key => $data['value']]
-                    : [$data['key'] => $data['value']]
-            )
+                    : [$data['key'] => $data['value']],
+            ),
         )->filter(fn ($value): bool => $this->filterEmpty($value))->toArray();
     }
 
@@ -449,7 +521,7 @@ class Json extends Field implements
         mixed $data,
         Closure $callback,
         ?Closure $response = null,
-        bool $fill = false
+        bool $fill = false,
     ): mixed {
         $requestValues = array_filter($this->getRequestValue() ?: []);
         $applyValues = [];
@@ -476,22 +548,24 @@ class Json extends Field implements
                     /** @phpstan-ignore-next-line  */
                     $applyValues[$index],
                     $field->getColumn(),
-                    data_get($apply, $field->getColumn())
+                    data_get($apply, $field->getColumn()),
                 );
+            }
+
+            if ($this->isObjectMode()) {
+                $applyValues = $applyValues[$index] ?? [];
             }
         }
 
         $preparedValues = $this->prepareOnApply($applyValues);
-        $values = $this->isKeyValue() ? $preparedValues : array_values($preparedValues);
-
-        if ($this->isObjectMode()) {
-            $values = $values[0] ?? [];
-        }
+        $values = $this->isObjectMode() || $this->isKeyValue()
+            ? $preparedValues
+            : array_values($preparedValues);
 
         return \is_null($response) ? data_set(
             $data,
             str_replace('.', '->', $this->getColumn()),
-            $values
+            $values,
         ) : $response($values, $data);
     }
 
@@ -501,7 +575,7 @@ class Json extends Field implements
             data: $item,
             callback: static fn (FieldContract $field, mixed $values): mixed => $field->apply(
                 static fn ($data): mixed => data_set($data, $field->getColumn(), data_get($values, $field->getColumn(), '')),
-                $values
+                $values,
             ),
         );
     }
@@ -543,12 +617,23 @@ class Json extends Field implements
                     ->each(
                         static fn (FieldContract $field): mixed => $field
                             ->fillData($value)
-                            ->afterDestroy($value)
+                            ->afterDestroy($value),
                     );
             }
         }
 
         return $data;
+    }
+
+    public function getReactiveValue(): mixed
+    {
+        if (! $this->isObjectMode()) {
+            throw FieldException::reactivityNotSupported(static::class, 'without object mode');
+        }
+
+        return $this->toValue() ?? $this->getPreparedFields()
+            ->onlyFields()
+            ->mapWithKeys(fn (FieldContract $field) => [$field->getColumn() => null]);
     }
 
     /**
@@ -557,28 +642,8 @@ class Json extends Field implements
      */
     protected function viewData(): array
     {
-        /** @var TableBuilderContract $value */
-        $value = $this->getValue();
-
-        if ($this->isObjectMode()) {
-            return [
-                'component' => $value,
-            ];
-        }
-
         return [
-            'component' => $value
-                ->editable()
-                ->reindex(prepared: true)
-                ->when(
-                    $this->isCreatable(),
-                    fn (TableBuilderContract $table): TableBuilderContract => $table->creatable(
-                        limit: $this->getCreateLimit(),
-                        button: $this->getCreateButton()
-                    )->removeAfterClone()
-                )
-                ->buttons($this->getButtons())
-                ->simple(),
+            'component' => $this->getComponent(),
         ];
     }
 }

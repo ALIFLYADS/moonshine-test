@@ -17,15 +17,19 @@ use MoonShine\Contracts\AssetManager\AssetManagerContract;
 use MoonShine\Contracts\AssetManager\AssetResolverContract;
 use MoonShine\Contracts\ColorManager\ColorManagerContract;
 use MoonShine\Contracts\Core\DependencyInjection\AppliesRegisterContract;
+use MoonShine\Contracts\Core\DependencyInjection\CacheAttributesContract;
 use MoonShine\Contracts\Core\DependencyInjection\ConfiguratorContract;
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
+use MoonShine\Contracts\Core\DependencyInjection\OptimizerCollectionContract;
 use MoonShine\Contracts\Core\DependencyInjection\RequestContract;
 use MoonShine\Contracts\Core\DependencyInjection\RouterContract;
 use MoonShine\Contracts\Core\DependencyInjection\StorageContract;
 use MoonShine\Contracts\Core\DependencyInjection\TranslatorContract;
 use MoonShine\Contracts\Core\DependencyInjection\ViewRendererContract;
+use MoonShine\Contracts\MenuManager\MenuAutoloaderContract;
 use MoonShine\Contracts\MenuManager\MenuManagerContract;
+use MoonShine\Core\Collections\OptimizerCollection;
 use MoonShine\Core\Core;
 use MoonShine\Laravel\Applies\Fields\FileModelApply;
 use MoonShine\Laravel\Applies\Filters\BelongsToManyModelApply;
@@ -50,6 +54,8 @@ use MoonShine\Laravel\Commands\MakePolicyCommand;
 use MoonShine\Laravel\Commands\MakeResourceCommand;
 use MoonShine\Laravel\Commands\MakeTypeCastCommand;
 use MoonShine\Laravel\Commands\MakeUserCommand;
+use MoonShine\Laravel\Commands\OptimizeClearCommand;
+use MoonShine\Laravel\Commands\OptimizeCommand;
 use MoonShine\Laravel\Commands\PublishCommand;
 use MoonShine\Laravel\Contracts\Notifications\MoonShineNotificationContract;
 use MoonShine\Laravel\DependencyInjection\AssetResolver;
@@ -67,6 +73,8 @@ use MoonShine\Laravel\Notifications\MoonShineMemoryNotification;
 use MoonShine\Laravel\Notifications\MoonShineNotification;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Storage\LaravelStorage;
+use MoonShine\Laravel\Support\CacheAttributes;
+use MoonShine\Laravel\Support\MenuAutoloader;
 use MoonShine\MenuManager\MenuManager;
 use MoonShine\UI\Applies\AppliesRegister;
 use MoonShine\UI\Fields\Checkbox;
@@ -95,6 +103,8 @@ final class MoonShineServiceProvider extends ServiceProvider
         MakeTypeCastCommand::class,
         PublishCommand::class,
         MakePolicyCommand::class,
+        OptimizeCommand::class,
+        OptimizeClearCommand::class,
     ];
 
     /**
@@ -145,10 +155,16 @@ final class MoonShineServiceProvider extends ServiceProvider
         $this->app->singleton(AssetResolverContract::class, AssetResolver::class);
         $this->app->{app()->runningUnitTests() ? 'bind' : 'singleton'}(ConfiguratorContract::class, MoonShineConfigurator::class);
         $this->app->singleton(AppliesRegisterContract::class, AppliesRegister::class);
+        $this->app->singleton(MenuAutoloaderContract::class, MenuAutoloader::class);
+        $this->app->singleton(CacheAttributesContract::class, CacheAttributes::class);
         $this->app->singleton(
             MoonShineNotificationContract::class,
             moonshineConfig()->isUseDatabaseNotifications() ? MoonShineNotification::class : MoonShineMemoryNotification::class
         );
+        $this->app->singleton(OptimizerCollectionContract::class, fn (): OptimizerCollection => new OptimizerCollection(
+            cachePath: $this->app->basePath('bootstrap/cache/moonshine.php'),
+            config   : $this->app->make(ConfiguratorContract::class)
+        ));
 
         $this->app->bind(TranslatorContract::class, Translator::class);
         $this->app->bind(FieldsContract::class, Fields::class);
@@ -282,6 +298,14 @@ final class MoonShineServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands($this->commands);
+
+            if (method_exists($this, 'optimizes')) {
+                $this->optimizes(
+                    optimize: 'moonshine:optimize',
+                    clear   : 'moonshine:optimize-clear',
+                    key     : 'moonshine'
+                );
+            }
         }
 
         Blade::componentNamespace('MoonShine\UI\Components', 'moonshine');

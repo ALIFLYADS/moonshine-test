@@ -38,11 +38,18 @@ interface ConfiguratorContract extends ArrayAccess
     public function getPage(string $name, string $default, mixed ...$parameters): PageContract;
 
     /**
+     * @return list<class-string<PageContract>>
+     */
+    public function getPages(): array;
+
+    /**
      * @return string[]
      */
     public function getLocales(): array;
 
     public function getLocale(): string;
+
+    public function getLocaleKey(): string;
 
     public function getDisk(): string;
 

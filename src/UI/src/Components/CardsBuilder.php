@@ -71,7 +71,7 @@ final class CardsBuilder extends IterableComponent implements
     protected bool $overlay = false;
 
     /**
-     * @var ?Closure(mixed, int, self): ComponentContract
+     * @var null|Closure(mixed, int, self): ComponentContract
      */
     protected ?Closure $customComponent = null;
 
@@ -160,7 +160,7 @@ final class CardsBuilder extends IterableComponent implements
         return $this;
     }
 
-    protected function prepareAsyncUrl(Closure|string|null $url = null): Closure|string|null
+    protected function prepareAsyncUrl(Closure|string|null $url = null): Closure|string
     {
         return $url ?? fn (): string => $this->getCore()->getRouter()->getEndpoints()->component(name: $this->getName());
     }

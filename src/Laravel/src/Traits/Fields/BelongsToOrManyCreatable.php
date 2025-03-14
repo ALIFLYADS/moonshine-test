@@ -7,6 +7,7 @@ namespace MoonShine\Laravel\Traits\Fields;
 use Closure;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Laravel\Buttons\BelongsToOrManyButton;
+use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use Throwable;
 
 trait BelongsToOrManyCreatable
@@ -43,6 +44,10 @@ trait BelongsToOrManyCreatable
             return null;
         }
 
+        if ($this->getParent() instanceof BelongsToMany) {
+            return null;
+        }
+
         $button = BelongsToOrManyButton::for($this, button: $this->creatableButton);
 
         return $button->isSee()
@@ -52,10 +57,14 @@ trait BelongsToOrManyCreatable
 
     public function getFragmentUrl(): string
     {
+        $resource = $this->getNowOnResource() ?? moonshineRequest()->getResource();
+        $page = $this->getNowOnPage() ?? moonshineRequest()->getPage();
+        $itemID = data_get($this->getNowOnQueryParams(), 'resourceItem', moonshineRequest()->getItemID());
+
         return $this->creatableFragmentUrl ?? toPage(
-            page: moonshineRequest()->getPage(),
-            resource: moonshineRequest()->getResource(),
-            params: ['resourceItem' => moonshineRequest()->getItemID()],
+            page: $page,
+            resource: $resource,
+            params: ['resourceItem' => $itemID],
             fragment: $this->getRelationName()
         );
     }

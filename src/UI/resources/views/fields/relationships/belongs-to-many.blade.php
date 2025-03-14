@@ -8,7 +8,9 @@
     'isAsyncSearch' => false,
     'isSelectMode' => false,
     'isTreeMode' => false,
+    'isHorizontalMode' => false,
     'treeHtml' => '',
+    'listHtml' => '',
     'asyncSearchUrl' => '',
     'isCreatable' => false,
     'createButton' => '',
@@ -19,6 +21,7 @@
 <div x-id="['belongs-to-many']"
      :id="$id('belongs-to-many')"
      data-show-when-field="{{ $attributes->get('name') }}"
+     data-validation-field="{{$relationName}}"
 >
     @if($isCreatable)
         {!! $createButton !!}
@@ -37,13 +40,17 @@
                     ])"
                     :nullable="$isNullable"
                     :searchable="$isSearchable"
-                    :values="$value"
+                    :values="$values"
                     :asyncRoute="$isAsyncSearch ? $asyncSearchUrl : null"
                 >
                 </x-moonshine::form.select>
             @elseif($isTreeMode)
-                <div x-data="belongsToMany" x-init='tree(@json($value))'>
+                <div x-data="belongsToMany" x-init='tree(@json($keys))'>
                     {!! $treeHtml !!}
+                </div>
+            @elseif($isHorizontalMode)
+                <div x-data="belongsToMany" x-init='tree(@json($keys))'>
+                    {!! $listHtml !!}
                 </div>
             @else
                 @if($isAsyncSearch)
@@ -83,7 +90,7 @@
                         <x-moonshine::layout.divider />
 
                         <div x-data="belongsToMany"
-                             x-init="pivot"
+                             x-init='pivot(@json($keys))'
                              class="js-pivot-table"
                              data-table-name="{{ $componentName }}"
                         >
@@ -96,7 +103,7 @@
                         </div>
                     </div>
                 @else
-                    <div x-data="belongsToMany" x-init="pivot">
+                    <div x-data="belongsToMany" x-init='pivot(@json($keys))'>
                         <x-moonshine::action-group
                             class="mb-4"
                             :actions="$buttons"

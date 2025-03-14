@@ -76,7 +76,12 @@ class MenuItem extends MenuElement
     {
         $this->setUrl(static fn (): string => $filler->getUrl());
 
-        $icon = Attributes::for($filler, Icon::class)->class()->first('icon');
+        $icon = $this->getCore()->getAttributes()->get(
+            default: fn (): ?string => Attributes::for($filler, Icon::class)->first('icon'),
+            target: $filler::class,
+            attribute: Icon::class,
+            column: [0 => 'icon']
+        );
 
         if (method_exists($filler, 'getBadge')) {
             $this->badge(static fn () => $filler->getBadge());
@@ -154,12 +159,20 @@ class MenuItem extends MenuElement
         $isActive = function ($path, $host): bool {
             $url = strtok($this->getUrl(), '?');
 
+            if ($url === false) {
+                return false;
+            }
+
             if ($path === '/' && $this->getCore()->getRequest()->getHost() === $host) {
                 return $this->getCore()->getRequest()->getPath() === $path;
             }
 
             if ($url === $this->getCore()->getRouter()->getEndpoints()->home()) {
                 return $this->getCore()->getRequest()->urlIs($this->getUrl());
+            }
+
+            if ($url === '/' || trim($url) === '') {
+                return $this->getCore()->getRequest()->urlIs($host ? $url : "*$url");
             }
 
             return $this->getCore()->getRequest()->urlIs($host ? "$url*" : "*$url*");

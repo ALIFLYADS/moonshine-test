@@ -15,6 +15,7 @@ use MoonShine\Support\DTOs\AsyncCallback;
 use MoonShine\Support\Enums\HttpMethod;
 use MoonShine\UI\Components\Badge;
 use MoonShine\UI\Components\Link;
+use MoonShine\UI\Traits\Fields\Reactivity;
 use MoonShine\UI\Traits\Fields\WithBadge;
 use MoonShine\UI\Traits\Fields\WithHint;
 use MoonShine\UI\Traits\Fields\WithLink;
@@ -26,6 +27,7 @@ use Psr\Container\NotFoundExceptionInterface;
  * The Field class complements the FormElement class with sugar and rendering logic
  *
  * @method static static make(Closure|string|null $label = null, ?string $column = null, ?Closure $formatted = null)
+ *
  */
 abstract class Field extends FormElement implements FieldContract
 {
@@ -33,6 +35,7 @@ abstract class Field extends FormElement implements FieldContract
     use WithHint;
     use WithLink;
     use WithBadge;
+    use Reactivity;
 
     protected bool $defaultMode = false;
 
@@ -51,6 +54,8 @@ abstract class Field extends FormElement implements FieldContract
     protected bool $withWrapper = true;
 
     protected bool $columnSelection = true;
+
+    protected bool $columnHideOnInit = false;
 
     protected bool $stickyColumn = false;
 
@@ -114,9 +119,10 @@ abstract class Field extends FormElement implements FieldContract
     }
 
 
-    public function columnSelection(bool $active = true): static
+    public function columnSelection(bool $active = true, bool $hideOnInit = false): static
     {
         $this->columnSelection = $active;
+        $this->columnHideOnInit = $hideOnInit;
 
         return $this;
     }
@@ -124,6 +130,11 @@ abstract class Field extends FormElement implements FieldContract
     public function isColumnSelection(): bool
     {
         return $this->columnSelection;
+    }
+
+    public function isColumnHideOnInit(): bool
+    {
+        return $this->columnHideOnInit;
     }
 
     public function sticky(): static
@@ -243,6 +254,23 @@ abstract class Field extends FormElement implements FieldContract
             selector: $selector,
             callback: $callback
         );
+    }
+
+    public function onChangeEvent(array|string $events, array $exclude = [], bool $withoutPayload = false): static
+    {
+        $excludes = $withoutPayload ? '*' : implode(',', [
+            ...$exclude,
+            '_component_name',
+            '_token',
+            '_method',
+        ]);
+
+        return $this->customAttributes([
+            '@change' => "dispatchEvents(
+                 `" . AlpineJs::prepareEvents($events) . "`,
+                 `$excludes`
+             )",
+        ]);
     }
 
     protected function onChangeAttributes(
@@ -437,11 +465,13 @@ abstract class Field extends FormElement implements FieldContract
         }
 
         if ($this->isRenderChanged()) {
-            return \call_user_func(
+            $render = \call_user_func(
                 $this->renderCallback,
                 $this->toValue(),
                 $this,
             );
+
+            return $render instanceof FieldContract ? $render->render() : $render;
         }
 
         if ($this->getView() === '') {

@@ -12,21 +12,34 @@ use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOneOrMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Contracts\UI\FieldWithComponentContract;
+use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Contracts\UI\HasFieldsContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
+use MoonShine\Core\Collections\Components;
 use MoonShine\Laravel\Buttons\HasManyButton;
 use MoonShine\Laravel\Collections\Fields;
+use MoonShine\Laravel\Contracts\Fields\HasModalModeContract;
+use MoonShine\Laravel\Contracts\Fields\HasOutsideSwitcherContract;
+use MoonShine\Laravel\Contracts\Fields\HasTabModeContract;
+use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Resources\ModelResource;
+use MoonShine\Laravel\Traits\Fields\HasModalModeConcern;
 use MoonShine\Laravel\Traits\Fields\WithRelatedLink;
+use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\ActionGroup;
+use MoonShine\UI\Components\Layout\Flex;
+use MoonShine\UI\Components\Layout\LineBreak;
 use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Contracts\HasUpdateOnPreviewContract;
 use MoonShine\UI\Fields\Field;
+use MoonShine\UI\Traits\Fields\HasTabModeConcern;
 use MoonShine\UI\Traits\WithFields;
 use Throwable;
 
@@ -34,11 +47,19 @@ use Throwable;
  * @template-covariant R of (HasOneOrMany|HasOneOrManyThrough|MorphOneOrMany)
  * @extends ModelRelationField<R>
  * @implements HasFieldsContract<Fields|FieldsContract>
+ * @implements FieldWithComponentContract<TableBuilderContract|FormBuilderContract|ActionButtonContract>
  */
-class HasMany extends ModelRelationField implements HasFieldsContract
+class HasMany extends ModelRelationField implements
+    HasFieldsContract,
+    FieldWithComponentContract,
+    HasModalModeContract,
+    HasTabModeContract,
+    HasOutsideSwitcherContract
 {
     use WithFields;
     use WithRelatedLink;
+    use HasModalModeConcern;
+    use HasTabModeConcern;
 
     protected string $view = 'moonshine::fields.relationships.has-many';
 
@@ -74,7 +95,7 @@ class HasMany extends ModelRelationField implements HasFieldsContract
 
     protected ?Closure $modifyEditButton = null;
 
-    /** @var ?Closure(ActionButtonContract,ActionButtonContract,ActionButtonContract,ActionButtonContract,static): array */
+    /** @var null|Closure(ActionButtonContract,ActionButtonContract,ActionButtonContract,ActionButtonContract,static): array */
     protected ?Closure $modifyItemButtons = null;
 
     protected ?Closure $modifyBuilder = null;
@@ -82,6 +103,20 @@ class HasMany extends ModelRelationField implements HasFieldsContract
     protected ?Closure $redirectAfter = null;
 
     protected bool $withoutModals = false;
+
+    protected null|TableBuilderContract|FormBuilderContract|ActionButtonContract $resolvedComponent = null;
+
+    /**
+     * @var null|ListOf<Action>
+     */
+    protected ?ListOf $activeActions = null;
+
+    public function disableOutside(): static
+    {
+        $this->outsideComponent = false;
+
+        return $this->searchable(false);
+    }
 
     public function withoutModals(): static
     {
@@ -108,7 +143,7 @@ class HasMany extends ModelRelationField implements HasFieldsContract
     public function getRedirectAfter(Model|int|null|string $parentId): ?string
     {
         if (! \is_null($this->redirectAfter)) {
-            return (string) value($this->redirectAfter, $parentId, $this);
+            return (string) \call_user_func($this->redirectAfter, $parentId, $this);
         }
 
         if ($this->isAsync()) {
@@ -120,9 +155,10 @@ class HasMany extends ModelRelationField implements HasFieldsContract
 
     public function getDefaultRedirect(Model|int|null|string $parentId): ?string
     {
-        return moonshineRequest()
-            ->getResource()
-            ?->getFormPageUrl($parentId);
+        /** @var ?CrudResourceContract $resource */
+        $resource = $this->getNowOnResource() ?? moonshineRequest()->getResource();
+
+        return $resource->getFormPageUrl($parentId);
     }
 
     /**
@@ -250,6 +286,10 @@ class HasMany extends ModelRelationField implements HasFieldsContract
     public function searchable(Closure|bool|null $condition = null): static
     {
         $this->isSearchable = value($condition, $this) ?? true;
+
+        if ($this->isOutsideComponent()) {
+            $this->isSearchable = false;
+        }
 
         return $this;
     }
@@ -420,7 +460,9 @@ class HasMany extends ModelRelationField implements HasFieldsContract
         $asyncUrl = moonshineRouter()->getEndpoints()->withRelation(
             'has-many.list',
             resourceItem: $this->getRelatedModel()?->getKey(),
-            relation: $this->getRelationName()
+            relation: $this->getRelationName(),
+            resourceUri: $this->getNowOnResource()?->getUriKey(),
+            pageUri: $this->getNowOnPage()?->getUriKey()
         );
 
         return TableBuilder::make(items: $items)
@@ -450,6 +492,39 @@ class HasMany extends ModelRelationField implements HasFieldsContract
                 ! \is_null($this->modifyTable),
                 fn (TableBuilderContract $tableBuilder) => value($this->modifyTable, $tableBuilder, false)
             );
+    }
+
+    public function activeActions(Action ...$actions): static
+    {
+        $this->activeActions = new ListOf(Action::class, $actions);
+
+        return $this;
+    }
+
+    public function withoutActions(Action ...$actions): static
+    {
+        $this->activeActions = (new ListOf(Action::class, [
+            Action::CREATE,
+            Action::VIEW,
+            Action::UPDATE,
+            Action::DELETE,
+            Action::MASS_DELETE,
+        ]))->except(...$actions);
+
+        return $this;
+    }
+
+    protected function hasAction(Action ...$actions): bool
+    {
+        if (! $this->activeActions instanceof ListOf) {
+            return true;
+        }
+
+        return collect($actions)->every(fn (Action $action): bool => \in_array(
+            $action,
+            $this->activeActions->toArray(),
+            true
+        ));
     }
 
     /**
@@ -499,13 +574,13 @@ class HasMany extends ModelRelationField implements HasFieldsContract
             );
         }
 
-        return [
+        return array_filter([
             ...$this->getIndexButtons(),
-            $detailButton,
-            $editButton,
-            $deleteButton,
-            $massDeleteButton,
-        ];
+            $this->hasAction(Action::VIEW) ? $detailButton : null,
+            $this->hasAction(Action::UPDATE) ? $editButton : null,
+            $this->hasAction(Action::DELETE) ? $deleteButton : null,
+            $this->hasAction(Action::MASS_DELETE) ? $massDeleteButton : null,
+        ]);
     }
 
     protected function prepareFill(array $raw = [], ?DataWrapperContract $casted = null): mixed
@@ -525,8 +600,16 @@ class HasMany extends ModelRelationField implements HasFieldsContract
      */
     protected function resolvePreview(): Renderable|string
     {
-        return $this->isRelatedLink()
-            ? $this->getRelatedLink()->render()
+        if ($this->isRelatedLink()) {
+            return $this->getRelatedLink()->render();
+        }
+
+        return $this->isModalMode()
+            ? (string) $this->getModalButton(
+                Components::make([$this->getTablePreview()]),
+                $this->getLabel(),
+                $this->getRelationName()
+            )
             : $this->getTablePreview()->render();
     }
 
@@ -559,7 +642,11 @@ class HasMany extends ModelRelationField implements HasFieldsContract
      */
     public function getComponent(): ComponentContract
     {
-        return $this->isRelatedLink()
+        if (! \is_null($this->resolvedComponent)) {
+            return $this->resolvedComponent;
+        }
+
+        return $this->resolvedComponent = $this->isRelatedLink()
             ? $this->getRelatedLink()
             : $this->getTableValue();
     }
@@ -582,11 +669,61 @@ class HasMany extends ModelRelationField implements HasFieldsContract
         return $data;
     }
 
+    public function isReactivitySupported(): bool
+    {
+        return false;
+    }
+
     /**
      * @return array<string, mixed>
      * @throws Throwable
      */
     protected function viewData(): array
+    {
+        return $this->isModalMode()
+            ? $this->modalViewData()
+            : $this->defaultViewData()
+        ;
+    }
+
+    /**
+     * @return array<string, mixed>
+     * @throws Throwable
+     */
+    protected function modalViewData(): array
+    {
+        $components = new Components();
+        $flexComponents = new Components();
+
+        if ($this->isCreatable()) {
+            $flexComponents->add($this->getCreateButton());
+        }
+
+        if (! \is_null($this->buttons)) {
+            $flexComponents->add($this->getButtons());
+        }
+
+        if ($flexComponents->isNotEmpty()) {
+            $components->add(Flex::make($flexComponents)->justifyAlign('between'));
+        }
+
+        $components->add(LineBreak::make());
+        $components->add($this->getComponent());
+
+        return [
+            'component' => $this->getModalButton(
+                $components,
+                $this->getLabel(),
+                $this->getRelationName()
+            ),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     * @throws Throwable
+     */
+    public function defaultViewData(): array
     {
         return [
             'component' => $this->getComponent(),

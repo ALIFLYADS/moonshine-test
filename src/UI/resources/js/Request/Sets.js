@@ -36,6 +36,13 @@ export function listComponentRequest(component, pushState = false) {
     delete eventData.sort
   }
 
+  let events = ''
+
+  if (eventData && eventData.events) {
+    events = eventData.events
+    delete eventData.events
+  }
+
   const originalUrl = url
 
   url = urlWithQuery(url, getQueryString(eventData))
@@ -47,7 +54,11 @@ export function listComponentRequest(component, pushState = false) {
   let componentRequestData = new ComponentRequestData()
   componentRequestData
     .withBeforeHandleResponse(function (data, t) {
-      const query = originalUrl.slice(originalUrl.indexOf('?') + 1)
+      let query = originalUrl.slice(originalUrl.indexOf('?') + 1)
+      const params = new URLSearchParams(query)
+      params.delete('_component_name')
+
+      query = params.toString()
 
       if (pushState) {
         history.pushState({}, '', query ? '?' + query : location.pathname)
@@ -85,6 +96,7 @@ export function listComponentRequest(component, pushState = false) {
       t.$root.outerHTML = tempElement.firstElementChild.innerHTML
       t.loading = false
     })
+    .withEvents(events)
     .withErrorCallback(stopLoading)
 
   request(component, url, 'get', {}, {}, componentRequestData)

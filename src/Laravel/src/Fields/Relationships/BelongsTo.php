@@ -6,9 +6,7 @@ namespace MoonShine\Laravel\Fields\Relationships;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;
-use MoonShine\Contracts\UI\HasReactivityContract;
 use MoonShine\Core\Exceptions\PageException;
-use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Contracts\Fields\HasAsyncSearchContract;
 use MoonShine\Laravel\Contracts\Fields\HasRelatedValuesContact;
 use MoonShine\Laravel\Enums\Action;
@@ -18,7 +16,6 @@ use MoonShine\Laravel\Traits\Fields\WithRelatedValues;
 use MoonShine\UI\Contracts\DefaultValueTypes\CanBeObject;
 use MoonShine\UI\Contracts\HasDefaultValueContract;
 use MoonShine\UI\Traits\Fields\HasPlaceholder;
-use MoonShine\UI\Traits\Fields\Reactivity;
 use MoonShine\UI\Traits\Fields\Searchable;
 use MoonShine\UI\Traits\Fields\WithDefaultValue;
 use Throwable;
@@ -27,22 +24,18 @@ use Throwable;
  * @template-covariant R of \Illuminate\Database\Eloquent\Relations\BelongsTo
  *
  * @extends ModelRelationField<R>
- *
- * @implements HasReactivityContract<Fields>
  */
 class BelongsTo extends ModelRelationField implements
     HasAsyncSearchContract,
     HasRelatedValuesContact,
     HasDefaultValueContract,
-    CanBeObject,
-    HasReactivityContract
+    CanBeObject
 {
     use WithRelatedValues;
     use WithAsyncSearch;
     use Searchable;
     use WithDefaultValue;
     use HasPlaceholder;
-    use Reactivity;
     use BelongsToOrManyCreatable;
 
     protected string $view = 'moonshine::fields.relationships.belongs-to';
@@ -80,6 +73,10 @@ class BelongsTo extends ModelRelationField implements
 
     protected function resolveValue(): mixed
     {
+        if (\is_scalar($this->toValue())) {
+            return $this->toValue();
+        }
+
         return $this->toValue()?->getKey();
     }
 
@@ -124,6 +121,16 @@ class BelongsTo extends ModelRelationField implements
         };
     }
 
+    public function prepareReactivityValue(mixed $value, mixed &$casted, array &$except): mixed
+    {
+        $value = data_get($value, 'value', $value);
+
+        $casted = $this->getRelatedModel();
+        $casted?->setRelation($this->getRelationName(), $this->makeRelatedModel($value));
+
+        return $value;
+    }
+
     /**
      * @throws Throwable
      */
@@ -134,7 +141,7 @@ class BelongsTo extends ModelRelationField implements
             'values' => $this->getRelation() ? $this->getValues()->toArray() : [],
             'isNullable' => $this->isNullable(),
             'isAsyncSearch' => $this->isAsyncSearch(),
-            'asyncSearchUrl' => $this->getAsyncSearchUrl(),
+            'asyncSearchUrl' => $this->isAsyncSearch() ? $this->getAsyncSearchUrl() : '',
             'isCreatable' => $this->isCreatable(),
             'createButton' => $this->getCreateButton(),
             'fragmentUrl' => $this->getFragmentUrl(),

@@ -62,7 +62,6 @@ final class FormBuilder extends MoonShineComponent implements
         '_without-redirect',
         '_method',
         '_component_name',
-        '_async_field',
     ];
 
     protected bool $isPrecognitive = false;
@@ -175,9 +174,16 @@ final class FormBuilder extends MoonShineComponent implements
         return $this->isPrecognitive;
     }
 
-    protected function prepareAsyncUrl(Closure|string|null $url = null): Closure|string|null
+    protected function prepareAsyncUrl(Closure|string|null $url = null): Closure|string
     {
         return $url ?? $this->getAction();
+    }
+
+    public function download(): self
+    {
+        return $this->customAttributes([
+            'data-async-response-type' => 'blob',
+        ]);
     }
 
     /**
@@ -349,9 +355,9 @@ final class FormBuilder extends MoonShineComponent implements
 
     /**
      * @param Closure(mixed $values, FieldsContract $fields): bool $apply
-     * @param ?Closure(FieldContract $field): void $default
-     * @param ?Closure(mixed $values): mixed $before
-     * @param ?Closure(mixed $values): void $after
+     * @param null|Closure(FieldContract $field): void $default
+     * @param null|Closure(mixed $values): mixed $before
+     * @param null|Closure(mixed $values): void $after
      * @throws Throwable
      */
     public function apply(
@@ -456,7 +462,7 @@ final class FormBuilder extends MoonShineComponent implements
         );
 
         $reactiveFields = $onlyFields->reactiveFields()
-            ->mapWithKeys(static fn (FieldContract $field): array => [$field->getColumn() => $field->getValue()]);
+            ->mapWithKeys(static fn (FieldContract $field): array => [$field->getColumn() => $field->getReactiveValue()]);
 
         $whenFields = [];
         $this->showWhenFields($onlyFields, $whenFields);

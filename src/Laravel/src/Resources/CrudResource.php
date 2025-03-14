@@ -12,6 +12,7 @@ use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+use MoonShine\Contracts\UI\TableBuilderContract;
 use MoonShine\Core\Resources\Resource;
 use MoonShine\Core\TypeCasts\MixedDataCaster;
 use MoonShine\Laravel\Components\Fragment;
@@ -33,6 +34,8 @@ use MoonShine\Support\AlpineJs;
 use MoonShine\Support\Enums\ClickAction;
 use MoonShine\Support\Enums\JsEvent;
 use MoonShine\UI\Components\Metrics\Wrapped\Metric;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 use Traversable;
 
 /**
@@ -99,6 +102,8 @@ abstract class CrudResource extends Resource implements CrudResourceContract
 
     protected bool $isRecentlyCreated = false;
 
+    protected ?PageContract $activePage = null;
+
     /**
      * @param array<int, int> $ids
      */
@@ -125,6 +130,7 @@ abstract class CrudResource extends Resource implements CrudResourceContract
         $this->item = null;
         $this->itemID = null;
         $this->pages = null;
+        $this->activePage = null;
     }
 
     /**
@@ -175,9 +181,14 @@ abstract class CrudResource extends Resource implements CrudResourceContract
         return $this->isFormPage() && ! \is_null($this->getItemID());
     }
 
+    public function setActivePage(?PageContract $page): void
+    {
+        $this->activePage = $page;
+    }
+
     public function getActivePage(): ?PageContract
     {
-        return $this->getPages()->activePage();
+        return $this->activePage ?? $this->getPages()->activePage();
     }
 
     /**
@@ -299,7 +310,7 @@ abstract class CrudResource extends Resource implements CrudResourceContract
     }
 
     /**
-     * @return ?Closure(array $components): Fragment
+     * @return null|Closure(array $components): Fragment
      */
     protected function fragmentMetrics(): ?Closure
     {
@@ -341,6 +352,11 @@ abstract class CrudResource extends Resource implements CrudResourceContract
         );
     }
 
+    public function getListComponentNameWithRow(null|int|string $id = null): string
+    {
+        return $this->getListComponentName() . ($id ? "-$id" : "-{row-id}");
+    }
+
     public function getListEventType(): JsEvent
     {
         return JsEvent::TABLE_UPDATED;
@@ -360,6 +376,14 @@ abstract class CrudResource extends Resource implements CrudResourceContract
             AlpineJs::event($this->getListEventType(), $name, $params),
             false,
         );
+    }
+
+    /**
+     * @return null|Closure(iterable $items, TableBuilderContract $table): iterable
+     */
+    public function getItemsResolver(): ?Closure
+    {
+        return null;
     }
 
     /**
@@ -389,6 +413,11 @@ abstract class CrudResource extends Resource implements CrudResourceContract
     }
 
     public function modifySaveResponse(MoonShineJsonResponse $response): MoonShineJsonResponse
+    {
+        return $response;
+    }
+
+    public function modifyErrorResponse(Response $response, Throwable $exception): Response
     {
         return $response;
     }

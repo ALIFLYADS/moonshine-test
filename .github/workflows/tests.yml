@@ -13,14 +13,17 @@ on:
 
 jobs:
   moonshine-tests:
-    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
+
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: true
       matrix:
         php: [8.2, 8.3, 8.4]
-        laravel: [10, 11]
+        laravel: [10, 11, 12]
 
     steps:
       - uses: shivammathur/setup-php@v2

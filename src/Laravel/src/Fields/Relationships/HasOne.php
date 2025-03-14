@@ -10,21 +10,29 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOneOrMany;
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Contracts\UI\FieldWithComponentContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Contracts\UI\HasFieldsContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
+use MoonShine\Core\Collections\Components;
 use MoonShine\Laravel\Collections\Fields;
+use MoonShine\Laravel\Contracts\Fields\HasModalModeContract;
+use MoonShine\Laravel\Contracts\Fields\HasOutsideSwitcherContract;
+use MoonShine\Laravel\Contracts\Fields\HasTabModeContract;
 use MoonShine\Laravel\Exceptions\ModelRelationFieldException;
 use MoonShine\Laravel\Resources\ModelResource;
+use MoonShine\Laravel\Traits\Fields\HasModalModeConcern;
 use MoonShine\UI\Components\FormBuilder;
 use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Contracts\HasUpdateOnPreviewContract;
 use MoonShine\UI\Exceptions\FieldException;
 use MoonShine\UI\Fields\Field;
 use MoonShine\UI\Fields\Hidden;
+use MoonShine\UI\Traits\Fields\HasTabModeConcern;
 use MoonShine\UI\Traits\WithFields;
 use Throwable;
 
@@ -32,10 +40,18 @@ use Throwable;
  * @template-covariant R of HasOneOrMany|HasOneOrManyThrough
  * @extends ModelRelationField<R>
  * @implements HasFieldsContract<Fields|FieldsContract>
+ * @implements FieldWithComponentContract<FormBuilderContract>
  */
-class HasOne extends ModelRelationField implements HasFieldsContract
+class HasOne extends ModelRelationField implements
+    HasFieldsContract,
+    FieldWithComponentContract,
+    HasModalModeContract,
+    HasTabModeContract,
+    HasOutsideSwitcherContract
 {
     use WithFields;
+    use HasModalModeConcern;
+    use HasTabModeConcern;
 
     protected string $view = 'moonshine::fields.relationships.has-one';
 
@@ -56,6 +72,15 @@ class HasOne extends ModelRelationField implements HasFieldsContract
     protected ?Closure $modifyForm = null;
 
     protected ?Closure $modifyTable = null;
+
+    protected ?FormBuilderContract $resolvedComponent = null;
+
+    public function disableOutside(): static
+    {
+        $this->outsideComponent = false;
+
+        return $this;
+    }
 
     public function hasWrapper(): bool
     {
@@ -118,7 +143,7 @@ class HasOne extends ModelRelationField implements HasFieldsContract
 
         $resource = $this->getResource()->stopGettingItemFromUrl();
 
-        return TableBuilder::make(items: $items)
+        $table = TableBuilder::make(items: $items)
             ->fields($this->getFieldsOnPreview())
             ->cast($resource->getCaster())
             ->preview()
@@ -127,8 +152,15 @@ class HasOne extends ModelRelationField implements HasFieldsContract
             ->when(
                 ! \is_null($this->modifyTable),
                 fn (TableBuilderContract $tableBuilder) => value($this->modifyTable, $tableBuilder)
+            );
+
+        return $this->isModalMode()
+            ? (string) $this->getModalButton(
+                Components::make([$table]),
+                $this->getLabel(),
+                $this->getRelationName()
             )
-            ->render();
+            : $table->render();
     }
 
     /**
@@ -165,7 +197,7 @@ class HasOne extends ModelRelationField implements HasFieldsContract
     public function getRedirectAfter(Model|int|null|string $parentId): ?string
     {
         if (! \is_null($this->redirectAfter)) {
-            return (string) value($this->redirectAfter, $parentId, $this);
+            return (string) \call_user_func($this->redirectAfter, $parentId, $this);
         }
 
         if ($this->isAsync() && ! \is_null($this->toValue())) {
@@ -177,9 +209,10 @@ class HasOne extends ModelRelationField implements HasFieldsContract
 
     public function getDefaultRedirect(Model|int|null|string $parentId): ?string
     {
-        return moonshineRequest()
-            ->getResource()
-            ?->getFormPageUrl($parentId);
+        /** @var ?CrudResourceContract $resource */
+        $resource = $this->getNowOnResource() ?? moonshineRequest()->getResource();
+
+        return $resource->getFormPageUrl($parentId);
     }
 
     /**
@@ -206,12 +239,16 @@ class HasOne extends ModelRelationField implements HasFieldsContract
      * @throws Throwable
      * @throws FieldException
      */
-    protected function getComponent(): FormBuilder
+    public function getComponent(): ComponentContract
     {
+        if (! \is_null($this->resolvedComponent)) {
+            return $this->resolvedComponent;
+        }
+
         $resource = $this->getResource()->stopGettingItemFromUrl();
 
         /** @var ?ModelResource $parentResource */
-        $parentResource = moonshineRequest()->getResource();
+        $parentResource = $this->getNowOnResource() ?? moonshineRequest()->getResource();
 
         $item = $this->toValue();
 
@@ -240,7 +277,7 @@ class HasOne extends ModelRelationField implements HasFieldsContract
 
         $isAsync = ! \is_null($item) && ($this->isAsync() || $resource->isAsync());
 
-        return FormBuilder::make($action)
+        return $this->resolvedComponent = FormBuilder::make($action)
             ->reactiveUrl(
                 static fn (): string => moonshineRouter()
                     ->getEndpoints()
@@ -312,6 +349,11 @@ class HasOne extends ModelRelationField implements HasFieldsContract
         return $data;
     }
 
+    public function isReactivitySupported(): bool
+    {
+        return false;
+    }
+
     /**
      * @throws FieldException
      * @return array<string, mixed>
@@ -319,8 +361,24 @@ class HasOne extends ModelRelationField implements HasFieldsContract
      */
     protected function viewData(): array
     {
+        // On the form when outsideComponent is false,
+        // the HasOne field can be displayed only in modalMode.
+        if (! $this->outsideComponent) {
+            $this->modalMode();
+        }
+
+        if (\is_null($this->getRelatedModel()?->getKey())) {
+            return ['component' => ''];
+        }
+
         return [
-            'component' => $this->getComponent(),
+            'component' => $this->isModalMode()
+                ? $this->getModalButton(
+                    Components::make([$this->getComponent()]),
+                    $this->getLabel(),
+                    $this->getRelationName()
+                )
+                : $this->getComponent(),
         ];
     }
 }
