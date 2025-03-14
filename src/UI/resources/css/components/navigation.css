@@ -34,4 +34,9 @@
       }
     }
   }
+
+  /* Search and lang wrapper */
+  .search-lang-wrapper {
+    @apply flex items-center gap-4 w-full justify-between sm:w-auto sm:justify-start;
+  }
 }

@@ -172,7 +172,7 @@ abstract class BaseLayout extends AbstractLayout
                     static fn (): array => [Notifications::make()],
                 ),
                 Locales::make(),
-            ])->class('flex items-center gap-4'),
+            ])->class('search-lang-wrapper'),
         ]);
     }
 
