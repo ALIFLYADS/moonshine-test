@@ -165,12 +165,14 @@ abstract class BaseLayout extends AbstractLayout
     {
         return Header::make([
             Breadcrumbs::make($this->getPage()->getBreadcrumbs())->prepend($this->getHomeUrl(), icon: 'home'),
-            $this->getSearchComponent(),
-            When::make(
-                fn (): bool => $this->isUseNotifications(),
-                static fn (): array => [Notifications::make()],
-            ),
-            Locales::make(),
+            Div::make([
+                $this->getSearchComponent(),
+                When::make(
+                    fn (): bool => $this->isUseNotifications(),
+                    static fn (): array => [Notifications::make()],
+                ),
+                Locales::make(),
+            ])->class('flex items-center gap-4'),
         ]);
     }
 
