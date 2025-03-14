@@ -37,6 +37,6 @@
 
   /* Search and lang wrapper */
   .search-lang-wrapper {
-    @apply flex items-center gap-4 w-full justify-between sm:w-auto sm:justify-start;
+    @apply flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start;
   }
 }
