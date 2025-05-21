@@ -45,6 +45,7 @@ final readonly class PaginatorCaster implements PaginatorCasterContract
         $data['from'] ??= 1;
         $data['to'] ??= 1;
 
+
         // Fix for Laravel 12 & PHP 8.2
         unset($data['currentPageUrl']);
 
