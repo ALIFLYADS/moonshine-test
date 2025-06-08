@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Http\Controllers;
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Validation\ValidationException;
+use Leeto\FastAttributes\Attributes;
 use MoonShine\Laravel\MoonShineRequest;
+use MoonShine\Support\Attributes\AsyncMethod;
 use MoonShine\Support\Enums\ToastType;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,7 +22,7 @@ final class MethodController extends MoonShineController
     /**
      * @throws Throwable
      */
-    public function __invoke(MoonShineRequest $request): Response
+    public function __invoke(MoonShineRequest $request, Container $container): Response
     {
         $toast = [
             'type' => 'info',
@@ -27,14 +30,19 @@ final class MethodController extends MoonShineController
         ];
 
         try {
+            $method = $request->input('method');
+            $page = $request->getPage();
             $pageOrResource = $request->hasResource()
                 ? $request->getResource()
-                : $request->getPage();
+                : $page;
 
-            $result = $pageOrResource
-                ?->{$request->input('method')}(
-                    $request
-                );
+            $target = method_exists($page, $method) ? $page : $pageOrResource;
+
+            if (!Attributes::for($target, AsyncMethod::class)->method($method)->first() instanceof AsyncMethod) {
+                throw new \RuntimeException("$method does not exist");
+            }
+
+            $result = $container->call([$target, $method]);
 
             $toast = $request->session()->get('toast', $toast);
         } catch (Throwable $e) {
@@ -67,7 +75,8 @@ final class MethodController extends MoonShineController
         return $this->json(
             message: $result instanceof Throwable ? $result->getMessage() : $toast['message'],
             redirect: $result instanceof RedirectResponse ? $result->getTargetUrl() : null,
-            messageType: $result instanceof Throwable ? ToastType::ERROR : ToastType::from($toast['type'])
+            messageType: $result instanceof Throwable ? ToastType::ERROR : ToastType::from($toast['type']),
+            status: $result instanceof Throwable ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK,
         );
     }
 }

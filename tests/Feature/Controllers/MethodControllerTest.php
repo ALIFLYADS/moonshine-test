@@ -15,3 +15,18 @@ it('get response', function () {
         ->assertOk()
     ;
 });
+
+it('get error response', function () {
+    asAdmin()->get($this->moonshineCore->getRouter()->to('method', [
+        'method' => 'testAsyncMethod2',
+        'resourceUri' => 'test-item-resource',
+        'pageUri' => 'index-page',
+        'var' => 'foo',
+    ]))
+        ->assertServerError()
+        ->assertJson([
+            'message' => 'testAsyncMethod2 does not exist',
+            'messageType' => 'error'
+        ])
+    ;
+});
