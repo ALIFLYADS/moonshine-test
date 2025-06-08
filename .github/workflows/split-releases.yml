@@ -2,7 +2,7 @@ name: Split releases
 
 on:
   release:
-    branches: ['3.x']
+    branches: ['4.x']
     types: ['published']
 
 concurrency:

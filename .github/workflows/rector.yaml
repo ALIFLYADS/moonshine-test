@@ -3,7 +3,7 @@ name: Rector
 
 on:
   push:
-    branches: ['3.x']
+    branches: ['4.x']
 
 jobs:
     rector:
