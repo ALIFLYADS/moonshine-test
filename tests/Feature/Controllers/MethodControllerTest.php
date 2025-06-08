@@ -26,7 +26,7 @@ it('get error response', function () {
         ->assertServerError()
         ->assertJson([
             'message' => 'testAsyncMethod2 does not exist',
-            'messageType' => 'error'
+            'messageType' => 'error',
         ])
     ;
 });

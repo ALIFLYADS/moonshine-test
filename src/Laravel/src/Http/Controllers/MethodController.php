@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Http\Controllers;
 
-use RuntimeException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Validation\ValidationException;
 use Leeto\FastAttributes\Attributes;
 use MoonShine\Laravel\MoonShineRequest;
 use MoonShine\Support\Attributes\AsyncMethod;
 use MoonShine\Support\Enums\ToastType;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -39,7 +39,7 @@ final class MethodController extends MoonShineController
 
             $target = method_exists($page, $method) ? $page : $pageOrResource;
 
-            if (!Attributes::for($target, AsyncMethod::class)->method($method)->first() instanceof AsyncMethod) {
+            if (! Attributes::for($target, AsyncMethod::class)->method($method)->first() instanceof AsyncMethod) {
                 throw new RuntimeException("$method does not exist");
             }
 
