@@ -10,6 +10,7 @@ use MoonShine\Laravel\Fields\Relationships\MorphMany;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Laravel\MoonShineRequest;
 use MoonShine\Laravel\QueryTags\QueryTag;
+use MoonShine\Support\Attributes\AsyncMethod;
 use MoonShine\Tests\Fixtures\Models\Category;
 use MoonShine\Tests\Fixtures\Models\Item;
 use MoonShine\UI\Components\Layout\Box;
@@ -130,9 +131,17 @@ class TestItemResource extends AbstractTestingResource
         return [];
     }
 
-    public function testAsyncMethod(MoonShineRequest $request): MoonShineJsonResponse
+    #[AsyncMethod]
+    public function testAsyncMethod(MoonShineRequest $request, MoonShineJsonResponse $response): MoonShineJsonResponse
     {
-        return MoonShineJsonResponse::make([
+        return $response->setData([
+            'var' => $request->input('var'),
+        ]);
+    }
+
+    public function testAsyncMethod2(MoonShineRequest $request, MoonShineJsonResponse $response): MoonShineJsonResponse
+    {
+        return $response->setData([
             'var' => $request->input('var'),
         ]);
     }
