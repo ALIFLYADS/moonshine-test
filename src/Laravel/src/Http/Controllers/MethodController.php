@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Http\Controllers;
 
+use RuntimeException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Validation\ValidationException;
 use Leeto\FastAttributes\Attributes;
@@ -39,7 +40,7 @@ final class MethodController extends MoonShineController
             $target = method_exists($page, $method) ? $page : $pageOrResource;
 
             if (!Attributes::for($target, AsyncMethod::class)->method($method)->first() instanceof AsyncMethod) {
-                throw new \RuntimeException("$method does not exist");
+                throw new RuntimeException("$method does not exist");
             }
 
             $result = $container->call([$target, $method]);
