@@ -25,7 +25,7 @@ class CustomPageIndexWithFeatures extends IndexPage
     protected function metrics(): array
     {
         return [
-            ValueMetric::make('TestValueMetric')->value(fn() => MoonshineUser::query()->count())
+            ValueMetric::make('TestValueMetric')->value(fn () => MoonshineUser::query()->count()),
         ];
     }
 

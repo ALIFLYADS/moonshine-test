@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Pages\MoonShineUser;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
@@ -26,7 +27,6 @@ use MoonShine\UI\Fields\Image;
 use MoonShine\UI\Fields\Password;
 use MoonShine\UI\Fields\PasswordRepeat;
 use MoonShine\UI\Fields\Text;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 
 /**
  * @extends FormPage<MoonShineUser, MoonShineUserResource>
@@ -47,11 +47,11 @@ final class MoonShineUserFormPage extends FormPage
                         BelongsTo::make(
                             __('moonshine::ui.resource.role'),
                             'moonshineUserRole',
-                            formatted: static fn(MoonshineUserRole $model) => $model->name,
+                            formatted: static fn (MoonshineUserRole $model) => $model->name,
                             resource: MoonShineUserRoleResource::class,
                         )
                             ->creatable()
-                            ->valuesQuery(static fn(Builder $q) => $q->select(['id', 'name'])),
+                            ->valuesQuery(static fn (Builder $q) => $q->select(['id', 'name'])),
 
                         Flex::make([
                             Text::make(__('moonshine::ui.resource.name'), 'name')

@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Commands;
 
 use Closure;
 use Illuminate\Filesystem\Filesystem;
+
 use function Laravel\Prompts\{confirm, info, multiselect};
 
 use MoonShine\Laravel\DependencyInjection\MoonShine;
@@ -249,7 +250,7 @@ class PublishCommand extends MoonShineCommand
             $fullClassPath
         );
 
-        if($then instanceof Closure) {
+        if ($then instanceof Closure) {
             $then($fullClassPath, $targetNamespace);
         }
 

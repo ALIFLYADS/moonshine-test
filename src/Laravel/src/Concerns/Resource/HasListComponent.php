@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Concerns\Resource;
 
-
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\HasListComponentContract;
 use MoonShine\Contracts\UI\ComponentContract;
@@ -20,7 +19,7 @@ trait HasListComponent
     {
         $page = $this->getIndexPage();
 
-        if(!$page instanceof HasListComponentContract) {
+        if (! $page instanceof HasListComponentContract) {
             return null;
         }
 
@@ -31,7 +30,7 @@ trait HasListComponent
     {
         $page = $this->getIndexPage();
 
-        if(!$page instanceof HasListComponentContract) {
+        if (! $page instanceof HasListComponentContract) {
             return "index-table-{$this->getUriKey()}";
         }
 
@@ -42,7 +41,7 @@ trait HasListComponent
     {
         $page = $this->getIndexPage();
 
-        if(!$page instanceof HasListComponentContract) {
+        if (! $page instanceof HasListComponentContract) {
             return $this->getListComponentName() . ($id ? "-$id" : "-{row-id}");
         }
 
@@ -56,7 +55,7 @@ trait HasListComponent
 
     public function isListComponentRequest(): bool
     {
-        if(!$this->getIndexPage() instanceof HasListComponentContract) {
+        if (! $this->getIndexPage() instanceof HasListComponentContract) {
             return false;
         }
 
@@ -69,7 +68,7 @@ trait HasListComponent
 
         $page = $this->getIndexPage();
 
-        if($page instanceof HasListComponentContract) {
+        if ($page instanceof HasListComponentContract) {
             return $page->getListEventName($name, $params);
         }
 

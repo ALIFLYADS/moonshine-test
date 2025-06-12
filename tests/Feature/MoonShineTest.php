@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use MoonShine\Support\Enums\PageType;
 
 uses()->group('core');
 

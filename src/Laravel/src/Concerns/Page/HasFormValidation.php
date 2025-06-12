@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Concerns\Page;
 
-use Stringable;
 use Illuminate\Contracts\Validation\Rule;
+use Stringable;
 
 /**
  * @template T

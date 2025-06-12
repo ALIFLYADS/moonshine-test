@@ -82,7 +82,7 @@ trait ResourceWithButtons
     /**
      * @throws InvalidArgumentException
      */
-    public function getFiltersButton(?CrudResource $resource = null,): ActionButtonContract
+    public function getFiltersButton(?CrudResource $resource = null): ActionButtonContract
     {
         return FiltersButton::for($resource ?? $this);
     }

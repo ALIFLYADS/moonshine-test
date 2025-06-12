@@ -196,11 +196,11 @@ trait ResourceModelQuery
      */
     protected function withTags(): static
     {
-        if(!$this instanceof HasQueryTagsContract) {
+        if (! $this instanceof HasQueryTagsContract) {
             return $this;
         }
 
-        if(!$this->hasQueryTags()) {
+        if (! $this->hasQueryTags()) {
             return $this;
         }
 

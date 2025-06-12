@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
-use Closure;
-use MoonShine\Support\ListOf;
-
 class TestResource extends AbstractTestingResource
 {
     private array $testRules = [];

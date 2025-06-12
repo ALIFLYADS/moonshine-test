@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use MoonShine\Laravel\Fields\Relationships\HasMany;
 use MoonShine\Laravel\Models\MoonshineUser;
-use MoonShine\Support\Enums\PageType;
 use MoonShine\Tests\Fixtures\Resources\TestImageResource;
 use MoonShine\Tests\Fixtures\Resources\TestResourceBuilder;
 

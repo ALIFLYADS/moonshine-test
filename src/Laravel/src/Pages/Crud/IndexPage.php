@@ -162,19 +162,19 @@ class IndexPage extends CrudPage implements IndexPageContract
                 ->buttons($this->getButtons())
                 ->when($this->isAsync(), function (TableBuilderContract $table): void {
                     $table->async(
-                        url: fn(): string
+                        url: fn (): string
                             => $this->getRouter()->getEndpoints()->component(
-                            name: $table->getName(),
-                            additionally: request()->query(),
-                        ),
+                                name: $table->getName(),
+                                additionally: request()->query(),
+                            ),
                     )->pushState();
                 })
                 ->when($this->isLazy(), function (TableBuilderContract $table): void {
                     $table->lazy()->whenAsync(
-                        fn(TableBuilderContract $t): TableBuilderContract
+                        fn (TableBuilderContract $t): TableBuilderContract
                             => $t->items(
-                            $this->getResource()->getItems(),
-                        ),
+                                $this->getResource()->getItems(),
+                            ),
                     );
                 })
                 ->when(
@@ -254,7 +254,7 @@ class IndexPage extends CrudPage implements IndexPageContract
     {
         return new ListOf(ActionButtonContract::class, [
             $this->getFiltersButton(),
-            ...$this->getResource()->getHandlers()->getButtons()->toArray()
+            ...$this->getResource()->getHandlers()->getButtons()->toArray(),
         ]);
     }
 
@@ -303,10 +303,10 @@ class IndexPage extends CrudPage implements IndexPageContract
             $this->buttons()->toArray(),
         )->when(
             $this->isButtonsInDropdown(),
-            fn(ActionButtonsContract $buttons)
+            fn (ActionButtonsContract $buttons)
                 => $buttons->map(
-                fn(ActionButtonContract $button): ActionButtonContract => $button->showInDropdown(),
-            ),
+                    fn (ActionButtonContract $button): ActionButtonContract => $button->showInDropdown(),
+                ),
         );
     }
 

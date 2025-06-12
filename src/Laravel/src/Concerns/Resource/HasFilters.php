@@ -30,9 +30,10 @@ trait HasFilters
 
     public function hasFilters(): bool
     {
-        if($this->filters() !== []) {
+        if ($this->filters() !== []) {
             return true;
         }
+
         return $this->getIndexPage() instanceof HasFiltersContract && $this->getIndexPage()->hasFilters();
     }
 
@@ -41,7 +42,7 @@ trait HasFilters
      */
     public function getFilters(): Fields
     {
-        if($this->getIndexPage() instanceof HasFiltersContract && $this->getIndexPage()->hasFilters()) {
+        if ($this->getIndexPage() instanceof HasFiltersContract && $this->getIndexPage()->hasFilters()) {
             return $this->getIndexPage()->getFilters();
         }
 

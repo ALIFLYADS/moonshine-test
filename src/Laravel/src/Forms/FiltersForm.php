@@ -42,7 +42,7 @@ final readonly class FiltersForm implements FormContract
         $resource = $this->resource;
         $page = $resource->getIndexPage();
 
-        if($page === null) {
+        if ($page === null) {
             throw new RuntimeException('Index page not defined');
         }
 

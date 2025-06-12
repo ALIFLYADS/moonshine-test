@@ -27,9 +27,10 @@ trait HasHandlers
 
     public function hasHandlers(): bool
     {
-        if($this->handlers()->toArray() !== []) {
+        if ($this->handlers()->toArray() !== []) {
             return true;
         }
+
         return $this->getIndexPage() instanceof HasHandlersContract && $this->getIndexPage()->hasHandlers();
     }
 
@@ -37,7 +38,7 @@ trait HasHandlers
     {
         $handlers = $this->handlers()->toArray();
 
-        if($this->getIndexPage() instanceof HasHandlersContract && $this->getIndexPage()->hasHandlers()) {
+        if ($this->getIndexPage() instanceof HasHandlersContract && $this->getIndexPage()->hasHandlers()) {
             $handlers = array_merge($handlers, $this->getIndexPage()->getHandlers()->toArray());
         }
 

@@ -20,7 +20,7 @@ trait HasQueryTags
      */
     public function getQueryTags(): array
     {
-        if($this->getIndexPage() instanceof HasQueryTagsContract && $this->getIndexPage()->hasQueryTags()) {
+        if ($this->getIndexPage() instanceof HasQueryTagsContract && $this->getIndexPage()->hasQueryTags()) {
             return $this->getIndexPage()->getQueryTags();
         }
 
@@ -39,9 +39,10 @@ trait HasQueryTags
 
     public function hasQueryTags(): bool
     {
-        if($this->queryTags() !== []) {
+        if ($this->queryTags() !== []) {
             return true;
         }
+
         return $this->getIndexPage() instanceof HasQueryTagsContract && $this->getIndexPage()->hasQueryTags();
     }
 }

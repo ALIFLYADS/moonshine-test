@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Http\Requests\Resources;
 
-use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Http\Requests\MoonShineFormRequest;
+use MoonShine\Laravel\Resources\CrudResource;
 use Throwable;
 
 final class UpdateFormRequest extends MoonShineFormRequest
@@ -37,7 +37,7 @@ final class UpdateFormRequest extends MoonShineFormRequest
 
     public function rules(): array
     {
-        if(!$this->getResource() instanceof CrudResource || !$this->getResource()->getFormPage() instanceof PageContract) {
+        if (! $this->getResource() instanceof CrudResource || ! $this->getResource()->getFormPage() instanceof PageContract) {
             return [];
         }
 

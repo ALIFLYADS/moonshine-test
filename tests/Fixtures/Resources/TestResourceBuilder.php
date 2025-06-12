@@ -9,8 +9,6 @@ use MoonShine\Laravel\Pages\Crud\DetailPage;
 use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\Laravel\QueryTags\QueryTag;
 use MoonShine\Tests\Fixtures\Pages\Custom\CustomPageIndexWithFeatures;
-use MoonShine\UI\Components\ActionButton;
-use MoonShine\UI\Components\Metrics\Wrapped\ValueMetric;
 use MoonShine\UI\Fields\Email;
 use MoonShine\UI\Fields\Password;
 use MoonShine\UI\Fields\Preview;

@@ -2,20 +2,14 @@
 
 declare(strict_types=1);
 
-use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Laravel\Buttons\CreateButton;
 use MoonShine\Laravel\Buttons\MassDeleteButton;
 use MoonShine\Laravel\Fields\Relationships\HasMany;
 use MoonShine\Laravel\Models\MoonshineUser;
-use MoonShine\Laravel\Pages\Crud\DetailPage;
-use MoonShine\Laravel\Pages\Crud\FormPage;
-use MoonShine\Laravel\Pages\Crud\IndexPage;
-use MoonShine\Support\Enums\HttpMethod;
 use MoonShine\Tests\Fixtures\Models\Comment;
 use MoonShine\Tests\Fixtures\Models\Item;
 use MoonShine\Tests\Fixtures\Resources\TestCommentResource;
 use MoonShine\Tests\Fixtures\Resources\TestResourceBuilder;
-use MoonShine\UI\Components\ActionButton;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
 
