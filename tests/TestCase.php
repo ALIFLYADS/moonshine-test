@@ -33,7 +33,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 class TestCase extends Orchestra
 {
     use InteractsWithViews;
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected Authenticatable|MoonshineUser $adminUser;
 
