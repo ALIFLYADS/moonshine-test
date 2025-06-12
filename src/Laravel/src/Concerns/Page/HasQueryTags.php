@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Concerns\Page;
 
-use MoonShine\Contracts\Core\CrudPageContract;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\QueryTags\QueryTag;
 
 /**
- * @mixin CrudPageContract
+ * @mixin IndexPageContract
  */
 trait HasQueryTags
 {

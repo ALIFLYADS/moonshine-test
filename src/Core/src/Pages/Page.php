@@ -30,7 +30,7 @@ use MoonShine\Support\Enums\PageType;
 abstract class Page implements PageContract
 {
     use WithCore;
-    /** @use HasResource<TResource, TResource> */
+    /** @use HasResource<TResource> */
     use HasResource;
     use WithUriKey;
     use WithAssets;
@@ -93,7 +93,6 @@ abstract class Page implements PageContract
     public function flushState(): void
     {
         $this->resource = null;
-        $this->parentResource = null;
         $this->components = null;
         $this->breadcrumbs = null;
         $this->layersComponents = [];

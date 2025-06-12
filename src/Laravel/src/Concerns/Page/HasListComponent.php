@@ -6,9 +6,13 @@ namespace MoonShine\Laravel\Concerns\Page;
 
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Laravel\Components\Fragment;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Support\AlpineJs;
 use MoonShine\Support\Enums\JsEvent;
 
+/**
+ * @mixin IndexPageContract
+ */
 trait HasListComponent
 {
     public function getListComponentName(): string

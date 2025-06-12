@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Concerns\Page;
 
-use MoonShine\Contracts\Core\CrudPageContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Applies\FieldsWithoutFilters;
 use MoonShine\Laravel\Collections\Fields;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Exceptions\FilterException;
 use Throwable;
 
 /**
- * @mixin CrudPageContract
+ * @mixin IndexPageContract
  */
 trait HasFilters
 {

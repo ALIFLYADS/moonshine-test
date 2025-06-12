@@ -65,11 +65,6 @@ abstract class Page extends CorePage implements WithResponseModifierContract
         );
     }
 
-    public function nowOn(): static
-    {
-        return $this;
-    }
-
     public function isResponseModified(): bool
     {
         return $this->modifyResponse() instanceof Response;

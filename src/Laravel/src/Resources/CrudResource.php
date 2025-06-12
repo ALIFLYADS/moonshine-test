@@ -21,17 +21,19 @@ use MoonShine\Laravel\Concerns\Resource\HasQueryTags;
 use MoonShine\Laravel\Contracts\HasFiltersContract;
 use MoonShine\Laravel\Contracts\HasHandlersContract;
 use MoonShine\Laravel\Contracts\HasQueryTagsContract;
+use MoonShine\Laravel\Contracts\Page\DetailPageContract;
+use MoonShine\Laravel\Contracts\Page\FormPageContract;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Laravel\Pages\Crud\DetailPage;
 use MoonShine\Laravel\Pages\Crud\FormPage;
-use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Traits\Resource\ResourceActions;
 use MoonShine\Laravel\Traits\Resource\ResourceCrudRouter;
 use MoonShine\Laravel\Traits\Resource\ResourceEvents;
 use MoonShine\Laravel\Traits\Resource\ResourceQuery;
 use MoonShine\Laravel\Traits\Resource\ResourceWithAuthorization;
-use MoonShine\Laravel\Traits\Resource\ResourceWithFields;
 use MoonShine\Laravel\Traits\Resource\ResourceWithButtons;
+use MoonShine\Laravel\Traits\Resource\ResourceWithFields;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 use Traversable;
@@ -128,9 +130,9 @@ abstract class CrudResource extends Resource implements
     protected function pages(): array
     {
         return [
-            IndexPage::class,
-            FormPage::class,
-            DetailPage::class,
+            IndexPageContract::class,
+            FormPageContract::class,
+            DetailPageContract::class,
         ];
     }
 
@@ -164,7 +166,7 @@ abstract class CrudResource extends Resource implements
 
     public function isIndexPage(): bool
     {
-        return $this->getActivePage() instanceof IndexPage;
+        return $this->getActivePage() instanceof IndexPageContract;
     }
 
     /**
@@ -177,7 +179,7 @@ abstract class CrudResource extends Resource implements
 
     public function isFormPage(): bool
     {
-        return $this->getActivePage() instanceof FormPage;
+        return $this->getActivePage() instanceof FormPageContract;
     }
 
     public function isCreateFormPage(): bool
@@ -210,7 +212,7 @@ abstract class CrudResource extends Resource implements
 
     public function isDetailPage(): bool
     {
-        return $this->getActivePage() instanceof DetailPage;
+        return $this->getActivePage() instanceof DetailPageContract;
     }
 
     public function getCaster(): DataCasterContract

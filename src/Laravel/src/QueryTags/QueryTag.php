@@ -12,7 +12,7 @@ use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\HasIconContract;
 use MoonShine\Contracts\UI\HasLabelContract;
 use MoonShine\Core\Traits\WithCore;
-use MoonShine\Laravel\Pages\Crud\IndexPage;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Support\AlpineJs;
 use MoonShine\Support\Traits\Makeable;
 use MoonShine\UI\Components\ActionButton;
@@ -107,7 +107,7 @@ final class QueryTag implements HasCanSeeContract, HasIconContract, HasLabelCont
         return $this;
     }
 
-    public function getButton(IndexPage $page): ActionButtonContract
+    public function getButton(IndexPageContract $page): ActionButtonContract
     {
         return ActionButton::make(
             $this->getLabel(),

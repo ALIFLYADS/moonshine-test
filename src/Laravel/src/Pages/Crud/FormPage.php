@@ -12,13 +12,14 @@ use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Components\Fragment;
+use MoonShine\Laravel\Concerns\Page\HasFormValidation;
 use MoonShine\Laravel\Contracts\Fields\HasModalModeContract;
 use MoonShine\Laravel\Contracts\Fields\HasTabModeContract;
+use MoonShine\Laravel\Contracts\Page\FormPageContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
 use MoonShine\Laravel\Resources\CrudResource;
-use MoonShine\Laravel\Traits\Page\FormValidation;
 use MoonShine\Support\AlpineJs;
 use MoonShine\Support\Enums\JsEvent;
 use MoonShine\Support\Enums\PageType;
@@ -39,10 +40,10 @@ use Throwable;
  * @template TResource of CrudResource = \MoonShine\Laravel\Resources\ModelResource
  * @extends CrudPage<TResource>
  */
-class FormPage extends CrudPage
+class FormPage extends CrudPage implements FormPageContract
 {
-    /** @use FormValidation<TData> */
-    use FormValidation;
+    /** @use HasFormValidation<TData> */
+    use HasFormValidation;
 
     protected ?PageType $pageType = PageType::FORM;
 

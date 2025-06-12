@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Pages\Crud;
 
-use Closure;
-use Illuminate\Support\Collection;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
-use MoonShine\Contracts\Core\HasListComponentContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
 use MoonShine\Contracts\UI\ComponentContract;
@@ -16,14 +13,12 @@ use MoonShine\Contracts\UI\TableBuilderContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Buttons\FiltersButton;
 use MoonShine\Laravel\Collections\Fields;
-use MoonShine\Laravel\Components\Fragment;
 use MoonShine\Laravel\Concerns\Page\HasFilters;
 use MoonShine\Laravel\Concerns\Page\HasHandlers;
 use MoonShine\Laravel\Concerns\Page\HasListComponent;
+use MoonShine\Laravel\Concerns\Page\HasMetrics;
 use MoonShine\Laravel\Concerns\Page\HasQueryTags;
-use MoonShine\Laravel\Contracts\HasFiltersContract;
-use MoonShine\Laravel\Contracts\HasHandlersContract;
-use MoonShine\Laravel\Contracts\HasQueryTagsContract;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Support\Enums\PageType;
@@ -33,7 +28,6 @@ use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\Layout\Div;
 use MoonShine\UI\Components\Layout\Flex;
 use MoonShine\UI\Components\Layout\LineBreak;
-use MoonShine\UI\Components\Metrics\Wrapped\Metric;
 use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Contracts\FieldsWrapperContract;
 use Throwable;
@@ -42,16 +36,13 @@ use Throwable;
  * @template TResource of CrudResource = \MoonShine\Laravel\Resources\ModelResource
  * @extends CrudPage<TResource>
  */
-class IndexPage extends CrudPage implements
-    HasQueryTagsContract,
-    HasHandlersContract,
-    HasFiltersContract,
-    HasListComponentContract
+class IndexPage extends CrudPage implements IndexPageContract
 {
     use HasHandlers;
     use HasQueryTags;
     use HasFilters;
     use HasListComponent;
+    use HasMetrics;
 
     protected ?PageType $pageType = PageType::INDEX;
 
@@ -144,24 +135,6 @@ class IndexPage extends CrudPage implements
         ];
     }
 
-    /**
-     * @return list<Metric>
-     */
-    protected function metrics(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return list<Metric>
-     */
-    public function getMetrics(): array
-    {
-        return Collection::make($this->metrics())
-            ->ensure(Metric::class)
-            ->toArray();
-    }
-
     protected function getMetricsComponent(): ?ComponentContract
     {
         if ($this->getResource()->isListComponentRequest()) {
@@ -176,19 +149,6 @@ class IndexPage extends CrudPage implements
         }
 
         return $components;
-    }
-
-    /**
-     * @return null|Closure(array $components): Fragment
-     */
-    protected function fragmentMetrics(): ?Closure
-    {
-        return null;
-    }
-
-    public function getFragmentMetrics(): ?Closure
-    {
-        return $this->fragmentMetrics();
     }
 
     protected function getItemsComponent(iterable $items, Fields $fields): ComponentContract
@@ -327,12 +287,12 @@ class IndexPage extends CrudPage implements
         ]);
     }
 
-    public function getTopLeftButtons(): ActionButtonsContract
+    protected function getTopLeftButtons(): ActionButtonsContract
     {
         return ActionButtons::make($this->topLeftButtons()->toArray());
     }
 
-    public function getTopRightButtons(): ActionButtonsContract
+    protected function getTopRightButtons(): ActionButtonsContract
     {
         return ActionButtons::make($this->topRightButtons()->toArray());
     }
@@ -350,7 +310,7 @@ class IndexPage extends CrudPage implements
         );
     }
 
-    public function getFiltersButton(): ActionButtonContract
+    protected function getFiltersButton(): ActionButtonContract
     {
         return $this->modifyFiltersButton(
             FiltersButton::for($this->getResource())
@@ -360,7 +320,7 @@ class IndexPage extends CrudPage implements
     /**
      * @return list<ComponentContract>
      */
-    public function getQueryTagsButtons(): array
+    protected function getQueryTagsButtons(): array
     {
         $resource = $this->getResource();
 

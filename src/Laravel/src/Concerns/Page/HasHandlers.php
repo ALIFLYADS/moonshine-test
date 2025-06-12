@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Concerns\Page;
 
-use MoonShine\Contracts\Core\CrudPageContract;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Handlers\Handler;
 use MoonShine\Laravel\Handlers\Handlers;
 use MoonShine\Support\ListOf;
 
 /**
- * @mixin CrudPageContract
+ * @mixin IndexPageContract
  */
 trait HasHandlers
 {

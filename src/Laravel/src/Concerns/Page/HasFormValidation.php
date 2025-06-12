@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MoonShine\Laravel\Traits\Page;
+namespace MoonShine\Laravel\Concerns\Page;
 
 use Stringable;
 use Illuminate\Contracts\Validation\Rule;
@@ -10,7 +10,7 @@ use Illuminate\Contracts\Validation\Rule;
 /**
  * @template T
  */
-trait FormValidation
+trait HasFormValidation
 {
     protected bool $errorsAbove = true;
 

@@ -15,6 +15,7 @@ use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Components\Fragment;
 use MoonShine\Laravel\Contracts\Fields\HasTabModeContract;
+use MoonShine\Laravel\Contracts\Page\DetailPageContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
@@ -37,7 +38,7 @@ use Throwable;
  * @template TResource of CrudResource = \MoonShine\Laravel\Resources\ModelResource
  * @extends CrudPage<TResource>
  */
-class DetailPage extends CrudPage
+class DetailPage extends CrudPage implements DetailPageContract
 {
     protected ?PageType $pageType = PageType::DETAIL;
 
