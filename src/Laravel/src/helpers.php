@@ -15,6 +15,7 @@ use MoonShine\Contracts\Core\ResourceContract;
 use MoonShine\Contracts\MenuManager\MenuManagerContract;
 use MoonShine\Laravel\DependencyInjection\MoonShineConfigurator;
 use MoonShine\Laravel\DependencyInjection\MoonShineRouter;
+use MoonShine\Laravel\MoonShineEndpoints;
 use MoonShine\Laravel\MoonShineRequest;
 use MoonShine\UI\Applies\AppliesRegister;
 
@@ -62,7 +63,7 @@ if (! \function_exists('moonshineMenu')) {
 
 if (! \function_exists('moonshineRouter')) {
     /**
-     * @return MoonShineRouter
+     * @return RouterContract<MoonShineRouter, MoonShineEndpoints>
      */
     function moonshineRouter(): RouterContract
     {
@@ -72,7 +73,7 @@ if (! \function_exists('moonshineRouter')) {
 
 if (! \function_exists('moonshineConfig')) {
     /**
-     * @return MoonShineConfigurator
+     * @return ConfiguratorContract<MoonShineConfigurator>
      */
     function moonshineConfig(): ConfiguratorContract
     {
@@ -82,7 +83,7 @@ if (! \function_exists('moonshineConfig')) {
 
 if (! \function_exists('appliesRegister')) {
     /**
-     * @return AppliesRegister
+     * @return AppliesRegisterContract<AppliesRegister>
      */
     function appliesRegister(): AppliesRegisterContract
     {

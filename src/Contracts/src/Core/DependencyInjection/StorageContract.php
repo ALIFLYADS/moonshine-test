@@ -12,6 +12,10 @@ interface StorageContract
 
     public function storeAs(string $path, mixed $file, $name = null, array $options = []): false|string;
 
+    /**
+     * @param  non-empty-string|string[]  $paths
+     *
+     */
     public function delete(string|array $paths): bool;
 
     public function makeDirectory(string $path): bool;

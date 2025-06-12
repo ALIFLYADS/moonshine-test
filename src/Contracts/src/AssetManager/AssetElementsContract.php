@@ -11,7 +11,7 @@ use Illuminate\Support\Enumerable;
 /**
  * @template-extends Enumerable<array-key, AssetElementContract>
  *
- * @mixin Collection
+ * @mixin Collection<array-key, AssetElementContract>
  */
 interface AssetElementsContract extends Enumerable, Htmlable
 {

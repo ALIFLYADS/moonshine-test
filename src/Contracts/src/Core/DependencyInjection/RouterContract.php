@@ -9,7 +9,8 @@ use MoonShine\Contracts\Core\ResourceContract;
 use MoonShine\Contracts\Core\StatefulContract;
 
 /**
- * @template-covariant I of RouterContract
+ * @template-covariant I of RouterContract = RouterContract
+ * @template-covariant E of EndpointsContract = EndpointsContract
 
  * @mixin I
  */
@@ -17,6 +18,9 @@ interface RouterContract extends StatefulContract
 {
     public function to(string $name = '', array $params = []): string;
 
+    /**
+     * @return E
+     */
     public function getEndpoints(): EndpointsContract;
 
     public function extractPageUri(?PageContract $page = null): ?string;
