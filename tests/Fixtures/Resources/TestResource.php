@@ -25,21 +25,11 @@ class TestResource extends AbstractTestingResource
 
     private array $testPages = [];
 
-    private array $testValidationMessages = [];
-
     private array $testFilters = [];
 
     private array $testSearch = [];
 
-    private array $testButtons = [];
-
     private array $testQueryTags = [];
-
-    private array $testMetrics = [];
-
-    private ?Closure $testTdAttributes = null;
-
-    private ?Closure $testTrAttributes = null;
 
     private ?string $testUriKey = null;
 
@@ -122,13 +112,6 @@ class TestResource extends AbstractTestingResource
         return $this;
     }
 
-    public function setTestValidationMessages(array $testValidationMessages): static
-    {
-        $this->testValidationMessages = $testValidationMessages;
-
-        return $this;
-    }
-
     public function setTestFilters(array $testFilters): static
     {
         $this->testFilters = $testFilters;
@@ -150,37 +133,9 @@ class TestResource extends AbstractTestingResource
         return $this;
     }
 
-    public function setTestButtons(array $buttons): static
-    {
-        $this->testButtons = $buttons;
-
-        return $this;
-    }
-
     public function setTestQueryTags(array $queryTags): static
     {
         $this->testQueryTags = $queryTags;
-
-        return $this;
-    }
-
-    public function setTestTdAttributes(Closure $fn): static
-    {
-        $this->testTdAttributes = $fn;
-
-        return $this;
-    }
-
-    public function setTestTrAttributes(Closure $fn): static
-    {
-        $this->testTrAttributes = $fn;
-
-        return $this;
-    }
-
-    public function setTestMetrics(array $metrics): static
-    {
-        $this->testMetrics = $metrics;
 
         return $this;
     }
@@ -221,11 +176,6 @@ class TestResource extends AbstractTestingResource
         return $this->testExportFields;
     }
 
-    public function validationMessages(): array
-    {
-        return $this->testValidationMessages;
-    }
-
     protected function filters(): iterable
     {
         if ($this->testFilters === []) {
@@ -238,13 +188,6 @@ class TestResource extends AbstractTestingResource
     protected function queryTags(): array
     {
         return $this->testQueryTags;
-    }
-
-    protected function indexButtons(): ListOf
-    {
-        return parent::indexButtons()->prepend(
-            ...$this->testButtons
-        );
     }
 
     protected function search(): array
@@ -264,16 +207,6 @@ class TestResource extends AbstractTestingResource
     protected function metrics(): array
     {
         return $this->testMetrics;
-    }
-
-    protected function trAttributes(): Closure
-    {
-        return $this->testTrAttributes ?? parent::trAttributes();
-    }
-
-    protected function tdAttributes(): Closure
-    {
-        return $this->testTdAttributes ?? parent::tdAttributes();
     }
 
     public function setSimplePaginate(): void

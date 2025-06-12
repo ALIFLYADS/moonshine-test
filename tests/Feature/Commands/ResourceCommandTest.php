@@ -34,7 +34,7 @@ final class ResourceCommandTest extends TestCase
         $this->artisan(MakeResourceCommand::class, [
             'className' => $name,
         ])
-            ->expectsQuestion('Resource type', 'ModelResourceDefault')
+            ->expectsQuestion('Type', 'ModelResource')
             ->expectsOutputToContain(
                 "$name was created"
             )
@@ -72,7 +72,7 @@ final class ResourceCommandTest extends TestCase
         $this->artisan(MakeResourceCommand::class, [
             'className' => $name,
         ])
-            ->expectsQuestion('Resource type', 'ModelResourceWithPages')
+            ->expectsQuestion('Type', 'ModelResource')
             ->expectsOutputToContain(
                 "$name was created"
             )
@@ -109,7 +109,7 @@ final class ResourceCommandTest extends TestCase
         $this->artisan(MakeResourceCommand::class, [
             'className' => "$dir/$name",
         ])
-            ->expectsQuestion('Resource type', 'ModelResourceDefault')
+            ->expectsQuestion('Type', 'ModelResource')
             ->expectsOutputToContain(
                 "$name was created"
             )

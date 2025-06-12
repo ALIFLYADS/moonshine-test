@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MoonShine\Laravel\Contracts\Resource;
+namespace MoonShine\Laravel\Contracts;
 
 interface HasQueryTagsContract
 {

@@ -30,7 +30,7 @@ beforeEach(function (): void {
 
 it('fields on index', function () {
     asAdmin()->get(
-        $this->moonshineCore->getRouter()->getEndpoints()->toPage(page: IndexPage::class, resource: $this->resource)
+        $this->resource->getIndexPageUrl(),
     )
         ->assertOk()
         ->assertSee('table')

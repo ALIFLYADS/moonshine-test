@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use MoonShine\Contracts\UI\FormBuilderContract;
+use MoonShine\Laravel\Buttons\CreateButton;
+use MoonShine\Laravel\Buttons\MassDeleteButton;
 use MoonShine\Laravel\Fields\Relationships\HasMany;
 use MoonShine\Laravel\Models\MoonshineUser;
 use MoonShine\Laravel\Pages\Crud\DetailPage;
@@ -41,45 +43,12 @@ it('policies in index', function () {
     expect($this->resource->isWithPolicy())
         ->toBeTrue();
 
-    $createButton = ActionButton::make(
-        __('moonshine::ui.create'),
-        $this->resource->getFormPageUrl()
-    )
-        ->name('resource-create-button')
-        ->primary()
-        ->icon('plus');
-
-    $resource = $this->resource;
-
-    $massButton = ActionButton::make(
-        '',
-        url: static fn (): string => $resource->getRoute('crud.massDelete')
-    )
-        ->name('mass-delete-button')
-        ->bulk($this->resource->getListComponentName())
-        ->withConfirm(
-            method: HttpMethod::DELETE,
-            formBuilder: static fn (FormBuilderContract $formBuilder): FormBuilderContract => $formBuilder->when(
-                $resource->isAsync(),
-                static fn (FormBuilderContract $form): FormBuilderContract => $form->async(
-                    events: $resource->getListEventName(
-                        $resource->getListComponentName()
-                    )
-                )
-            ),
-            name: 'resource-mass-delete-modal'
-        )
-        ->error()
-        ->icon('trash')
-        ->showInLine();
-
     asAdmin()->get(
-        $this->moonshineCore->getRouter()->getEndpoints()
-            ->toPage(page: IndexPage::class, resource: $this->resource)
+        $this->resource->getIndexPageUrl()
     )
         ->assertOk()
-        ->assertSeeHtml($createButton)
-        ->assertSeeHtml($massButton)
+        ->assertSeeHtml(CreateButton::for($this->resource))
+        ->assertSeeHtml(MassDeleteButton::for($this->resource))
     ;
 
 });
@@ -88,8 +57,7 @@ it('policy in has many', function () {
     $comment = Comment::query()->first();
 
     asAdmin()->get(
-        $this->moonshineCore->getRouter()->getEndpoints()
-            ->toPage(page: FormPage::class, resource: $this->resource, params: ['resourceItem' => $this->item->id])
+        $this->resource->getFormPageUrl($this->item->id)
     )
         ->assertOk()
         ->assertSee($comment->content)
@@ -105,17 +73,12 @@ it('policies index forbidden', function () {
     ]);
 
     asAdmin()->get(
-        $this->moonshineCore->getRouter()->getEndpoints()
-            ->toPage(page: IndexPage::class, resource: $this->resource)
-    )
-        ->assertForbidden();
+        $this->resource->getIndexPageUrl()
+    )->assertForbidden();
 });
 
 it('policies in detail', function () {
     asAdmin()->get(
-        $this->moonshineCore->getRouter()->getEndpoints()
-            ->toPage(page: DetailPage::class, resource: $this->resource, params: ['resourceItem' => $this->item->id])
-    )
-        ->assertForbidden()
-    ;
+        $this->resource->getDetailPageUrl($this->item->id)
+    )->assertForbidden();
 });

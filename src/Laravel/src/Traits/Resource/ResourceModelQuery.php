@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use MoonShine\Contracts\UI\ApplyContract;
 use MoonShine\Core\Exceptions\ResourceException;
+use MoonShine\Laravel\Contracts\HasQueryTagsContract;
 use MoonShine\Laravel\Exceptions\CrudResourceException;
 use MoonShine\Laravel\QueryTags\QueryTag;
 use MoonShine\Laravel\Resources\ModelResource;
@@ -191,27 +192,25 @@ trait ResourceModelQuery
     }
 
     /**
-     * Get an array of custom form actions
-     *
-     * @return list<QueryTag>
-     */
-    protected function queryTags(): array
-    {
-        return [];
-    }
-
-    public function hasQueryTags(): bool
-    {
-        return $this->queryTags() !== [];
-    }
-
-    /**
      * @throws Throwable
      */
     protected function withTags(): static
     {
+        if(!$this instanceof HasQueryTagsContract) {
+            return $this;
+        }
+
+        if(!$this->hasQueryTags()) {
+            return $this;
+        }
+
+        $tags = array_merge(
+            $this->getIndexPage()?->getQueryTags() ?? [],
+            $this->queryTags()
+        );
+
         /** @var ?QueryTag $tag */
-        $tag = collect($this->getQueryTags())
+        $tag = collect($tags)
             ->first(
                 static fn (QueryTag $tag): bool => $tag->isActive(),
             );
@@ -373,14 +372,6 @@ trait ResourceModelQuery
         }
 
         return $this;
-    }
-
-    /**
-     * @return list<QueryTag>
-     */
-    public function getQueryTags(): array
-    {
-        return $this->queryTags();
     }
 
     /**

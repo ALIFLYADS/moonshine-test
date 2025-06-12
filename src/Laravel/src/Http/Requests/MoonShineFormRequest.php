@@ -24,9 +24,12 @@ class MoonShineFormRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->hasResource()) {
-            $this->errorBag = $this->getResource()?->getUriKey();
-            $this->getResource()?->prepareForValidation();
+        if ($this->getResource() !== null) {
+            $this->errorBag = $this->getResource()->getUriKey();
+        }
+
+        if ($this->getResource()->getFormPage() !== null) {
+            $this->getResource()->getFormPage()->prepareForValidation();
         }
 
         $this->request = request()->getPayload();
@@ -34,12 +37,12 @@ class MoonShineFormRequest extends FormRequest
 
     public function messages(): array
     {
-        if ($this->hasResource()) {
+        if ($this->getResource() !== null && $this->getResource()->getFormPage() !== null) {
             $messages = __('moonshine::validation');
 
             return array_merge(
                 \is_array($messages) ? $messages : [],
-                $this->getResource()?->validationMessages() ?? []
+                $this->getResource()->getFormPage()->validationMessages()
             );
         }
 

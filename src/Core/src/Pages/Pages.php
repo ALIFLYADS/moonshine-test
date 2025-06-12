@@ -13,7 +13,7 @@ use MoonShine\Support\Enums\PageType;
 /**
  * @template T of PageContract
  *
- * @implements PagesContract<self, T>
+ * @implements PagesContract<T>
  */
 final class Pages extends Collection implements PagesContract
 {
@@ -22,6 +22,10 @@ final class Pages extends Collection implements PagesContract
         return $this->each(static fn (PageContract $page): PageContract => $page->setResource($resource));
     }
 
+    /**
+     * @param null|T $default
+     * @return null|T
+     */
     public function findByType(
         PageType $type,
         ?PageContract $default = null
@@ -29,6 +33,11 @@ final class Pages extends Collection implements PagesContract
         return $this->first(static fn (PageContract $page): bool => $page->getPageType() === $type, $default);
     }
 
+    /**
+     * @param class-string<T> $class
+     * @param null|T $default
+     * @return null|T
+     */
     public function findByClass(
         string $class,
         ?PageContract $default = null
@@ -39,26 +48,42 @@ final class Pages extends Collection implements PagesContract
         );
     }
 
+    /**
+     * @return null|T
+     */
     public function indexPage(): ?PageContract
     {
         return $this->findByType(PageType::INDEX);
     }
 
+    /**
+     * @return null|T
+     */
     public function formPage(): ?PageContract
     {
         return $this->findByType(PageType::FORM);
     }
 
+    /**
+     * @return null|T
+     */
     public function detailPage(): ?PageContract
     {
         return $this->findByType(PageType::DETAIL);
     }
 
+    /**
+     * @return null|T
+     */
     public function activePage(): ?PageContract
     {
         return $this->first(fn (PageContract $page): bool => $page->isActive());
     }
 
+    /**
+     * @param null|T $default
+     * @return null|T
+     */
     public function findByUri(
         string $uri,
         ?PageContract $default = null

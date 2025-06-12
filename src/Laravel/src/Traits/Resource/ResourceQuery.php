@@ -12,6 +12,7 @@ use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Support\Attributes\SearchUsingFullText;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\UI\Contracts\RangeFieldContract;
+use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
 
 /**
@@ -379,6 +380,7 @@ trait ResourceQuery
 
     /**
      * @return array<array-key, mixed>
+     * @throws InvalidArgumentException
      */
     public function getFilterParams(): array
     {

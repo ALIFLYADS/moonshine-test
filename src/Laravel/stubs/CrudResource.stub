@@ -1,0 +1,58 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {namespace};
+
+use {index-page-namespace};
+use {form-page-namespace};
+use {detail-page-namespace};
+
+use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Laravel\Pages\Page;
+
+/**
+ * @extends CrudResource<mixed, {indexPage}, {formPage}, {detailPage}>
+ */
+class DummyClass extends CrudResource
+{
+    protected string $title = 'DummyTitle';
+    {properties}
+    /**
+     * @return list<Page>
+     */
+    protected function pages(): array
+    {
+        return [
+            {indexPage}::class,
+            {formPage}::class,
+            {detailPage}::class,
+        ];
+    }
+
+
+    public function save(mixed $item, ?FieldsContract $fields = null): mixed
+    {
+        return $item;
+    }
+
+    public function getItems(): mixed
+    {
+        return [];
+    }
+
+    public function findItem(bool $orFail = false): mixed
+    {
+        return [];
+    }
+
+    public function massDelete(array $ids): void
+    {
+        //
+    }
+
+    public function delete(mixed $item, ?FieldsContract $fields = null): bool
+    {
+        return true;
+    }
+}

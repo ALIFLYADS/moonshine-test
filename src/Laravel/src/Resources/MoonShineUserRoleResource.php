@@ -6,19 +6,18 @@ namespace MoonShine\Laravel\Resources;
 
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Models\MoonshineUserRole;
+use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleFormPage;
+use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleIndexPage;
 use MoonShine\MenuManager\Attributes\Group;
 use MoonShine\MenuManager\Attributes\Order;
 use MoonShine\Support\Attributes\Icon;
 use MoonShine\Support\ListOf;
-use MoonShine\UI\Components\Layout\Box;
-use MoonShine\UI\Fields\ID;
-use MoonShine\UI\Fields\Text;
 
 #[Icon('bookmark')]
 #[Group('moonshine::ui.resource.system', 'users', translatable: true)]
 #[Order(1)]
 /**
- * @extends ModelResource<MoonshineUserRole>
+ * @extends ModelResource<MoonshineUserRole, MoonShineUserRoleIndexPage, MoonShineUserRoleFormPage, null>
  */
 class MoonShineUserRoleResource extends ModelResource
 {
@@ -44,37 +43,11 @@ class MoonShineUserRoleResource extends ModelResource
         return parent::activeActions()->except(Action::VIEW);
     }
 
-    protected function indexFields(): iterable
+    protected function pages(): array
     {
         return [
-            ID::make()->sortable(),
-            Text::make(__('moonshine::ui.resource.role_name'), 'name'),
-        ];
-    }
-
-    protected function detailFields(): iterable
-    {
-        return $this->indexFields();
-    }
-
-    protected function formFields(): iterable
-    {
-        return [
-            Box::make([
-                ID::make()->sortable(),
-                Text::make(__('moonshine::ui.resource.role_name'), 'name')
-                    ->required(),
-            ]),
-        ];
-    }
-
-    /**
-     * @return array{name: array|string}
-     */
-    protected function rules($item): array
-    {
-        return [
-            'name' => ['required', 'min:5'],
+            MoonShineUserRoleIndexPage::class,
+            MoonShineUserRoleFormPage::class,
         ];
     }
 

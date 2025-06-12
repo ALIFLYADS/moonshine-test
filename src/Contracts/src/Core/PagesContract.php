@@ -9,9 +9,7 @@ use Illuminate\Support\Enumerable;
 use MoonShine\Support\Enums\PageType;
 
 /**
- * @template-covariant I of PagesContract
  * @template TPage of PageContract
- * @mixin I
  *
  * @template-extends Enumerable<array-key, TPage>
  *
@@ -20,8 +18,8 @@ use MoonShine\Support\Enums\PageType;
 interface PagesContract extends Enumerable
 {
     /**
-     * @param  ?PageContract<TPage>  $default
-     * @return ?PageContract<TPage>
+     * @param  null|TPage  $default
+     * @return null|TPage
      */
     public function findByType(
         PageType $type,
@@ -29,11 +27,11 @@ interface PagesContract extends Enumerable
     ): ?PageContract;
 
     /**
-     * @template T of PageContract
+     * @template T of TPage
      * @param  class-string<T>  $class
-     * @param  ?PageContract<TPage>  $default
+     * @param  null|TPage  $default
      *
-     * @return ?PageContract<T>
+     * @return null|T
      */
     public function findByClass(
         string $class,
@@ -41,13 +39,16 @@ interface PagesContract extends Enumerable
     ): ?PageContract;
 
     /**
-     * @param  ?PageContract<TPage>  $default
-     * @return ?PageContract<TPage>
+     * @param  null|TPage  $default
+     * @return null|TPage
      */
     public function findByUri(
         string $uri,
         ?PageContract $default = null
     ): ?PageContract;
 
+    /**
+     * @return null|TPage
+     */
     public function activePage(): ?PageContract;
 }

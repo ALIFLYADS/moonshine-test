@@ -11,26 +11,30 @@ use Traversable;
 
 /**
  * @template TData
- * @template-covariant TIndexPage of CrudPageContract
- * @template-covariant TFormPage of CrudPageContract
- * @template-covariant TDetailPage of CrudPageContract
+ * @template-covariant TIndexPage of null|CrudPageContract
+ * @template-covariant TFormPage of null|CrudPageContract
+ * @template-covariant TDetailPage of null|CrudPageContract
  * @template TFields of FieldsContract
  * @template-covariant TItems of Traversable
  *
  * @extends CrudResourceWithPagesContract<TData, TIndexPage, TFormPage, TDetailPage>
  * @extends CrudResourceWithFieldsContract<TFields>
  * @extends CrudResourceWithResponseModifiersContract<TData>
+ * @extends ResourceContract<CrudPageContract>
  */
 interface CrudResourceContract extends
     ResourceContract,
+    CrudResourceWithModalsContract,
     CrudResourceWithPagesContract,
     CrudResourceWithFieldsContract,
-    CrudResourceWithModalsContract,
     CrudResourceWithResponseModifiersContract,
     CrudResourceWithQueryParamsContract,
-    CrudResourceWithSearchContract
+    CrudResourceWithSearchContract,
+    HasListComponentContract
 {
     public function getColumn(): string;
+
+    public function isAsync(): bool;
 
     /**
      * @param  DataWrapperContract<TData>|int|string|null  $key
@@ -55,6 +59,11 @@ interface CrudResourceContract extends
      * @return ?TData
      */
     public function getDataInstance(): mixed;
+
+    /**
+     * @param  ?TData  $item
+     */
+    public function setItem(mixed $item): static;
 
     /**
      * @return ?TData

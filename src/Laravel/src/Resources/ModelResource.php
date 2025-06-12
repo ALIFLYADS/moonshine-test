@@ -15,35 +15,38 @@ use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Collections\Fields;
+use MoonShine\Laravel\Concerns\Resource\HasHandlers;
+use MoonShine\Laravel\Concerns\Resource\HasQueryTags;
 use MoonShine\Laravel\Contracts\Fields\HasOutsideSwitcherContract;
-use MoonShine\Laravel\Contracts\Resource\HasHandlersContract;
-use MoonShine\Laravel\Contracts\Resource\HasQueryTagsContract;
+use MoonShine\Laravel\Contracts\HasHandlersContract;
+use MoonShine\Laravel\Contracts\HasQueryTagsContract;
 use MoonShine\Laravel\Contracts\Resource\WithQueryBuilderContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
 use MoonShine\Laravel\MoonShineAuth;
+use MoonShine\Laravel\Pages\Crud\DetailPage;
+use MoonShine\Laravel\Pages\Crud\FormPage;
+use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Traits\Resource\ResourceModelQuery;
 use MoonShine\Laravel\TypeCasts\ModelCaster;
 use Throwable;
 
 /**
  * @template TData of Model
- * @template-covariant TIndexPage of CrudPageContract
- * @template-covariant TFormPage of CrudPageContract
- * @template-covariant TDetailPage of CrudPageContract
+ * @template-covariant TIndexPage of null|IndexPage = null
+ * @template-covariant TFormPage of null|FormPage = null
+ * @template-covariant TDetailPage of null|DetailPage = null
  *
  * @extends CrudResource<TData, TIndexPage, TFormPage, TDetailPage, Fields, Enumerable>
  */
-abstract class ModelResource extends CrudResource implements
-    HasQueryTagsContract,
-    HasHandlersContract,
-    WithQueryBuilderContract
+abstract class ModelResource extends CrudResource implements WithQueryBuilderContract
 {
     /**
      * @use ResourceModelQuery<TData>
      */
     use ResourceModelQuery;
 
+    /** @var class-string<TData> */
     protected string $model;
 
     protected string $column = '';
@@ -79,7 +82,6 @@ abstract class ModelResource extends CrudResource implements
      */
     public function getCaster(): DataCasterContract
     {
-        /** @var ModelCaster<TData> */
         /** @noRector */
         return new ModelCaster($this->model);
     }

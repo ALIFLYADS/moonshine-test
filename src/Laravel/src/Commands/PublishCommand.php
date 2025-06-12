@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Commands;
 
+use Closure;
 use Illuminate\Filesystem\Filesystem;
 
+use MoonShine\Laravel\Pages\MoonShineUser\MoonShineUserFormPage;
+use MoonShine\Laravel\Pages\MoonShineUser\MoonShineUserIndexPage;
+use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleFormPage;
+use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleIndexPage;
 use function Laravel\Prompts\{confirm, info, multiselect};
 
 use MoonShine\Laravel\DependencyInjection\MoonShine;
@@ -115,6 +120,12 @@ class PublishCommand extends MoonShineCommand
         );
 
         $this->replaceInFile(
+            "use MoonShine\Laravel\Pages\MoonShineUser",
+            "use App\MoonShine\Pages\MoonShineUser",
+            $fullClassPath
+        );
+
+        $this->replaceInFile(
             "use MoonShine\Laravel\Resources\\$name;",
             "use $targetNamespace\\$name;",
             app_path('Providers/MoonShineServiceProvider.php')
@@ -125,6 +136,19 @@ class PublishCommand extends MoonShineCommand
         if (! str_contains($provider, "$targetNamespace\\$name")) {
             self::addResourceOrPageToProviderFile($name, namespace: $targetNamespace);
         }
+
+        $replaceResources = function ($fullClassPath) {
+            $this->replaceInFile(
+                "MoonShine\Laravel\Resources\\",
+                "App\MoonShine\Resources\\",
+                $fullClassPath
+            );
+        };
+
+        $this->copySystemClass('MoonShineUserIndexPage', 'Pages/MoonShineUser', $replaceResources);
+        $this->copySystemClass('MoonShineUserFormPage', 'Pages/MoonShineUser', $replaceResources);
+        $this->copySystemClass('MoonShineUserRoleIndexPage', 'Pages/MoonShineUserRole', $replaceResources);
+        $this->copySystemClass('MoonShineUserRoleFormPage', 'Pages/MoonShineUserRole', $replaceResources);
     }
 
     private function publishForms(): void
@@ -211,22 +235,28 @@ class PublishCommand extends MoonShineCommand
     /**
      * @return array{full_class_path: string, target_namespace: string}
      */
-    private function copySystemClass(string $name, string $dir): array
+    private function copySystemClass(string $name, string $dir, ?Closure $then = null): array
     {
         $classPath = "src/$dir/$name.php";
         $fullClassPath = $this->getDirectory("/$dir/$name.php");
-        $targetNamespace = $this->getNamespace("\\$dir");
+        $namespace = str_replace('/', '\\', $dir);
+        $targetNamespace = $this->getNamespace("\\$namespace");
 
+        (new Filesystem())->makeDirectory($this->getDirectory($dir), recursive: true, force: true);
         (new Filesystem())->put(
             $fullClassPath,
             file_get_contents(MoonShine::path($classPath))
         );
 
         $this->replaceInFile(
-            "namespace MoonShine\Laravel\\$dir;",
+            "namespace MoonShine\Laravel\\$namespace;",
             "namespace $targetNamespace;",
             $fullClassPath
         );
+
+        if($then !== null) {
+            $then($fullClassPath, $targetNamespace);
+        }
 
         return [
             'full_class_path' => $fullClassPath,

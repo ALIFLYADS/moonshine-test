@@ -476,18 +476,6 @@ class HasMany extends ModelRelationField implements
             ->fields($this->getFieldsOnPreview())
             ->cast($resource->getCaster())
             ->withNotFound()
-            ->when(
-                ! \is_null($resource->getTrAttributes()),
-                static fn (TableBuilderContract $table): TableBuilderContract => $table->trAttributes(
-                    $resource->getTrAttributes()
-                )
-            )
-            ->when(
-                ! \is_null($resource->getTdAttributes()),
-                static fn (TableBuilderContract $table): TableBuilderContract => $table->tdAttributes(
-                    $resource->getTdAttributes()
-                )
-            )
             ->buttons($this->getItemButtons())
             ->when(
                 ! \is_null($this->modifyTable),
@@ -533,6 +521,7 @@ class HasMany extends ModelRelationField implements
      */
     protected function getItemButtons(): array
     {
+        /** @var ModelResource $resource */
         $resource = $this->getResource()->stopGettingItemFromUrl();
 
         $redirectAfter = $this->getRedirectAfter(

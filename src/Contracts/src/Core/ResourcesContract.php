@@ -8,9 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Enumerable;
 
 /**
- * @template-covariant I of ResourcesContract
  * @template TResource of ResourceContract
- * @mixin I
  *
  * @template-extends Enumerable<array-key, TResource>
  *
@@ -19,9 +17,9 @@ use Illuminate\Support\Enumerable;
 interface ResourcesContract extends Enumerable
 {
     /**
-     * @param  ?ResourceContract<TResource>  $default
+     * @param  null|TResource $default
      *
-     * @return ?ResourceContract<TResource>
+     * @return null|TResource
      */
     public function findByUri(
         string $uri,
@@ -29,9 +27,10 @@ interface ResourcesContract extends Enumerable
     ): ?ResourceContract;
 
     /**
-     * @param  ?ResourceContract<TResource>  $default
+     * @param  class-string<TResource>  $default
+     * @param  null|TResource  $default
      *
-     * @return ?ResourceContract<TResource>
+     * @return null|TResource
      */
     public function findByClass(
         string $class,

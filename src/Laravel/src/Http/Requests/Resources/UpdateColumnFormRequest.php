@@ -67,8 +67,15 @@ final class UpdateColumnFormRequest extends MoonShineFormRequest
      */
     public function rules(): array
     {
+        if($this->getResource() === null || $this->getResource()->getFormPage() === null) {
+            return [
+                'field' => ['required'],
+                'value' => ['required'],
+            ];
+        }
+
         $fieldRules = data_get(
-            $this->getResource()?->getRules(),
+            $this->getResource()->getFormPage()->getRules(),
             request()->getScalar('field'),
         );
 

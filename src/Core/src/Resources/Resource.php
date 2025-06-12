@@ -15,7 +15,9 @@ use MoonShine\Core\Traits\WithCore;
 use MoonShine\Core\Traits\WithUriKey;
 
 /**
- * @template TPage of PageContract
+ * @template TPage of PageContract = PageContract
+ *
+ * @implements ResourceContract<TPage>
  */
 abstract class Resource implements ResourceContract
 {

@@ -26,23 +26,23 @@ interface PageContract extends
     HasStructureContract,
     StatefulContract
 {
-    public function getRouter(): RouterContract;
-
-    public function getTitle(): string;
-
-    public function getSubtitle(): string;
+    public function getPageType(): ?PageType;
 
     public function getLayout(): LayoutContract;
 
+    public function getRouter(): RouterContract;
+
     public function getRoute(array $params = []): string;
 
-    public function loaded(): static;
+    public function getTitle(): string;
+
+    public function getBreadcrumbs(): array;
+
+    public function getSubtitle(): string;
 
     public function isCheckUrl(): bool;
 
     public function checkUrl(): static;
 
-    public function getBreadcrumbs(): array;
-
-    public function getPageType(): ?PageType;
+    public function loaded(): static;
 }

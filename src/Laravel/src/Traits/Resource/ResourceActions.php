@@ -44,18 +44,4 @@ trait ResourceActions
             ->filter(fn (Action $action): bool => \in_array($action, $this->getActiveActions()))
             ->isNotEmpty();
     }
-
-    /**
-     * @return ListOf<Handler>
-     */
-    protected function handlers(): ListOf
-    {
-        return new ListOf(Handler::class, []);
-    }
-
-    public function getHandlers(): Handlers
-    {
-        return Handlers::make($this->handlers()->toArray())
-            ->each(fn (Handler $handler): Handler => $handler->setResource($this));
-    }
 }

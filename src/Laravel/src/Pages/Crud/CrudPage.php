@@ -18,6 +18,13 @@ use MoonShine\UI\Components\Modal;
  */
 abstract class CrudPage extends Page implements CrudPageContract
 {
+    protected bool $isAsync = true;
+
+    public function isAsync(): bool
+    {
+        return $this->isAsync || $this->getResource()->isAsync();
+    }
+
     /**
      * @return list<ComponentContract>
      */
@@ -26,11 +33,21 @@ abstract class CrudPage extends Page implements CrudPageContract
         return [];
     }
 
-    public function getFields(): FieldsContract
+    protected function prepareFields(FieldsContract $fields): FieldsContract
     {
-        return $this->getCore()->getFieldsCollection($this->fields());
+        return $fields;
     }
 
+    public function getFields(): FieldsContract
+    {
+        return $this->prepareFields(
+            $this->getCore()->getFieldsCollection($this->fields())
+        );
+    }
+
+    /**
+     * @return list<Modal>
+     */
     public function getEmptyModals(): array
     {
         $components = [];
@@ -40,7 +57,7 @@ abstract class CrudPage extends Page implements CrudPageContract
                 __('moonshine::ui.edit'),
                 components: [
                     Div::make()->customAttributes(['id' => 'resource-edit-modal']),
-                ]
+                ],
             )
                 ->wide()
                 ->name('resource-edit-modal');
@@ -51,7 +68,7 @@ abstract class CrudPage extends Page implements CrudPageContract
                 __('moonshine::ui.show'),
                 components: [
                     Div::make()->customAttributes(['id' => 'resource-detail-modal']),
-                ]
+                ],
             )
                 ->wide()
                 ->name('resource-detail-modal');

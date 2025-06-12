@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Forms;
 
 use Illuminate\Support\Arr;
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Contracts\UI\FormContract;
 use MoonShine\Laravel\Collections\Fields;
@@ -17,17 +18,18 @@ use MoonShine\Support\Traits\Makeable;
 use MoonShine\UI\Components\ActionButton;
 use MoonShine\UI\Components\FormBuilder;
 use MoonShine\UI\Fields\Hidden;
+use RuntimeException;
 use Stringable;
 use Throwable;
 
 /**
- * @method static static make(CrudResource $resource)
+ * @method static static make(CrudResourceContract $resource)
  */
 final readonly class FiltersForm implements FormContract
 {
     use Makeable;
 
-    public function __construct(private CrudResource $resource)
+    public function __construct(private CrudResourceContract $resource)
     {
     }
 
@@ -36,7 +38,13 @@ final readonly class FiltersForm implements FormContract
      */
     public function __invoke(): FormBuilderContract
     {
+        /** @var CrudResource $resource */
         $resource = $this->resource;
+        $page = $resource->getIndexPage();
+
+        if($page === null) {
+            throw new RuntimeException('Index page not defined');
+        }
 
         $resource->setQueryParams(
             request()->only($resource->getQueryParamsKeys()),
@@ -45,7 +53,7 @@ final readonly class FiltersForm implements FormContract
         $values = $resource->getFilterParams();
         $filters = $resource->getFilters();
 
-        $action = $resource->isAsync() ? '#' : $this->getFormAction();
+        $action = $page->isAsync() ? '#' : $this->getFormAction();
 
         foreach ($filters->onlyFields() as $filter) {
             if (! $filter instanceof ModelRelationField) {
@@ -84,7 +92,7 @@ final readonly class FiltersForm implements FormContract
                     )
                     ->toArray(),
             )
-            ->when($resource->isAsync(), function (FormBuilderContract $form) use ($resource): void {
+            ->when($page->isAsync(), function (FormBuilderContract $form) use ($resource, $page): void {
                 $events = [
                     $resource->getListEventName(),
                     AlpineJs::event(JsEvent::OFF_CANVAS_TOGGLED, 'filters-off-canvas'),
@@ -98,7 +106,7 @@ final readonly class FiltersForm implements FormContract
                 ]);
 
                 $form->buttons([
-                    $this->getResetButton($resource->isAsync(), true),
+                    $this->getResetButton($page->isAsync(), true),
                 ]);
             })
             ->submit(__('moonshine::ui.search'), ['class' => 'btn-primary'])

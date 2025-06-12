@@ -8,9 +8,7 @@ use MoonShine\Contracts\Core\DependencyInjection\RouterContract;
 use MoonShine\Contracts\MenuManager\MenuFillerContract;
 
 /**
- * @template I of ResourceContract
- *
- * @mixin I
+ * @template TPage of PageContract = PageContract
  */
 interface ResourceContract extends
     HasCoreContract,
@@ -19,6 +17,9 @@ interface ResourceContract extends
     HasUriKeyContract,
     StatefulContract
 {
+    /**
+     * @return PagesContract<TPage>
+     */
     public function getPages(): PagesContract;
 
     public function getRouter(): RouterContract;

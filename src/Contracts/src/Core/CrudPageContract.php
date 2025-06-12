@@ -15,4 +15,8 @@ interface CrudPageContract extends PageContract
      * @return TFields
      */
     public function getFields(): FieldsContract;
+
+    public function isAsync(): bool;
+
+    public function getEmptyModals(): array;
 }

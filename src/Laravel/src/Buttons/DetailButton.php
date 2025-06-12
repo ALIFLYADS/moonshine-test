@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Buttons;
 
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Laravel\Enums\Ability;
@@ -16,8 +17,11 @@ use MoonShine\UI\Components\Modal;
 
 final class DetailButton
 {
+    /**
+     * @param  CrudResource  $resource
+     */
     public static function for(
-        CrudResource $resource,
+        CrudResourceContract $resource,
         string $modalName = 'resource-detail-modal',
         bool $isSeparateModal = true,
     ): ActionButtonContract {

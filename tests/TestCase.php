@@ -6,6 +6,7 @@ namespace MoonShine\Tests;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithViews;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Laravel\Commands\InstallCommand;
@@ -32,7 +33,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 class TestCase extends Orchestra
 {
     use InteractsWithViews;
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected Authenticatable|MoonshineUser $adminUser;
 
