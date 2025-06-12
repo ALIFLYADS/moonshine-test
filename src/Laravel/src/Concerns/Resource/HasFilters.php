@@ -33,12 +33,7 @@ trait HasFilters
         if($this->filters() !== []) {
             return true;
         }
-
-        if($this->getIndexPage() instanceof HasFiltersContract && $this->getIndexPage()->hasFilters()) {
-            return true;
-        }
-
-        return false;
+        return $this->getIndexPage() instanceof HasFiltersContract && $this->getIndexPage()->hasFilters();
     }
 
     /**

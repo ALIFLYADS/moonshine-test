@@ -22,8 +22,6 @@ use MoonShine\Laravel\Contracts\Resource\WithQueryBuilderContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
 use MoonShine\Laravel\MoonShineAuth;
-use MoonShine\Laravel\Pages\Crud\DetailPage;
-use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\Laravel\Traits\Resource\ResourceModelQuery;
 use MoonShine\Laravel\TypeCasts\ModelCaster;
 use Throwable;

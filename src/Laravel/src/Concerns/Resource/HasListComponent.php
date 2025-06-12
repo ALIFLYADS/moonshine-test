@@ -60,7 +60,7 @@ trait HasListComponent
             return false;
         }
 
-        return $this->getIndexPage()->isListComponentRequest() === true;
+        return $this->getIndexPage()->isListComponentRequest();
     }
 
     public function getListEventName(?string $name = null, array $params = []): string

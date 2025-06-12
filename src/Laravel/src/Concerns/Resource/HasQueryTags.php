@@ -42,11 +42,6 @@ trait HasQueryTags
         if($this->queryTags() !== []) {
             return true;
         }
-
-        if($this->getIndexPage() instanceof HasQueryTagsContract && $this->getIndexPage()->hasQueryTags()) {
-            return true;
-        }
-
-        return false;
+        return $this->getIndexPage() instanceof HasQueryTagsContract && $this->getIndexPage()->hasQueryTags();
     }
 }

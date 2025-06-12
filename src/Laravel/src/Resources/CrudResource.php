@@ -25,8 +25,6 @@ use MoonShine\Laravel\Contracts\Page\DetailPageContract;
 use MoonShine\Laravel\Contracts\Page\FormPageContract;
 use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
-use MoonShine\Laravel\Pages\Crud\DetailPage;
-use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\Laravel\Traits\Resource\ResourceActions;
 use MoonShine\Laravel\Traits\Resource\ResourceCrudRouter;
 use MoonShine\Laravel\Traits\Resource\ResourceEvents;

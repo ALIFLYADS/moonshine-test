@@ -30,12 +30,7 @@ trait HasHandlers
         if($this->handlers()->toArray() !== []) {
             return true;
         }
-
-        if($this->getIndexPage() instanceof HasHandlersContract && $this->getIndexPage()->hasHandlers()) {
-            return true;
-        }
-
-        return false;
+        return $this->getIndexPage() instanceof HasHandlersContract && $this->getIndexPage()->hasHandlers();
     }
 
     public function getHandlers(): Handlers
