@@ -28,7 +28,7 @@ class MoonShineFormRequest extends FormRequest
             $this->errorBag = $this->getResource()->getUriKey();
         }
 
-        if ($this->getResource()->getFormPage() instanceof PageContract) {
+        if ($this->hasResource() && $this->getResource()->getFormPage() instanceof PageContract) {
             $this->getResource()->getFormPage()->prepareForValidation();
         }
 

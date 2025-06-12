@@ -8,6 +8,7 @@ use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Applies\FieldsWithoutFilters;
 use MoonShine\Laravel\Collections\Fields;
+use MoonShine\Laravel\Contracts\HasFiltersContract;
 use MoonShine\Laravel\Exceptions\FilterException;
 use MoonShine\Laravel\Pages\Crud\IndexPage;
 use Throwable;
@@ -29,7 +30,15 @@ trait HasFilters
 
     public function hasFilters(): bool
     {
-        return $this->filters() !== [] || $this->getIndexPage()?->hasFilters();
+        if($this->filters() !== []) {
+            return true;
+        }
+
+        if($this->getIndexPage() instanceof HasFiltersContract && $this->getIndexPage()->hasFilters()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -37,13 +46,8 @@ trait HasFilters
      */
     public function getFilters(): Fields
     {
-        /**
-         * @var Fields $filters
-         */
-        $filters = $this->getIndexPage()?->getFilters();
-
-        if(!$filters->isEmpty()) {
-            return $filters;
+        if($this->getIndexPage() instanceof HasFiltersContract && $this->getIndexPage()->hasFilters()) {
+            return $this->getIndexPage()->getFilters();
         }
 
         $filters = Fields::make($this->filters())

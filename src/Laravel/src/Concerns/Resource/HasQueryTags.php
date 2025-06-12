@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Concerns\Resource;
 
 use MoonShine\Contracts\Core\CrudResourceContract;
+use MoonShine\Laravel\Contracts\HasQueryTagsContract;
 use MoonShine\Laravel\QueryTags\QueryTag;
 
 /**
@@ -19,7 +20,7 @@ trait HasQueryTags
      */
     public function getQueryTags(): array
     {
-        if($this->getIndexPage() !== null && $this->getIndexPage()->hasQueryTags()) {
+        if($this->getIndexPage() instanceof HasQueryTagsContract && $this->getIndexPage()->hasQueryTags()) {
             return $this->getIndexPage()->getQueryTags();
         }
 
@@ -38,6 +39,14 @@ trait HasQueryTags
 
     public function hasQueryTags(): bool
     {
-        return $this->queryTags() !== [] || $this->getIndexPage()?->hasQueryTags();
+        if($this->queryTags() !== []) {
+            return true;
+        }
+
+        if($this->getIndexPage() instanceof HasQueryTagsContract && $this->getIndexPage()->hasQueryTags()) {
+            return true;
+        }
+
+        return false;
     }
 }
