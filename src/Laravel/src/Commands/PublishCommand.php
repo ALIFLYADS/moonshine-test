@@ -6,11 +6,6 @@ namespace MoonShine\Laravel\Commands;
 
 use Closure;
 use Illuminate\Filesystem\Filesystem;
-
-use MoonShine\Laravel\Pages\MoonShineUser\MoonShineUserFormPage;
-use MoonShine\Laravel\Pages\MoonShineUser\MoonShineUserIndexPage;
-use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleFormPage;
-use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleIndexPage;
 use function Laravel\Prompts\{confirm, info, multiselect};
 
 use MoonShine\Laravel\DependencyInjection\MoonShine;
@@ -137,7 +132,7 @@ class PublishCommand extends MoonShineCommand
             self::addResourceOrPageToProviderFile($name, namespace: $targetNamespace);
         }
 
-        $replaceResources = function ($fullClassPath) {
+        $replaceResources = function ($fullClassPath): void {
             $this->replaceInFile(
                 "MoonShine\Laravel\Resources\\",
                 "App\MoonShine\Resources\\",
@@ -254,7 +249,7 @@ class PublishCommand extends MoonShineCommand
             $fullClassPath
         );
 
-        if($then !== null) {
+        if($then instanceof Closure) {
             $then($fullClassPath, $targetNamespace);
         }
 

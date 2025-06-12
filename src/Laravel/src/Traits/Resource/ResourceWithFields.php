@@ -6,11 +6,8 @@ namespace MoonShine\Laravel\Traits\Resource;
 
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
-use MoonShine\Laravel\Applies\FieldsWithoutFilters;
 use MoonShine\Laravel\Collections\Fields;
-use MoonShine\Laravel\Exceptions\FilterException;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
-use MoonShine\Support\Enums\PageType;
 use MoonShine\UI\Contracts\FieldsWrapperContract;
 use Throwable;
 

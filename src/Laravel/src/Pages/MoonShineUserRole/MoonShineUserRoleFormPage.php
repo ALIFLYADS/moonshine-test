@@ -6,7 +6,6 @@ namespace MoonShine\Laravel\Pages\MoonShineUserRole;
 
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
-use MoonShine\Laravel\Models\MoonshineUser;
 use MoonShine\Laravel\Models\MoonshineUserRole;
 use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\Laravel\Resources\MoonShineUserRoleResource;

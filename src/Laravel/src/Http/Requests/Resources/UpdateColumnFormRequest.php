@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Http\Requests\Resources;
 
+use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Enums\Ability;
@@ -67,7 +69,7 @@ final class UpdateColumnFormRequest extends MoonShineFormRequest
      */
     public function rules(): array
     {
-        if($this->getResource() === null || $this->getResource()->getFormPage() === null) {
+        if(!$this->getResource() instanceof CrudResource || !$this->getResource()->getFormPage() instanceof PageContract) {
             return [
                 'field' => ['required'],
                 'value' => ['required'],

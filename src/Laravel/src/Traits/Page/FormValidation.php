@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Traits\Page;
 
+use Stringable;
 use Illuminate\Contracts\Validation\Rule;
 
 /**
@@ -20,7 +21,7 @@ trait FormValidation
      *
      * @param T $item
      *
-     * @return array<string, string[]|string|list<Rule>|list<\Stringable>>
+     * @return array<string, string[]|string|list<Rule>|list<Stringable>>
      * @see https://laravel.com/docs/validation#available-validation-rules
      */
     protected function rules(mixed $item): array

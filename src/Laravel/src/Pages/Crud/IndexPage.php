@@ -6,7 +6,6 @@ namespace MoonShine\Laravel\Pages\Crud;
 
 use Closure;
 use Illuminate\Support\Collection;
-use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\HasListComponentContract;
 use MoonShine\Contracts\UI\ActionButtonContract;

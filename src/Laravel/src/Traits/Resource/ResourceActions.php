@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Traits\Resource;
 
 use MoonShine\Laravel\Enums\Action;
-use MoonShine\Laravel\Handlers\Handler;
-use MoonShine\Laravel\Handlers\Handlers;
 use MoonShine\Support\ListOf;
 
 trait ResourceActions
