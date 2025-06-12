@@ -33,6 +33,7 @@ use MoonShine\UI\Components\Layout\Flex;
 use MoonShine\UI\Components\Layout\Grid;
 use MoonShine\UI\Components\Link;
 use MoonShine\UI\Fields\Checkbox;
+use MoonShine\UI\Fields\Field;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Traits\HasAsync;
 use MoonShine\UI\Traits\Table\TableStates;
@@ -118,9 +119,9 @@ final class TableBuilder extends IterableComponent implements
     }
 
     /**
-     * @param  Closure(?DataWrapperContract $data, int $row, self $table): array  $callback
+     * @param  Closure(?DataWrapperContract $data, int $row, static $table): array  $callback
      */
-    public function trAttributes(Closure $callback): self
+    public function trAttributes(Closure $callback): static
     {
         $this->trAttributes[] = $callback;
 
@@ -136,9 +137,9 @@ final class TableBuilder extends IterableComponent implements
     }
 
     /**
-     * @param  Closure(?DataWrapperContract $data, int $row, int $cell, self $table): array  $callback
+     * @param  Closure(?DataWrapperContract $data, int $row, int $cell, static $table): array  $callback
      */
-    public function tdAttributes(Closure $callback): self
+    public function tdAttributes(Closure $callback): static
     {
         $this->tdAttributes[] = $callback;
 

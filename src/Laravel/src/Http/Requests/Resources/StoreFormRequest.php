@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Http\Requests\Resources;
 
+use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Enums\Action;
@@ -35,6 +37,10 @@ final class StoreFormRequest extends MoonShineFormRequest
 
     public function rules(): array
     {
-        return $this->getResource()?->getRules() ?? [];
+        if(!$this->getResource() instanceof CrudResource || !$this->getResource()->getFormPage() instanceof PageContract) {
+            return [];
+        }
+
+        return $this->getResource()->getFormPage()->getRules();
     }
 }

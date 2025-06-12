@@ -4,18 +4,25 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Pages\Crud;
 
+use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+use MoonShine\Contracts\UI\ActionButtonContract;
+use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
 use MoonShine\Contracts\UI\ComponentContract;
+use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Core\Exceptions\PageException;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Components\Fragment;
 use MoonShine\Laravel\Contracts\Fields\HasTabModeContract;
+use MoonShine\Laravel\Contracts\Page\DetailPageContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
 use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Support\Enums\PageType;
+use MoonShine\Support\ListOf;
+use MoonShine\UI\Collections\ActionButtons;
 use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\Heading;
 use MoonShine\UI\Components\Layout\Box;
@@ -23,6 +30,7 @@ use MoonShine\UI\Components\Layout\LineBreak;
 use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
+use MoonShine\UI\Contracts\FieldsWrapperContract;
 use MoonShine\UI\Exceptions\MoonShineComponentException;
 use Throwable;
 
@@ -30,13 +38,19 @@ use Throwable;
  * @template TResource of CrudResource = \MoonShine\Laravel\Resources\ModelResource
  * @extends CrudPage<TResource>
  */
-class DetailPage extends CrudPage
+class DetailPage extends CrudPage implements DetailPageContract
 {
     protected ?PageType $pageType = PageType::DETAIL;
 
     public function getTitle(): string
     {
         return $this->title ?: __('moonshine::ui.show');
+    }
+
+    protected function prepareFields(FieldsContract $fields): FieldsContract
+    {
+        /** @var Fields $fields */
+        return $fields->ensure([FieldsWrapperContract::class, FieldContract::class, ModelRelationField::class]);
     }
 
     /**
@@ -97,7 +111,7 @@ class DetailPage extends CrudPage
             Box::make([
                 ...$this->getDetailComponents($item),
                 LineBreak::make(),
-                ...$this->getPageButtons(),
+                ...$this->getTopButtons(),
             ]),
         ];
     }
@@ -158,23 +172,28 @@ class DetailPage extends CrudPage
             $components[] = Tabs::make($tabs);
         }
 
-        $components = array_merge($components, $this->getEmptyModals());
-
-        return array_merge($components, $this->getResource()->getDetailPageComponents());
+        return array_merge($components, $this->getEmptyModals());
     }
 
     protected function getDetailComponent(?DataWrapperContract $item, Fields $fields): ComponentContract
     {
-        return TableBuilder::make($fields)
-            ->cast($this->getResource()->getCaster())
-            ->items([$item])
-            ->vertical(
-                title: $this->getResource()->isDetailInModal() ? 3 : 2,
-                value: $this->getResource()->isDetailInModal() ? 9 : 10,
-            )
-            ->simple()
-            ->preview()
-            ->class('table-divider');
+        return $this->modifyDetailComponent(
+            TableBuilder::make($fields)
+                ->cast($this->getResource()->getCaster())
+                ->items([$item])
+                ->vertical(
+                    title: $this->getResource()->isDetailInModal() ? 3 : 2,
+                    value: $this->getResource()->isDetailInModal() ? 9 : 10,
+                )
+                ->simple()
+                ->preview()
+                ->class('table-divider')
+        );
+    }
+
+    protected function modifyDetailComponent(ComponentContract $component): ComponentContract
+    {
+        return $component;
     }
 
     /**
@@ -187,18 +206,39 @@ class DetailPage extends CrudPage
     {
         return [
             Fragment::make([
-                $this->getResource()->modifyDetailComponent(
-                    $this->getDetailComponent($item, $this->getResource()->getDetailFields())
-                ),
+                $this->getDetailComponent($item, $this->getResource()->getDetailFields()),
             ])->name('crud-detail'),
         ];
     }
 
-    protected function getPageButtons(): array
+    /**
+     * @return ListOf<ActionButtonContract>
+     */
+    protected function buttons(): ListOf
+    {
+        return new ListOf(ActionButtonContract::class, [
+            $this->getResource()->getEditButton(
+                isAsync: $this->isAsync(),
+            ),
+            $this->getResource()->getDeleteButton(
+                redirectAfterDelete: $this->getResource()->getRedirectAfterDelete(),
+                isAsync: false
+            ),
+        ]);
+    }
+
+    public function getButtons(): ActionButtonsContract
+    {
+        return ActionButtons::make(
+            $this->buttons()->toArray()
+        )->withoutBulk();
+    }
+
+    protected function getTopButtons(): array
     {
         return [
             ActionGroup::make(
-                $this->getResource()->getDetailButtons()
+                $this->getButtons()
             )
                 ->fill($this->getResource()->getCastedData())
                 ->class('justify-end'),

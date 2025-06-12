@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Pages\Crud;
 
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+use MoonShine\Contracts\UI\ActionButtonContract;
+use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Components\Fragment;
+use MoonShine\Laravel\Concerns\Page\HasFormValidation;
 use MoonShine\Laravel\Contracts\Fields\HasModalModeContract;
 use MoonShine\Laravel\Contracts\Fields\HasTabModeContract;
+use MoonShine\Laravel\Contracts\Page\FormPageContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
@@ -19,23 +23,28 @@ use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Support\AlpineJs;
 use MoonShine\Support\Enums\JsEvent;
 use MoonShine\Support\Enums\PageType;
+use MoonShine\Support\ListOf;
+use MoonShine\UI\Collections\ActionButtons;
 use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\FormBuilder;
 use MoonShine\UI\Components\Heading;
 use MoonShine\UI\Components\Layout\Divider;
 use MoonShine\UI\Components\Layout\LineBreak;
-use MoonShine\UI\Components\MoonShineComponent;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Hidden;
 use Throwable;
 
 /**
+ * @template TData of mixed
  * @template TResource of CrudResource = \MoonShine\Laravel\Resources\ModelResource
  * @extends CrudPage<TResource>
  */
-class FormPage extends CrudPage
+class FormPage extends CrudPage implements FormPageContract
 {
+    /** @use HasFormValidation<TData> */
+    use HasFormValidation;
+
     protected ?PageType $pageType = PageType::FORM;
 
     public function getTitle(): string
@@ -110,7 +119,7 @@ class FormPage extends CrudPage
      */
     protected function topLayer(): array
     {
-        return $this->getPageButtons();
+        return $this->getTopButtons();
     }
 
     /**
@@ -128,7 +137,7 @@ class FormPage extends CrudPage
         );
 
         // Reset form problem
-        $isAsync = $resource->isAsync();
+        $isAsync = $this->isAsync();
 
         if (request()->boolean('_async_form')) {
             $isAsync = true;
@@ -153,9 +162,7 @@ class FormPage extends CrudPage
         $outsideFields = $this->getResource()->getOutsideFields()->formFields();
 
         if ($outsideFields->isEmpty()) {
-            $components = array_merge($components, $this->getEmptyModals());
-
-            return array_merge($components, $this->getResource()->getFormPageComponents());
+            return array_merge($components, $this->getEmptyModals());
         }
 
         $tabs = [];
@@ -197,25 +204,7 @@ class FormPage extends CrudPage
             $components[] = Tabs::make($tabs);
         }
 
-        $components = array_merge($components, $this->getEmptyModals());
-
-        return array_merge($components, $this->getResource()->getFormPageComponents());
-    }
-
-    /**
-     * @return list<ComponentContract>
-     */
-    protected function getPageButtons(): array
-    {
-        if (! $this->getResource()->isItemExists()) {
-            return [];
-        }
-
-        return [
-            ActionGroup::make($this->getResource()->getFormButtons())
-                ->fill($this->getResource()->getCastedData())
-                ->class('mb-4'),
-        ];
+        return array_merge($components, $this->getEmptyModals());
     }
 
     /**
@@ -231,13 +220,11 @@ class FormPage extends CrudPage
 
         return [
             Fragment::make([
-                $this->getResource()->modifyFormComponent(
-                    $this->getFormComponent(
-                        $action,
-                        $item,
-                        $this->getResource()->getFormFields(),
-                        $isAsync
-                    ),
+                $this->getFormComponent(
+                    $action,
+                    $item,
+                    $this->getResource()->getFormFields(),
+                    $isAsync
                 ),
             ])
                 ->name('crud-form')
@@ -245,60 +232,116 @@ class FormPage extends CrudPage
         ];
     }
 
-    /**
-     * @return MoonShineComponent
-     */
     protected function getFormComponent(
         string $action,
         ?DataWrapperContract $item,
         Fields $fields,
         bool $isAsync = true,
-    ): ComponentContract {
+    ): FormBuilderContract {
         $resource = $this->getResource();
 
-        return FormBuilder::make($action)
-            ->cast($this->getResource()->getCaster())
-            ->fill($item)
-            ->fields([
-                ...$fields
-                    ->when(
-                        ! \is_null($item),
-                        static fn (Fields $fields): Fields => $fields->push(
-                            Hidden::make('_method')->setValue('PUT')
+        return $this->modifyFormComponent(
+            FormBuilder::make($action)
+                ->cast($this->getResource()->getCaster())
+                ->fill($item)
+                ->fields([
+                    ...$fields
+                        ->when(
+                            ! \is_null($item),
+                            static fn (Fields $fields): Fields => $fields->push(
+                                Hidden::make('_method')->setValue('PUT')
+                            )
                         )
-                    )
-                    ->toArray(),
-            ])
-            ->when(
-                ! $resource->hasErrorsAbove(),
-                fn (FormBuilderContract $form): FormBuilderContract => $form->errorsAbove($resource->hasErrorsAbove())
-            )
-            ->when(
-                $isAsync,
-                static fn (FormBuilderContract $formBuilder): FormBuilderContract => $formBuilder
-                    ->async(events: array_filter([
-                        $resource->getListEventName(
-                            request()->getScalar('_component_name', 'default'),
-                            $isAsync && $resource->isItemExists() ? array_filter([
-                                'page' => request()->getScalar('page'),
-                                'sort' => request()->getScalar('sort'),
-                            ]) : []
-                        ),
-                        ! $resource->isItemExists() && $resource->isCreateInModal()
-                            ? AlpineJs::event(JsEvent::FORM_RESET, $resource->getUriKey())
-                            : null,
-                    ]))
-            )
-            ->when(
-                $resource->isPrecognitive() || (moonshineRequest()->isFragmentLoad('crud-form') && ! $isAsync),
-                static fn (FormBuilderContract $form): FormBuilderContract => $form->precognitive()
-            )
-            ->when(
-                $resource->isSubmitShowWhen(),
-                static fn (FormBuilderContract $form): FormBuilderContract => $form->submitShowWhenAttribute()
-            )
-            ->name($resource->getUriKey())
-            ->submit(__('moonshine::ui.save'), ['class' => 'btn-primary btn-lg'])
-            ->buttons($resource->getFormBuilderButtons());
+                        ->toArray(),
+                ])
+                ->when(
+                    ! $this->hasErrorsAbove(),
+                    fn (FormBuilderContract $form): FormBuilderContract => $form->errorsAbove($this->hasErrorsAbove())
+                )
+                ->when(
+                    $isAsync,
+                    static fn (FormBuilderContract $formBuilder): FormBuilderContract => $formBuilder
+                        ->async(events: array_filter([
+                            $resource->getListEventName(
+                                request()->getScalar('_component_name', 'default'),
+                                $isAsync && $resource->isItemExists() ? array_filter([
+                                    'page' => request()->getScalar('page'),
+                                    'sort' => request()->getScalar('sort'),
+                                ]) : []
+                            ),
+                            ! $resource->isItemExists() && $resource->isCreateInModal()
+                                ? AlpineJs::event(JsEvent::FORM_RESET, $resource->getUriKey())
+                                : null,
+                        ]))
+                )
+                ->when(
+                    $this->isPrecognitive() || (moonshineRequest()->isFragmentLoad('crud-form') && ! $isAsync),
+                    static fn (FormBuilderContract $form): FormBuilderContract => $form->precognitive()
+                )
+                ->name($resource->getUriKey())
+                ->submit(__('moonshine::ui.save'), ['class' => 'btn-primary btn-lg'])
+                ->buttons($this->getFormButtons())
+        );
+    }
+
+    protected function modifyFormComponent(FormBuilderContract $component): FormBuilderContract
+    {
+        return $component;
+    }
+
+    /**
+     * @return list<ComponentContract>
+     */
+    protected function getTopButtons(): array
+    {
+        if (! $this->getResource()->isItemExists()) {
+            return [];
+        }
+
+        return [
+            ActionGroup::make($this->getButtons())
+                ->fill($this->getResource()->getCastedData())
+                ->class('mb-4'),
+        ];
+    }
+
+    /**
+     * Top form buttons
+     *
+     * @return ListOf<ActionButtonContract>
+     */
+    protected function buttons(): ListOf
+    {
+        return new ListOf(ActionButtonContract::class, [
+            $this->getResource()->getDetailButton(),
+            $this->getResource()->getDeleteButton(
+                redirectAfterDelete: $this->getResource()->getRedirectAfterDelete(),
+                isAsync: false
+            ),
+        ]);
+    }
+
+    public function getButtons(): ActionButtonsContract
+    {
+        return ActionButtons::make(
+            $this->buttons()->toArray()
+        )->withoutBulk();
+    }
+
+    /**
+     * Form buttons after submit
+     *
+     * @return ListOf<ActionButtonContract>
+     */
+    protected function formButtons(): ListOf
+    {
+        return new ListOf(ActionButtonContract::class, []);
+    }
+
+    public function getFormButtons(): ActionButtonsContract
+    {
+        return ActionButtons::make(
+            $this->formButtons()->toArray()
+        )->withoutBulk();
     }
 }

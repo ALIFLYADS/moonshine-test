@@ -12,7 +12,7 @@ use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\HasIconContract;
 use MoonShine\Contracts\UI\HasLabelContract;
 use MoonShine\Core\Traits\WithCore;
-use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Support\AlpineJs;
 use MoonShine\Support\Traits\Makeable;
 use MoonShine\UI\Components\ActionButton;
@@ -107,28 +107,28 @@ final class QueryTag implements HasCanSeeContract, HasIconContract, HasLabelCont
         return $this;
     }
 
-    public function getButton(CrudResource $resource): ActionButtonContract
+    public function getButton(IndexPageContract $page): ActionButtonContract
     {
         return ActionButton::make(
             $this->getLabel(),
-            $resource->getIndexPageUrl(['query-tag' => $this->getUri()])
+            $page->getRoute(['query-tag' => $this->getUri()])
         )
             ->name("query-tag-{$this->getUri()}-button")
             ->showInLine()
             ->icon($this->getIconValue(), $this->isCustomIcon(), $this->getIconPath())
             ->canSee(fn (mixed $data): bool => $this->isSee())
             ->class('js-query-tag-button')
-            ->xDataMethod('queryTag', 'btn-primary', $resource->getListEventName())
+            ->xDataMethod('queryTag', 'btn-primary', $page->getListEventName())
             ->when(
                 $this->isActive(),
                 static fn (ActionButtonContract $btn): ActionButtonContract => $btn
                     ->primary()
                     ->customAttributes([
-                        'href' => $resource->getIndexPageUrl(),
+                        'href' => $page->getUrl(),
                     ])
             )
             ->when(
-                $resource->isAsync(),
+                $page->isAsync(),
                 fn (ActionButtonContract $btn): ActionButtonContract => $btn
                     ->onClick(
                         fn ($action): string => "request(`{$this->getUri()}`)",
@@ -139,7 +139,7 @@ final class QueryTag implements HasCanSeeContract, HasIconContract, HasLabelCont
                 $this->isDefault(),
                 static fn (ActionButtonContract $btn): ActionButtonContract => $btn->class('js-query-tag-default')
             )->when(
-                $resource->isQueryTagsInDropdown(),
+                $page->isQueryTagsInDropdown(),
                 fn (ActionButtonContract $btn): ActionButtonContract => $btn->showInDropdown()
             )->when(
                 ! \is_null($this->modifyButton),

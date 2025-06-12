@@ -32,7 +32,7 @@ abstract class Handler implements HasIconContract, HasResourceContract, HasUriKe
     use Makeable;
     use WithQueue;
     /**
-     * @use HasResource<CrudResourceContract, CrudResourceContract>
+     * @use HasResource<CrudResourceContract>
      */
     use HasResource;
     use WithIcon;

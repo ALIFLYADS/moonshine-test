@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Buttons;
 
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Laravel\Enums\Ability;
@@ -14,8 +15,11 @@ use MoonShine\UI\Components\ActionButton;
 
 final class MassDeleteButton
 {
+    /**
+     * @param  CrudResource  $resource
+     */
     public static function for(
-        CrudResource $resource,
+        CrudResourceContract $resource,
         ?string $componentName = null,
         ?string $redirectAfterDelete = null,
         bool $isAsync = true,

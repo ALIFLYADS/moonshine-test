@@ -30,7 +30,7 @@ use Throwable;
  */
 abstract class ModelRelationField extends Field implements HasResourceContract
 {
-    /** @use HasResource<ModelResource, ModelResource> */
+    /** @use HasResource<ModelResource> */
     use HasResource;
 
     protected string $relationName;

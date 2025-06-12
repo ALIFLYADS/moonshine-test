@@ -4,34 +4,78 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Pages\Crud;
 
+use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
+use MoonShine\Contracts\UI\ActionButtonContract;
+use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
 use MoonShine\Contracts\UI\ComponentContract;
+use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
 use MoonShine\Core\Exceptions\ResourceException;
+use MoonShine\Laravel\Buttons\FiltersButton;
 use MoonShine\Laravel\Collections\Fields;
-use MoonShine\Laravel\Components\Fragment;
-use MoonShine\Laravel\Contracts\Resource\HasQueryTagsContract;
+use MoonShine\Laravel\Concerns\Page\HasFilters;
+use MoonShine\Laravel\Concerns\Page\HasHandlers;
+use MoonShine\Laravel\Concerns\Page\HasListComponent;
+use MoonShine\Laravel\Concerns\Page\HasMetrics;
+use MoonShine\Laravel\Concerns\Page\HasQueryTags;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Resources\CrudResource;
-use MoonShine\Support\Enums\JsEvent;
 use MoonShine\Support\Enums\PageType;
+use MoonShine\Support\ListOf;
+use MoonShine\UI\Collections\ActionButtons;
 use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\Layout\Div;
 use MoonShine\UI\Components\Layout\Flex;
 use MoonShine\UI\Components\Layout\LineBreak;
 use MoonShine\UI\Components\Table\TableBuilder;
+use MoonShine\UI\Contracts\FieldsWrapperContract;
 use Throwable;
 
 /**
  * @template TResource of CrudResource = \MoonShine\Laravel\Resources\ModelResource
  * @extends CrudPage<TResource>
  */
-class IndexPage extends CrudPage
+class IndexPage extends CrudPage implements IndexPageContract
 {
+    use HasHandlers;
+    use HasQueryTags;
+    use HasFilters;
+    use HasListComponent;
+    use HasMetrics;
+
     protected ?PageType $pageType = PageType::INDEX;
+
+    protected bool $isLazy = false;
+
+    protected bool $queryTagsInDropdown = false;
+
+    protected bool $buttonsInDropdown = false;
 
     public function getTitle(): string
     {
         return $this->title ?: $this->getResource()->getTitle();
+    }
+
+    public function isLazy(): bool
+    {
+        return $this->isLazy;
+    }
+
+    public function isQueryTagsInDropdown(): bool
+    {
+        return $this->queryTagsInDropdown;
+    }
+
+    public function isButtonsInDropdown(): bool
+    {
+        return $this->buttonsInDropdown;
+    }
+
+    protected function prepareFields(FieldsContract $fields): FieldsContract
+    {
+        /** @var Fields $fields */
+        return $fields->ensure([FieldContract::class, FieldsWrapperContract::class]);
     }
 
     /**
@@ -61,11 +105,12 @@ class IndexPage extends CrudPage
     protected function topLayer(): array
     {
         $components = [];
-        if ($metrics = $this->getMetrics()) {
+
+        if ($metrics = $this->getMetricsComponent()) {
             $components[] = $metrics;
         }
 
-        return $components;
+        return array_merge($components, $this->getTopButtons());
     }
 
     /**
@@ -75,8 +120,7 @@ class IndexPage extends CrudPage
     protected function mainLayer(): array
     {
         return [
-            ...$this->getPageButtons(),
-            ...$this->getQueryTags(),
+            ...$this->getQueryTagsButtons(),
             ...$this->getItemsComponents(),
         ];
     }
@@ -86,155 +130,67 @@ class IndexPage extends CrudPage
      */
     protected function bottomLayer(): array
     {
-        $pageComponents = $this->getResource()->getIndexPageComponents();
-
-        return array_merge($pageComponents, $this->getEmptyModals());
+        return [
+            ...$this->getEmptyModals(),
+        ];
     }
 
-    protected function getMetrics(): ?ComponentContract
+    protected function getMetricsComponent(): ?ComponentContract
     {
         if ($this->getResource()->isListComponentRequest()) {
             return null;
         }
 
-        $metrics = $this->getResource()->getMetrics();
-
-        if ($metrics === []) {
-            return null;
-        }
-
-        $components = Div::make($metrics)->class('layout-metrics');
+        $components = Div::make($this->getMetrics())->class('layout-metrics');
 
 
-        if (! \is_null($fragment = $this->getResource()->getFragmentMetrics())) {
+        if (! \is_null($fragment = $this->getFragmentMetrics())) {
             return $fragment([$components]);
         }
 
         return $components;
     }
 
-    /**
-     * @return list<ComponentContract>
-     */
-    protected function getPageButtons(): array
-    {
-        return [
-            Flex::make([
-                ActionGroup::make(
-                    $this->getResource()->getTopButtons(),
-                ),
-
-                ActionGroup::make()->when(
-                    $this->getResource()->hasFilters(),
-                    fn (ActionGroup $group): ActionGroup => $group->add(
-                        $this->getResource()->getFiltersButton()
-                    )
-                )->when(
-                    $this->getResource()->getHandlers()->isNotEmpty(),
-                    fn (ActionGroup $group): ActionGroup => $group->addMany(
-                        $this->getResource()->getHandlers()->getButtons()
-                    )
-                ),
-            ])
-                ->justifyAlign('between')
-                ->itemsAlign('start'),
-            LineBreak::make(),
-        ];
-    }
-
-    /**
-     * @return list<ComponentContract>
-     */
-    protected function getQueryTags(): array
-    {
-        $resource = $this->getResource();
-
-        if (! $resource instanceof HasQueryTagsContract) {
-            return [];
-        }
-
-        return [
-            ActionGroup::make()->when(
-                $resource->hasQueryTags(),
-                static function (ActionGroup $group) use ($resource): ActionGroup {
-                    foreach ($resource->getQueryTags() as $tag) {
-                        $group->add(
-                            $tag->getButton($resource)
-                        );
-                    }
-
-                    return $group;
-                }
-            )->customAttributes(['class' => 'flex-wrap']),
-            LineBreak::make(),
-        ];
-    }
-
-    public function getListComponentName(): string
-    {
-        return "index-table-{$this->getResource()->getUriKey()}";
-    }
-
-    public function getListEventName(): string
-    {
-        return JsEvent::TABLE_UPDATED->value;
-    }
-
     protected function getItemsComponent(iterable $items, Fields $fields): ComponentContract
     {
-        return TableBuilder::make(items: $items)
-            ->name($this->getListComponentName())
-            ->fields($fields)
-            ->cast($this->getResource()->getCaster())
-            ->withNotFound()
-            ->when(
-                ! \is_null($head = $this->getResource()->getHeadRows()),
-                fn (TableBuilderContract $table): TableBuilderContract => $table->headRows($head)
-            )
-            ->when(
-                ! \is_null($body = $this->getResource()->getRows()),
-                fn (TableBuilderContract $table): TableBuilderContract => $table->rows($body)
-            )
-            ->when(
-                ! \is_null($foot = $this->getResource()->getFootRows()),
-                fn (TableBuilderContract $table): TableBuilderContract => $table->footRows($foot)
-            )
-            ->when(
-                ! \is_null($this->getResource()->getTrAttributes()),
-                fn (TableBuilderContract $table): TableBuilderContract => $table->trAttributes(
-                    $this->getResource()->getTrAttributes()
-                )
-            )
-            ->when(
-                ! \is_null($this->getResource()->getTdAttributes()),
-                fn (TableBuilderContract $table): TableBuilderContract => $table->tdAttributes(
-                    $this->getResource()->getTdAttributes()
-                )
-            )
-            ->buttons($this->getResource()->getIndexButtons())
-            ->clickAction($this->getResource()->getClickAction())
-            ->when($this->getResource()->isAsync(), function (TableBuilderContract $table): void {
-                $table->async(
-                    url: fn (): string => $this->getRouter()->getEndpoints()->component(name: $table->getName(), additionally: request()->query())
-                )->pushState();
-            })
-            ->when($this->getResource()->isStickyTable(), function (TableBuilderContract $table): void {
-                $table->sticky();
-            })
-            ->when($this->getResource()->isStickyButtons(), function (TableBuilderContract $table): void {
-                $table->stickyButtons();
-            })
-            ->when($this->getResource()->isLazy(), function (TableBuilderContract $table): void {
-                $table->lazy()->whenAsync(fn (TableBuilderContract $t): TableBuilderContract => $t->items($this->getResource()->getItems()));
-            })
-            ->when($this->getResource()->isColumnSelection(), function (TableBuilderContract $table): void {
-                $table->columnSelection();
-            })
-            ->when(! \is_null($this->getResource()->getItemsResolver()), function (TableBuilderContract $table): void {
-                $table->itemsResolver(
-                    $this->getResource()->getItemsResolver()
-                );
-            });
+        return $this->modifyListComponent(
+            TableBuilder::make(items: $items)
+                ->name($this->getListComponentName())
+                ->fields($fields)
+                ->cast($this->getResource()->getCaster())
+                ->withNotFound()
+                ->buttons($this->getButtons())
+                ->when($this->isAsync(), function (TableBuilderContract $table): void {
+                    $table->async(
+                        url: fn(): string
+                            => $this->getRouter()->getEndpoints()->component(
+                            name: $table->getName(),
+                            additionally: request()->query(),
+                        ),
+                    )->pushState();
+                })
+                ->when($this->isLazy(), function (TableBuilderContract $table): void {
+                    $table->lazy()->whenAsync(
+                        fn(TableBuilderContract $t): TableBuilderContract
+                            => $t->items(
+                            $this->getResource()->getItems(),
+                        ),
+                    );
+                })
+                ->when(
+                    ! \is_null($this->getResource()->getItemsResolver()),
+                    function (TableBuilderContract $table): void {
+                        $table->itemsResolver(
+                            $this->getResource()->getItemsResolver(),
+                        );
+                    },
+                ),
+        );
+    }
+
+    protected function modifyListComponent(ComponentContract $component): ComponentContract
+    {
+        return $component;
     }
 
     /**
@@ -248,7 +204,7 @@ class IndexPage extends CrudPage
         }
 
         $this->getResource()->setQueryParams(
-            request()->only($this->getResource()->getQueryParamsKeys())
+            request()->only($this->getResource()->getQueryParamsKeys()),
         );
 
         return [
@@ -256,19 +212,162 @@ class IndexPage extends CrudPage
         ];
     }
 
-    public function getListComponent(bool $withoutFragment = false): ComponentContract
+    /**
+     * @return list<ComponentContract>
+     */
+    protected function getTopButtons(): array
     {
-        $items = $this->getResource()->isLazy() ? [] : $this->getResource()->getItems();
-        $fields = $this->getResource()->getIndexFields();
+        return [
+            Flex::make([
+                ActionGroup::make(
+                    $this->getTopLeftButtons(),
+                ),
 
-        $component = $this->getResource()->modifyListComponent(
-            $this->getItemsComponent($items, $fields)
+                ActionGroup::make(
+                    $this->getTopRightButtons(),
+                ),
+            ])
+                ->justifyAlign('between')
+                ->itemsAlign('start'),
+            LineBreak::make(),
+        ];
+    }
+
+    /**
+     * @return ListOf<ActionButtonContract>
+     */
+    protected function topLeftButtons(): ListOf
+    {
+        return new ListOf(ActionButtonContract::class, [
+            $this->modifyCreateButton(
+                $this->getResource()->getCreateButton(
+                    isAsync: $this->isAsync()
+                )
+            ),
+        ]);
+    }
+
+    /**
+     * @return ListOf<ActionButtonContract>
+     */
+    protected function topRightButtons(): ListOf
+    {
+        return new ListOf(ActionButtonContract::class, [
+            $this->getFiltersButton(),
+            ...$this->getResource()->getHandlers()->getButtons()->toArray()
+        ]);
+    }
+
+    /**
+     * @return ListOf<ActionButtonContract>
+     */
+    protected function buttons(): ListOf
+    {
+        return new ListOf(ActionButtonContract::class, [
+            $this->modifyDetailButton(
+                $this->getResource()->getDetailButton()
+            ),
+            $this->modifyEditButton(
+                $this->getResource()->getEditButton(
+                    isAsync: $this->isAsync(),
+                )
+            ),
+            $this->modifyDeleteButton(
+                $this->getResource()->getDeleteButton(
+                    redirectAfterDelete: $this->getResource()->getRedirectAfterDelete(),
+                    isAsync: $this->isAsync(),
+                )
+            ),
+            $this->modifyMassDeleteButton(
+                $this->getResource()->getMassDeleteButton(
+                    redirectAfterDelete: $this->getResource()->getRedirectAfterDelete(),
+                    isAsync: $this->isAsync(),
+                )
+            ),
+        ]);
+    }
+
+    protected function getTopLeftButtons(): ActionButtonsContract
+    {
+        return ActionButtons::make($this->topLeftButtons()->toArray());
+    }
+
+    protected function getTopRightButtons(): ActionButtonsContract
+    {
+        return ActionButtons::make($this->topRightButtons()->toArray());
+    }
+
+    public function getButtons(): ActionButtonsContract
+    {
+        return ActionButtons::make(
+            $this->buttons()->toArray(),
+        )->when(
+            $this->isButtonsInDropdown(),
+            fn(ActionButtonsContract $buttons)
+                => $buttons->map(
+                fn(ActionButtonContract $button): ActionButtonContract => $button->showInDropdown(),
+            ),
         );
+    }
 
-        if ($withoutFragment) {
-            return $component;
-        }
+    protected function getFiltersButton(): ActionButtonContract
+    {
+        return $this->modifyFiltersButton(
+            FiltersButton::for($this->getResource())
+        );
+    }
 
-        return Fragment::make([$component])->name('crud-list');
+    /**
+     * @return list<ComponentContract>
+     */
+    protected function getQueryTagsButtons(): array
+    {
+        $resource = $this->getResource();
+
+        return [
+            ActionGroup::make()->when(
+                $resource->hasQueryTags(),
+                function (ActionGroup $group) use ($resource): ActionGroup {
+                    foreach ($resource->getQueryTags() as $tag) {
+                        $group->add(
+                            $tag->getButton($this),
+                        );
+                    }
+
+                    return $group;
+                },
+            )->customAttributes(['class' => 'flex-wrap']),
+            LineBreak::make(),
+        ];
+    }
+
+    protected function modifyCreateButton(ActionButtonContract $button): ActionButtonContract
+    {
+        return $button;
+    }
+
+    protected function modifyEditButton(ActionButtonContract $button): ActionButtonContract
+    {
+        return $button;
+    }
+
+    protected function modifyDetailButton(ActionButtonContract $button): ActionButtonContract
+    {
+        return $button;
+    }
+
+    protected function modifyDeleteButton(ActionButtonContract $button): ActionButtonContract
+    {
+        return $button;
+    }
+
+    protected function modifyFiltersButton(ActionButtonContract $button): ActionButtonContract
+    {
+        return $button;
+    }
+
+    protected function modifyMassDeleteButton(ActionButtonContract $button): ActionButtonContract
+    {
+        return $button;
     }
 }

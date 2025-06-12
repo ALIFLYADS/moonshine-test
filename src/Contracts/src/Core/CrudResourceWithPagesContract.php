@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace MoonShine\Contracts\Core;
 
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
-use MoonShine\Contracts\UI\ActionButtonContract;
-use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
-use MoonShine\Contracts\UI\ComponentContract;
 
 /**
  * @internal
  * @template TData
- * @template-covariant TIndexPage of CrudPageContract
- * @template-covariant TFormPage of CrudPageContract
- * @template-covariant TDetailPage of CrudPageContract
+ * @template-covariant TIndexPage of null|CrudPageContract = null
+ * @template-covariant TFormPage of null|CrudPageContract = null
+ * @template-covariant TDetailPage of null|CrudPageContract = null
  *
  */
 interface CrudResourceWithPagesContract
@@ -22,25 +19,21 @@ interface CrudResourceWithPagesContract
     public function setActivePage(?PageContract $page): void;
 
     /**
-     * @return ?PageContract<TIndexPage>
+     * @return null|TIndexPage
      */
     public function getIndexPage(): ?PageContract;
 
     /**
-     * @return ?PageContract<TFormPage>
+     * @return null|TFormPage
      */
     public function getFormPage(): ?PageContract;
 
     /**
-     * @return ?PageContract<TDetailPage>
+     * @return null|TDetailPage
      */
     public function getDetailPage(): ?PageContract;
 
-    /**
-     * @return ?PageContract<TIndexPage|TDetailPage|TFormPage>
-     */
     public function getActivePage(): ?PageContract;
-
 
     public function getIndexPageUrl(array $params = [], null|string|array $fragment = null): string;
 
@@ -71,35 +64,4 @@ interface CrudResourceWithPagesContract
     public function isCreateFormPage(): bool;
 
     public function isUpdateFormPage(): bool;
-
-    /**
-     * @return list<ComponentContract>
-     */
-    public function getDetailPageComponents(): array;
-
-    /**
-     * @return list<ComponentContract>
-     */
-    public function getFormPageComponents(): array;
-
-    /**
-     * @return list<ComponentContract>
-     */
-    public function getIndexPageComponents(): array;
-
-    public function modifyFormComponent(ComponentContract $component): ComponentContract;
-
-    public function modifyListComponent(ComponentContract $component): ComponentContract;
-
-    public function modifyDetailComponent(ComponentContract $component): ComponentContract;
-
-    public function getTopButtons(): ActionButtonsContract;
-
-    public function getIndexButtons(): ActionButtonsContract;
-
-    public function getFormButtons(): ActionButtonsContract;
-
-    public function getDetailButtons(): ActionButtonsContract;
-
-    public function getFiltersButton(): ActionButtonContract;
 }

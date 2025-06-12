@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace MoonShine\Tests\Fixtures\Resources;
 
 use MoonShine\Laravel\Models\MoonshineUser;
+use MoonShine\Laravel\Pages\Crud\DetailPage;
+use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\Laravel\QueryTags\QueryTag;
+use MoonShine\Tests\Fixtures\Pages\Custom\CustomPageIndexWithFeatures;
 use MoonShine\UI\Components\ActionButton;
 use MoonShine\UI\Components\Metrics\Wrapped\ValueMetric;
 use MoonShine\UI\Fields\Email;
@@ -45,32 +48,10 @@ class TestResourceBuilder
                     static fn ($query) => $query->where('id', 1) // Query builder
                 ),
             ])
-            ->setTestButtons([
-                ActionButton::make(
-                    'Test button',
-                    url: static fn (): string => '/'
-                )->showInLine(),
-            ])
-            ->setTestMetrics([
-                ValueMetric::make('TestValueMetric')->value(MoonshineUser::query()->count()),
-            ])
-            ->setTestTdAttributes(static fn (
-                mixed $data,
-                int $row,
-                int $cell,
-            ) => [
-                'data-test-td-attr' => 'success',
-            ])->setTestTrAttributes(static function (
-                mixed $data,
-                int $row,
-            ): array {
-                if ($row === 1) {
-                    return [
-                        'data-test-tr-attr' => 'success',
-                    ];
-                }
-
-                return [];
-            });
+            ->setTestPages([
+                CustomPageIndexWithFeatures::class,
+                FormPage::class,
+                DetailPage::class,
+            ]);
     }
 }

@@ -59,6 +59,9 @@ use MoonShine\Laravel\Commands\OptimizeClearCommand;
 use MoonShine\Laravel\Commands\OptimizeCommand;
 use MoonShine\Laravel\Commands\PublishCommand;
 use MoonShine\Laravel\Contracts\Notifications\MoonShineNotificationContract;
+use MoonShine\Laravel\Contracts\Page\DetailPageContract;
+use MoonShine\Laravel\Contracts\Page\FormPageContract;
+use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\DependencyInjection\AssetResolver;
 use MoonShine\Laravel\DependencyInjection\MoonShine;
 use MoonShine\Laravel\DependencyInjection\MoonShineConfigurator;
@@ -73,6 +76,9 @@ use MoonShine\Laravel\Models\MoonshineUser;
 use MoonShine\Laravel\MoonShineRequest;
 use MoonShine\Laravel\Notifications\MoonShineMemoryNotification;
 use MoonShine\Laravel\Notifications\MoonShineNotification;
+use MoonShine\Laravel\Pages\Crud\DetailPage;
+use MoonShine\Laravel\Pages\Crud\FormPage;
+use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Storage\LaravelStorage;
 use MoonShine\Laravel\Support\CacheAttributes;
@@ -180,6 +186,10 @@ final class MoonShineServiceProvider extends ServiceProvider
         ));
 
         $this->app->scoped(ColorManagerContract::class, ColorManager::class);
+
+        $this->app->bind(IndexPageContract::class, IndexPage::class);
+        $this->app->bind(FormPageContract::class, FormPage::class);
+        $this->app->bind(DetailPageContract::class, DetailPage::class);
 
         return $this;
     }

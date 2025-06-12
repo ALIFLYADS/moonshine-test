@@ -37,7 +37,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.68",
-        "larastan/larastan": "^3.0",
+        "larastan/larastan": "^3.4",
         "moonshine/import-export": "^1.0",
         "orchestra/testbench": "^9.9",
         "pestphp/pest": "^3",
@@ -94,7 +94,6 @@
         }
     },
     "scripts": {
-        "analyse": "vendor/bin/phpstan analyse src --memory-limit=-1",
         "rector": "vendor/bin/rector process --clear-cache",
         "rector:dry": "vendor/bin/rector process --clear-cache --dry-run",
         "test": "vendor/bin/pest",
@@ -104,6 +103,7 @@
             "composer install",
             "vendor/bin/pest --bail"
         ],
+        "test:types": "vendor/bin/phpstan analyse src --memory-limit=-1",
         "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes",
         "monorepo:merge": "vendor/bin/monorepo-builder merge"
     }

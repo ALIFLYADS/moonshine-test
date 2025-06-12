@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Buttons;
 
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Laravel\Enums\Ability;
@@ -12,11 +13,17 @@ use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Support\AlpineJs;
 use MoonShine\Support\Enums\JsEvent;
 use MoonShine\UI\Components\ActionButton;
+use Throwable;
 
 final class EditButton
 {
+    /**
+     * @param  CrudResource  $resource
+     *
+     * @throws Throwable
+     */
     public static function for(
-        CrudResource $resource,
+        CrudResourceContract $resource,
         ?string $componentName = null,
         bool $isAsync = true,
         string $modalName = 'resource-edit-modal',

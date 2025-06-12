@@ -13,7 +13,7 @@ use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
 
 /**
- * @template T of FieldContract
+ * @template T of FieldContract = \MoonShine\Contracts\UI\FieldContract
  * @template-extends Enumerable<array-key, T>
  *
  * @mixin Collection

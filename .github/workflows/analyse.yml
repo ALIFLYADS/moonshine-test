@@ -31,4 +31,4 @@ jobs:
         run: composer install --dev
 
       - name: Execute
-        run: composer analyse
+        run: composer test:types

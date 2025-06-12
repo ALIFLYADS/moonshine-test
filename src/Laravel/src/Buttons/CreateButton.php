@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Buttons;
 
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\UI\Components\ActionButton;
 use MoonShine\UI\Components\Modal;
+use Throwable;
 
 final class CreateButton
 {
+    /**
+     * @param  CrudResource  $resource
+     *
+     * @throws Throwable
+     */
     public static function for(
-        CrudResource $resource,
+        CrudResourceContract $resource,
         ?string $componentName = null,
         bool $isAsync = true,
         string $modalName = 'resource-create-modal',

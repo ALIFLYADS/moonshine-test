@@ -6,11 +6,8 @@ namespace MoonShine\Laravel\Traits\Resource;
 
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
-use MoonShine\Laravel\Applies\FieldsWithoutFilters;
 use MoonShine\Laravel\Collections\Fields;
-use MoonShine\Laravel\Exceptions\FilterException;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
-use MoonShine\Support\Enums\PageType;
 use MoonShine\UI\Contracts\FieldsWrapperContract;
 use Throwable;
 
@@ -30,12 +27,10 @@ trait ResourceWithFields
     public function getIndexFields(): Fields
     {
         /** @var Fields $fields */
-        $fields = $this->getPages()
-            ->findByType(PageType::INDEX)
-            ?->getFields();
+        $fields = $this->getIndexPage()?->getFields();
 
         if ($fields->isEmpty()) {
-            $fields = Fields::make($this->indexFields());
+            return Fields::make($this->indexFields());
         }
 
         $fields->ensure([FieldContract::class, FieldsWrapperContract::class]);
@@ -57,9 +52,7 @@ trait ResourceWithFields
     public function getFormFields(bool $withOutside = false): Fields
     {
         /** @var Fields $fields */
-        $fields = $this->getPages()
-            ->findByType(PageType::FORM)
-            ?->getFields();
+        $fields = $this->getFormPage()?->getFields();
 
         if ($fields->isEmpty()) {
             $fields = Fields::make($this->formFields());
@@ -82,9 +75,7 @@ trait ResourceWithFields
     public function getDetailFields(bool $withOutside = false, bool $onlyOutside = false): Fields
     {
         /** @var Fields $fields */
-        $fields = $this->getPages()
-            ->findByType(PageType::DETAIL)
-            ?->getFields();
+        $fields = $this->getDetailPage()?->getFields();
 
         if ($fields->isEmpty()) {
             $fields = Fields::make($this->detailFields());
@@ -103,9 +94,7 @@ trait ResourceWithFields
         /**
          * @var Fields $fields
          */
-        $fields = $this->getPages()
-            ->findByType(PageType::FORM)
-            ?->getFields();
+        $fields = $this->getFormPage()?->getFields();
 
         if ($fields->isEmpty()) {
             $fields = Fields::make($this->formFields());
@@ -114,36 +103,5 @@ trait ResourceWithFields
         return $fields
             ->onlyFields()
             ->onlyOutside();
-    }
-
-    /**
-     * @return list<FieldContract>
-     */
-    protected function filters(): iterable
-    {
-        return [];
-    }
-
-    public function hasFilters(): bool
-    {
-        return $this->filters() !== [];
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function getFilters(): Fields
-    {
-        $filters = Fields::make($this->filters())
-            ->withoutOutside()
-            ->wrapNames('filter');
-
-        $filters->each(static function ($filter): void {
-            if (\in_array($filter::class, FieldsWithoutFilters::LIST)) {
-                throw FilterException::notAcceptable($filter::class);
-            }
-        });
-
-        return $filters;
     }
 }

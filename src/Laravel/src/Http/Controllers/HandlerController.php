@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Http\Controllers;
 
 use MoonShine\Core\Exceptions\ResourceException;
-use MoonShine\Laravel\Contracts\Resource\HasHandlersContract;
+use MoonShine\Laravel\Contracts\HasHandlersContract;
 use MoonShine\Laravel\MoonShineRequest;
 use Symfony\Component\HttpFoundation\Response;
 

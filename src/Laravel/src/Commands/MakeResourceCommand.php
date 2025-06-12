@@ -47,16 +47,16 @@ class MakeResourceCommand extends MoonShineCommand
         $this->makeDir($stubsPath->dir);
 
         $types = [
-            'ModelResourceDefault' => 'Default model resource',
-            'ModelResourceWithPages' => 'Model resource with pages',
-            'Resource' => 'Empty resource',
+            'ModelResource' => 'Resource bound to an Eloquent model',
+            'CrudResource' => 'Resource for custom data with your own logic',
+            'Resource' => 'Blank resource, fully manual implementation',
         ];
 
         if ($type = $this->option('type')) {
             $keys = array_keys($types);
             $stub = $keys[$type - 1] ?? $keys[0];
         } else {
-            $stub = select('Resource type', $types, 'ModelResourceDefault');
+            $stub = select('Type', $types, 'ModelResourceDefault');
         }
 
         $properties = '';
@@ -84,7 +84,7 @@ class MakeResourceCommand extends MoonShineCommand
             outro('Test was created: ' . $this->getRelativePath($testPath));
         }
 
-        if ($stub === 'ModelResourceWithPages') {
+        if ($stub !== 'Resource') {
             $this->call(MakePageCommand::class, [
                 'className' => $name,
                 '--crud' => true,

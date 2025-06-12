@@ -19,7 +19,8 @@ interface MoonShineNotificationContract
         string $message,
         ?NotificationButtonContract $button = null,
         array $ids = [],
-        string|Color|null $color = null
+        string|Color|null $color = null,
+        ?string $icon = null
     ): void;
 
     /**

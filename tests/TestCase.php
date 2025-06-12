@@ -6,6 +6,7 @@ namespace MoonShine\Tests;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithViews;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Laravel\Commands\InstallCommand;

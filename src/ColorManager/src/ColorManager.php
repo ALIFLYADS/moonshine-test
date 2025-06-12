@@ -73,8 +73,14 @@ final class ColorManager implements ColorManagerContract
         'info-text' => '179, 220, 255',
     ];
 
+    /**
+     * @var array<string, string|array<string|int, string>>
+     */
     private array $colors = self::DEFAULT;
 
+    /**
+     * @var array<string, string|array<string|int, string>>
+     */
     private array $darkColors = self::DARK;
 
     public function background(string $value): static
@@ -125,6 +131,11 @@ final class ColorManager implements ColorManagerContract
             ->set('dark.900', $value);
     }
 
+    /**
+     * @param  non-empty-string  $name
+     * @param  non-empty-string|array<string|int, string>  $value
+     *
+     */
     public function set(string $name, string|array $value, bool $dark = false): static
     {
         data_set($this->{$dark ? 'darkColors' : 'colors'}, $name, $value);
@@ -132,6 +143,9 @@ final class ColorManager implements ColorManagerContract
         return $this;
     }
 
+    /**
+     * @param array<string, string|array<string|int, string>> $colors
+     */
     public function bulkAssign(array $colors, bool $dark = false): static
     {
         foreach ($colors as $name => $color) {
@@ -156,6 +170,9 @@ final class ColorManager implements ColorManagerContract
             : $value;
     }
 
+    /**
+     * @return array<string, string|array<string|int, string>>
+     */
     public function getAll(bool $dark = false): array
     {
         $colors = [];

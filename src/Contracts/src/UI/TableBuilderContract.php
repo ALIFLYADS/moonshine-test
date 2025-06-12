@@ -75,6 +75,16 @@ interface TableBuilderContract extends
 
     public function isVertical(): bool;
 
+    /**
+     * @param  Closure(?DataWrapperContract $data, int $row, int $cell, static $table): array  $callback
+     */
+    public function tdAttributes(Closure $callback): static;
+
+    /**
+     * @param  Closure(?DataWrapperContract $data, int $row, static $table): array  $callback
+     */
+    public function trAttributes(Closure $callback): static;
+
     public function reindex(bool $prepared = false): static;
 
     public function isReindex(): bool;

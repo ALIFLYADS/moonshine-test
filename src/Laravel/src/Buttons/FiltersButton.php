@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Buttons;
 
+use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Laravel\Forms\FiltersForm;
 use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\UI\Components\ActionButton;
+use Psr\SimpleCache\InvalidArgumentException;
 
 final class FiltersButton
 {
-    public static function for(CrudResource $resource): ActionButtonContract
+    /**
+     * @param  CrudResource  $resource
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function for(CrudResourceContract $resource): ActionButtonContract
     {
         $form = moonshineConfig()->getForm('filters', FiltersForm::class, resource: $resource);
 
