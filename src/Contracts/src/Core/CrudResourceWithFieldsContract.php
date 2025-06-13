@@ -27,4 +27,9 @@ interface CrudResourceWithFieldsContract
      * @return TFields
      */
     public function getDetailFields(bool $withOutside = false, bool $onlyOutside = false): FieldsContract;
+
+    /**
+     * @return TFields
+     */
+    public function getOutsideFields(): FieldsContract;
 }

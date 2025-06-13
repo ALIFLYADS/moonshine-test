@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MoonShine\Contracts\Core;
 
+use Closure;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+use MoonShine\Contracts\UI\TableBuilderContract;
 use Traversable;
 
 /**
@@ -30,6 +32,8 @@ interface CrudResourceContract extends
     CrudResourceWithResponseModifiersContract,
     CrudResourceWithQueryParamsContract,
     CrudResourceWithSearchContract,
+    CrudResourceWithActionsContract,
+    CrudResourceWithAuthorizationContract,
     HasListComponentContract
 {
     public function getColumn(): string;
@@ -70,9 +74,23 @@ interface CrudResourceContract extends
      */
     public function getItem(): mixed;
 
+    /**
+     * @return TData
+     */
+    public function getItemOrFail(): mixed;
+
+    /**
+     * @return null|Closure(iterable $items, TableBuilderContract $table): iterable
+     */
+    public function getItemsResolver(): ?Closure;
+
     public function setItemID(int|string|false|null $itemID): static;
 
     public function getItemID(): int|string|null;
+
+    public function stopGettingItemFromUrl(): static;
+
+    public function isStopGettingItemFromUrl(): bool;
 
     /**
      * @return TData
@@ -110,4 +128,12 @@ interface CrudResourceContract extends
      * @return TData
      */
     public function save(mixed $item, ?FieldsContract $fields = null): mixed;
+
+    public function isRecentlyCreated(): bool;
+
+    public function getRedirectAfterSave(): ?string;
+
+    public function getRedirectAfterDelete(): string;
+
+    public function isDeleteRelationships(): bool;
 }

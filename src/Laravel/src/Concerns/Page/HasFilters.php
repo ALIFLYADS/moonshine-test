@@ -46,4 +46,12 @@ trait HasFilters
 
         return $filters;
     }
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    public function getFilterParams(): array
+    {
+        return $this->getResource()->getFilterParams();
+    }
 }

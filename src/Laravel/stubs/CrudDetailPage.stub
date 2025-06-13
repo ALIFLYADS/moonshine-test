@@ -1,0 +1,65 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {namespace};
+
+use MoonShine\Laravel\Pages\Crud\{extendShort};
+use MoonShine\Contracts\UI\ComponentContract;
+use MoonShine\Contracts\UI\FieldContract;
+use {resource-namespace};
+use MoonShine\Support\ListOf;
+use Throwable;
+{uses}
+
+/**
+ * @extends {extendShort}<{resourceShort}>
+ */
+class DummyClass extends {extendShort}
+{
+    /**
+     * @return list<FieldContract>
+     */
+    protected function fields(): iterable
+    {
+        return [];
+    }
+
+    protected function buttons(): ListOf
+    {
+        return parent::buttons();
+    }
+
+    /**
+     * @return list<ComponentContract>
+     * @throws Throwable
+     */
+    protected function topLayer(): array
+    {
+        return [
+            ...parent::topLayer()
+        ];
+    }
+
+    /**
+     * @return list<ComponentContract>
+     * @throws Throwable
+     */
+    protected function mainLayer(): array
+    {
+        return [
+            ...parent::mainLayer()
+        ];
+    }
+
+    /**
+     * @return list<ComponentContract>
+     * @throws Throwable
+     */
+    protected function bottomLayer(): array
+    {
+        return [
+            ...parent::bottomLayer()
+        ];
+    }
+}

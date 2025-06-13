@@ -12,6 +12,8 @@ interface HasShowWhenContract
 
     public function modifyShowFieldName(string $name): static;
 
+    public function modifyShowFieldRangeName(): static;
+
     public function showWhen(
         string $column,
         mixed $operator = null,

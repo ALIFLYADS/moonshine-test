@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Traits\Resource;
 
 use MoonShine\Core\Exceptions\ResourceException;
-use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Exceptions\CrudResourceException;
+use MoonShine\Support\Enums\Ability;
 
 trait ResourceWithAuthorization
 {

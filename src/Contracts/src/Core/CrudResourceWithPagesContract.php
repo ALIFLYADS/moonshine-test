@@ -35,6 +35,8 @@ interface CrudResourceWithPagesContract
 
     public function getActivePage(): ?PageContract;
 
+    public function getPageUrl(string|PageContract $page, array $params = [], null|string|array $fragment = null): string;
+
     public function getIndexPageUrl(array $params = [], null|string|array $fragment = null): string;
 
     /**

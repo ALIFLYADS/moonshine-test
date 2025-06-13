@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Resources;
 
-use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Models\MoonshineUser;
 use MoonShine\Laravel\Pages\MoonShineUser\MoonShineUserFormPage;
 use MoonShine\Laravel\Pages\MoonShineUser\MoonShineUserIndexPage;
 use MoonShine\MenuManager\Attributes\Group;
 use MoonShine\MenuManager\Attributes\Order;
 use MoonShine\Support\Attributes\Icon;
+use MoonShine\Support\Enums\Action;
 use MoonShine\Support\ListOf;
 
 #[Icon('users')]

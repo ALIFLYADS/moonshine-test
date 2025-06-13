@@ -91,6 +91,8 @@ interface FieldContract extends
         ?AsyncCallback $callback = null,
     ): static;
 
+    public function onChangeEvent(array|string $events, array $exclude = [], bool $withoutPayload = false): static;
+
     public function beforeRender(Closure $callback): static;
 
     public function getBeforeRender(): Renderable|string;

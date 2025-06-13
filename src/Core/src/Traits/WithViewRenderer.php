@@ -92,9 +92,7 @@ trait WithViewRenderer
 
     public function shouldRender(): bool
     {
-        return $this instanceof HasCanSeeContract
-            ? $this->isSee()
-            : true;
+        return ! $this instanceof HasCanSeeContract || $this->isSee();
     }
 
     public function onBeforeRender(Closure $onBeforeRender): static

@@ -123,7 +123,7 @@ abstract class Resource implements ResourceContract
 
     public function getTitle(): string
     {
-        return $this->title;
+        return $this->title ?: class_basename($this);
     }
 
     public function getRouter(): RouterContract

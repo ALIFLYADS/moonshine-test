@@ -87,6 +87,7 @@ class MakeResourceCommand extends MoonShineCommand
         if ($stub !== 'Resource') {
             $this->call(MakePageCommand::class, [
                 'className' => $name,
+                '--resource' => str_replace('::class', '', $stubsPath->getClassString()),
                 '--crud' => true,
                 '--without-register' => true,
             ]);

@@ -104,7 +104,7 @@
             "vendor/bin/pest --bail"
         ],
         "test:types": "vendor/bin/phpstan analyse src --memory-limit=-1",
-        "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes",
+        "cs:fix": "vendor/bin/php-cs-fixer fix --allow-risky=yes",
         "monorepo:merge": "vendor/bin/monorepo-builder merge"
     }
 }

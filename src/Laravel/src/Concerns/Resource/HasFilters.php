@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Concerns\Resource;
 
+use InvalidArgumentException;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Applies\FieldsWithoutFilters;
@@ -57,5 +58,24 @@ trait HasFilters
         });
 
         return $filters;
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     * @throws InvalidArgumentException
+     */
+    public function getFilterParams(): array
+    {
+        $default = $this->getQueryParams()->get('filter', []);
+
+        if ($this->isSaveQueryState() && ! moonshineRequest()->has('reset')) {
+            return data_get(
+                moonshineCache()->get($this->getQueryCacheKey(), []),
+                'filter',
+                $default,
+            );
+        }
+
+        return $default;
     }
 }

@@ -18,12 +18,14 @@ use MoonShine\Laravel\Concerns\Resource\HasFilters;
 use MoonShine\Laravel\Concerns\Resource\HasHandlers;
 use MoonShine\Laravel\Concerns\Resource\HasListComponent;
 use MoonShine\Laravel\Concerns\Resource\HasQueryTags;
+use MoonShine\Laravel\Concerns\Resource\HasCrudResponseModifiers;
 use MoonShine\Laravel\Contracts\HasFiltersContract;
 use MoonShine\Laravel\Contracts\HasHandlersContract;
 use MoonShine\Laravel\Contracts\HasQueryTagsContract;
 use MoonShine\Laravel\Contracts\Page\DetailPageContract;
 use MoonShine\Laravel\Contracts\Page\FormPageContract;
 use MoonShine\Laravel\Contracts\Page\IndexPageContract;
+use MoonShine\Laravel\Contracts\Resource\HasCrudResponseModifiersContract;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Laravel\Traits\Resource\ResourceActions;
 use MoonShine\Laravel\Traits\Resource\ResourceCrudRouter;
@@ -51,11 +53,13 @@ abstract class CrudResource extends Resource implements
     CrudResourceContract,
     HasQueryTagsContract,
     HasHandlersContract,
-    HasFiltersContract
+    HasFiltersContract,
+    HasCrudResponseModifiersContract
 {
     use HasFilters;
     use HasHandlers;
     use HasQueryTags;
+    use HasCrudResponseModifiers;
 
     use HasListComponent;
 
@@ -84,13 +88,23 @@ abstract class CrudResource extends Resource implements
 
     protected ?PageContract $activePage = null;
 
-    protected bool $isAsync = false;
+    protected bool $isAsync = true;
 
     protected bool $createInModal = false;
 
     protected bool $editInModal = false;
 
     protected bool $detailInModal = false;
+
+    /**
+     * @return ?TData
+     */
+    abstract public function findItem(bool $orFail = false): mixed;
+
+    /**
+     * @return TItems
+     */
+    abstract public function getItems(): mixed;
 
     /**
      * @param  array<int, int>  $ids
@@ -289,25 +303,5 @@ abstract class CrudResource extends Resource implements
     public function modifyCollectionResponse(mixed $items): mixed
     {
         return $items;
-    }
-
-    public function modifyDestroyResponse(MoonShineJsonResponse $response): MoonShineJsonResponse
-    {
-        return $response;
-    }
-
-    public function modifyMassDeleteResponse(MoonShineJsonResponse $response): MoonShineJsonResponse
-    {
-        return $response;
-    }
-
-    public function modifySaveResponse(MoonShineJsonResponse $response): MoonShineJsonResponse
-    {
-        return $response;
-    }
-
-    public function modifyErrorResponse(Response $response, Throwable $exception): Response
-    {
-        return $response;
     }
 }

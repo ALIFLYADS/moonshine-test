@@ -9,6 +9,7 @@ use {form-page-namespace};
 use {detail-page-namespace};
 
 use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Laravel\Pages\Page;
 
 /**
@@ -16,6 +17,8 @@ use MoonShine\Laravel\Pages\Page;
  */
 class DummyClass extends CrudResource
 {
+    protected ?string $casterKeyName = 'id';
+
     protected string $title = 'DummyTitle';
     {properties}
     /**
@@ -30,12 +33,6 @@ class DummyClass extends CrudResource
         ];
     }
 
-
-    public function save(mixed $item, ?FieldsContract $fields = null): mixed
-    {
-        return $item;
-    }
-
     public function getItems(): mixed
     {
         return [];
@@ -46,13 +43,18 @@ class DummyClass extends CrudResource
         return [];
     }
 
-    public function massDelete(array $ids): void
+    public function save(mixed $item, ?FieldsContract $fields = null): mixed
     {
-        //
+        return $item;
     }
 
     public function delete(mixed $item, ?FieldsContract $fields = null): bool
     {
         return true;
+    }
+
+    public function massDelete(array $ids): void
+    {
+        //
     }
 }

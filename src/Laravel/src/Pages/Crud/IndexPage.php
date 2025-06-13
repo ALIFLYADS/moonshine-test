@@ -19,8 +19,8 @@ use MoonShine\Laravel\Concerns\Page\HasListComponent;
 use MoonShine\Laravel\Concerns\Page\HasMetrics;
 use MoonShine\Laravel\Concerns\Page\HasQueryTags;
 use MoonShine\Laravel\Contracts\Page\IndexPageContract;
-use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Support\Enums\Ability;
 use MoonShine\Support\Enums\PageType;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Collections\ActionButtons;
@@ -252,10 +252,10 @@ class IndexPage extends CrudPage implements IndexPageContract
      */
     protected function topRightButtons(): ListOf
     {
-        return new ListOf(ActionButtonContract::class, [
-            $this->getFiltersButton(),
+        return new ListOf(ActionButtonContract::class, array_filter([
+            $this->getResource()->hasFilters() ? $this->getFiltersButton() : null,
             ...$this->getResource()->getHandlers()->getButtons()->toArray(),
-        ]);
+        ]));
     }
 
     /**
