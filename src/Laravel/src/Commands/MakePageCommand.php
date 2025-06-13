@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Commands;
 
+use MoonShine\Laravel\Resources\ModelResource;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 use function Laravel\Prompts\{select, text};
@@ -33,7 +34,7 @@ class MakePageCommand extends MoonShineCommand
         $stubsPath = new StubsPath($className, 'php');
 
         $dir = $this->option('dir') ?: 'Pages';
-        $resource = $this->option('resource') ?: 'MoonShine\Laravel\Resources\ModelResource';
+        $resource = $this->option('resource') ?: ModelResource::class;
 
         $stubsPath = $this->qualifyStubsDir($stubsPath, $dir);
 
@@ -94,7 +95,7 @@ class MakePageCommand extends MoonShineCommand
         StubsPath $stubsPath,
         string $stub = 'Page',
         ?string $extends = null,
-        string $resource = 'MoonShine\Laravel\Resources\ModelResource',
+        string $resource = ModelResource::class,
     ): void {
         $extends = $extends ?: 'Page';
 

@@ -26,7 +26,6 @@ use MoonShine\Laravel\Contracts\Page\DetailPageContract;
 use MoonShine\Laravel\Contracts\Page\FormPageContract;
 use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Contracts\Resource\HasCrudResponseModifiersContract;
-use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Laravel\Traits\Resource\ResourceActions;
 use MoonShine\Laravel\Traits\Resource\ResourceCrudRouter;
 use MoonShine\Laravel\Traits\Resource\ResourceEvents;
@@ -34,8 +33,6 @@ use MoonShine\Laravel\Traits\Resource\ResourceQuery;
 use MoonShine\Laravel\Traits\Resource\ResourceWithAuthorization;
 use MoonShine\Laravel\Traits\Resource\ResourceWithButtons;
 use MoonShine\Laravel\Traits\Resource\ResourceWithFields;
-use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 use Traversable;
 
 /**
