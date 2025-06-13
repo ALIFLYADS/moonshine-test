@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MoonShine\Laravel\Enums;
+namespace MoonShine\Support\Enums;
 
 enum Action: string
 {

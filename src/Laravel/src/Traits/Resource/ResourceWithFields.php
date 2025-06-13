@@ -26,10 +26,10 @@ trait ResourceWithFields
      */
     public function getIndexFields(): Fields
     {
-        /** @var Fields $fields */
+        /** @var ?Fields $fields */
         $fields = $this->getIndexPage()?->getFields();
 
-        if ($fields->isEmpty()) {
+        if ($fields === null || $fields->isEmpty()) {
             return Fields::make($this->indexFields());
         }
 
@@ -51,10 +51,10 @@ trait ResourceWithFields
      */
     public function getFormFields(bool $withOutside = false): Fields
     {
-        /** @var Fields $fields */
+        /** @var ?Fields $fields */
         $fields = $this->getFormPage()?->getFields();
 
-        if ($fields->isEmpty()) {
+        if ($fields === null || $fields->isEmpty()) {
             $fields = Fields::make($this->formFields());
         }
 
@@ -74,10 +74,10 @@ trait ResourceWithFields
      */
     public function getDetailFields(bool $withOutside = false, bool $onlyOutside = false): Fields
     {
-        /** @var Fields $fields */
+        /** @var ?Fields $fields */
         $fields = $this->getDetailPage()?->getFields();
 
-        if ($fields->isEmpty()) {
+        if ($fields === null || $fields->isEmpty()) {
             $fields = Fields::make($this->detailFields());
         }
 
@@ -92,11 +92,11 @@ trait ResourceWithFields
     public function getOutsideFields(): Fields
     {
         /**
-         * @var Fields $fields
+         * @var ?Fields $fields
          */
         $fields = $this->getFormPage()?->getFields();
 
-        if ($fields->isEmpty()) {
+        if ($fields === null || $fields->isEmpty()) {
             $fields = Fields::make($this->formFields());
         }
 

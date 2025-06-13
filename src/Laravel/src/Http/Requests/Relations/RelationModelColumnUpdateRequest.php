@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Http\Requests\Relations;
 
 use MoonShine\Core\Exceptions\ResourceException;
-use MoonShine\Laravel\Enums\Ability;
-use MoonShine\Laravel\Enums\Action;
+use MoonShine\Support\Enums\Ability;
+use MoonShine\Support\Enums\Action;
 use Throwable;
 
 class RelationModelColumnUpdateRequest extends RelationModelFieldRequest

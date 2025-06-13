@@ -378,25 +378,6 @@ trait ResourceQuery
         return $this;
     }
 
-    /**
-     * @return array<array-key, mixed>
-     * @throws InvalidArgumentException
-     */
-    public function getFilterParams(): array
-    {
-        $default = $this->getQueryParams()->get('filter', []);
-
-        if ($this->isSaveQueryState() && ! moonshineRequest()->has('reset')) {
-            return data_get(
-                moonshineCache()->get($this->getQueryCacheKey(), []),
-                'filter',
-                $default,
-            );
-        }
-
-        return $default;
-    }
-
     protected function prepareFilters(): ?Fields
     {
         $params = $this->getFilterParams();

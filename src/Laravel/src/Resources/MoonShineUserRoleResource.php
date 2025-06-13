@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Resources;
 
-use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Models\MoonshineUserRole;
 use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleFormPage;
 use MoonShine\Laravel\Pages\MoonShineUserRole\MoonShineUserRoleIndexPage;
 use MoonShine\MenuManager\Attributes\Group;
 use MoonShine\MenuManager\Attributes\Order;
 use MoonShine\Support\Attributes\Icon;
+use MoonShine\Support\Enums\Action;
 use MoonShine\Support\ListOf;
 
 #[Icon('bookmark')]

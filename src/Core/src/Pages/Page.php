@@ -157,6 +157,10 @@ abstract class Page implements PageContract
         ];
     }
 
+    /**
+     * @param  array<string, string>  $breadcrumbs
+     *
+     */
     public function breadcrumbs(array $breadcrumbs): static
     {
         $this->breadcrumbs = $breadcrumbs;

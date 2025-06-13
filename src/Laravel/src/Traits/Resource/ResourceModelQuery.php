@@ -29,8 +29,6 @@ trait ResourceModelQuery
 {
     protected array $with = [];
 
-    protected array $parentRelations = [];
-
     protected ?Builder $queryBuilder = null;
 
     protected ?Builder $customQueryBuilder = null;
@@ -372,13 +370,5 @@ trait ResourceModelQuery
         }
 
         return $this;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getParentRelations(): array
-    {
-        return $this->parentRelations;
     }
 }

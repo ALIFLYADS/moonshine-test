@@ -6,10 +6,10 @@ namespace MoonShine\Laravel\Http\Requests\Resources;
 
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Core\Exceptions\ResourceException;
-use MoonShine\Laravel\Enums\Ability;
-use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Http\Requests\MoonShineFormRequest;
 use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Support\Enums\Ability;
+use MoonShine\Support\Enums\Action;
 use Throwable;
 
 final class UpdateFormRequest extends MoonShineFormRequest

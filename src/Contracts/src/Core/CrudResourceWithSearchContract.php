@@ -10,4 +10,9 @@ namespace MoonShine\Contracts\Core;
 interface CrudResourceWithSearchContract
 {
     public function hasSearch(): bool;
+
+    /**
+     * @return string[]
+     */
+    public function getSearchColumns(): array;
 }

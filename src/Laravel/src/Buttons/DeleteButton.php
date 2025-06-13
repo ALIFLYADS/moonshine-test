@@ -8,9 +8,9 @@ use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
-use MoonShine\Laravel\Enums\Ability;
-use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Resources\CrudResource;
+use MoonShine\Support\Enums\Ability;
+use MoonShine\Support\Enums\Action;
 use MoonShine\Support\Enums\HttpMethod;
 use MoonShine\UI\Components\ActionButton;
 

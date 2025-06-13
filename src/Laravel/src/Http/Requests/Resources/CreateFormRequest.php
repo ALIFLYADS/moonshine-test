@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Http\Requests\Resources;
 
 use MoonShine\Core\Exceptions\ResourceException;
-use MoonShine\Laravel\Enums\Ability;
-use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Http\Requests\MoonShineFormRequest;
+use MoonShine\Support\Enums\Ability;
+use MoonShine\Support\Enums\Action;
 use Throwable;
 
 final class CreateFormRequest extends MoonShineFormRequest

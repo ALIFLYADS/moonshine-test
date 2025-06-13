@@ -14,7 +14,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'moonshine:page')]
 class MakePageCommand extends MoonShineCommand
 {
-    protected $signature = 'moonshine:page {className?} {--force} {--without-register} {--skip-menu} {--crud} {--dir=} {--extends=} {--base-dir=} {--base-namespace=}';
+    protected $signature = 'moonshine:page {className?} {--force} {--without-register} {--skip-menu} {--crud} {--dir=} {--extends=} {--base-dir=} {--base-namespace=} {--resource=}';
 
     protected $description = 'Create page';
 
@@ -33,6 +33,7 @@ class MakePageCommand extends MoonShineCommand
         $stubsPath = new StubsPath($className, 'php');
 
         $dir = $this->option('dir') ?: 'Pages';
+        $resource = $this->option('resource') ?: 'MoonShine\Laravel\Resources\ModelResource';
 
         $stubsPath = $this->qualifyStubsDir($stubsPath, $dir);
 
@@ -51,8 +52,14 @@ class MakePageCommand extends MoonShineCommand
             );
 
             $extends = $type ?: null;
+            $stub = match ($extends) {
+                'IndexPage' => 'CrudIndexPage',
+                'FormPage' => 'CrudFormPage',
+                'DetailPage' => 'CrudDetailPage',
+                default => 'Page'
+            };
 
-            $this->makePage($stubsPath, $extends ? 'CrudPage' : 'Page', $extends);
+            $this->makePage($stubsPath, $stub, $extends, $resource);
 
             return self::SUCCESS;
         }
@@ -69,7 +76,7 @@ class MakePageCommand extends MoonShineCommand
                     $this->getNamespace("$dir\\$name"),
                 );
 
-                $this->makePage($stubsPath, 'CrudPage', $type);
+                $this->makePage($stubsPath, "Crud$type", $type, $resource);
             }
 
             return self::SUCCESS;
@@ -87,6 +94,7 @@ class MakePageCommand extends MoonShineCommand
         StubsPath $stubsPath,
         string $stub = 'Page',
         ?string $extends = null,
+        string $resource = 'MoonShine\Laravel\Resources\ModelResource',
     ): void {
         $extends = $extends ?: 'Page';
 
@@ -100,6 +108,8 @@ class MakePageCommand extends MoonShineCommand
 
         $this->copyStub($stub, $stubsPath->getPath(), [
             '{namespace}' => $stubsPath->namespace,
+            '{resource-namespace}' => $resource,
+            '{resourceShort}' => class_basename($resource),
             'DummyClass' => $stubsPath->name,
             'DummyTitle' => $stubsPath->name,
             '{extendShort}' => $extends,

@@ -19,11 +19,11 @@ use MoonShine\Laravel\Contracts\Page\DetailPageContract;
 use MoonShine\Laravel\Contracts\Page\FormPageContract;
 use MoonShine\Laravel\Contracts\Page\IndexPageContract;
 use MoonShine\Laravel\Contracts\Resource\WithQueryBuilderContract;
-use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Fields\Relationships\ModelRelationField;
 use MoonShine\Laravel\MoonShineAuth;
 use MoonShine\Laravel\Traits\Resource\ResourceModelQuery;
 use MoonShine\Laravel\TypeCasts\ModelCaster;
+use MoonShine\Support\Enums\Ability;
 use Throwable;
 
 /**

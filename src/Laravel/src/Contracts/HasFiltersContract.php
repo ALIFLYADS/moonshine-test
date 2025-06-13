@@ -11,4 +11,9 @@ interface HasFiltersContract
     public function hasFilters(): bool;
 
     public function getFilters(): Fields;
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    public function getFilterParams(): array;
 }

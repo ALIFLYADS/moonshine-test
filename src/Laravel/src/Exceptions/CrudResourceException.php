@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Exceptions;
 
 use MoonShine\Core\Exceptions\MoonShineException;
-use MoonShine\Laravel\Enums\Ability;
+use MoonShine\Support\Enums\Ability;
 
 final class CrudResourceException extends MoonShineException
 {

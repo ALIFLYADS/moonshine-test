@@ -12,10 +12,10 @@ use MoonShine\Contracts\Core\DependencyInjection\ConfiguratorContract;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\Core\ResourceContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
-use MoonShine\Laravel\Enums\Ability;
 use MoonShine\Laravel\Exceptions\MoonShineNotFoundException;
 use MoonShine\Laravel\Http\Middleware\ChangeLocale;
 use MoonShine\Laravel\Layouts\AppLayout;
+use MoonShine\Support\Enums\Ability;
 use MoonShine\UI\AbstractLayout;
 use Throwable;
 
