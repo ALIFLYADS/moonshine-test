@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Contracts\Resource;
 
-
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Commands;
 
-use MoonShine\Laravel\Resources\ModelResource;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 use function Laravel\Prompts\{select, text};
 
+use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Support\StubsPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 

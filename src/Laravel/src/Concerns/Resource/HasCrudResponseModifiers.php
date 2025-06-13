@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Concerns\Resource;
 
-
-use Symfony\Component\HttpFoundation\Response;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 trait HasCrudResponseModifiers
