@@ -479,7 +479,7 @@ class RelationRepeater extends ModelRelationField implements
     {
         $items = collect($items);
 
-        if(self::$silentApply) {
+        if (self::$silentApply) {
             data_set($model, $this->getRelationName(), $items);
 
             return $model;

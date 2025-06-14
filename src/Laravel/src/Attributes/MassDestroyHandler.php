@@ -16,5 +16,6 @@ final readonly class MassDestroyHandler
     public function __construct(
         public string $service,
         public ?string $method = null,
-    ) {}
+    ) {
+    }
 }

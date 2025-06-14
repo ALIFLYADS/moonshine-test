@@ -116,7 +116,7 @@ class BelongsTo extends ModelRelationField implements
                 return $item;
             }
 
-            if(self::$silentApply) {
+            if (self::$silentApply) {
                 data_set($item, $this->getColumn(), $value);
 
                 return $item;

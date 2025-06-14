@@ -122,7 +122,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
      */
     public function massDelete(array $ids): void
     {
-        if($handler = Attributes::for($this, MassDestroyHandler::class)->first()) {
+        if ($handler = Attributes::for($this, MassDestroyHandler::class)->first()) {
             $service = $this->getCore()->getContainer($handler->service);
 
             $handler->method === null
@@ -138,7 +138,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             ->newModelQuery()
             ->whereIn($this->getDataInstance()->getKeyName(), $ids)
             ->get()
-            ->each(fn(mixed $item): bool => $this->delete($item));
+            ->each(fn (mixed $item): bool => $this->delete($item));
 
         $this->afterMassDeleted($ids);
     }
@@ -154,7 +154,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
 
         $fields->fill($item->toArray(), $this->getCaster()->cast($item));
 
-        if($handler = Attributes::for($this, DestroyHandler::class)->first()) {
+        if ($handler = Attributes::for($this, DestroyHandler::class)->first()) {
             $service = $this->getCore()->getContainer($handler->service);
 
             return $handler->method === null
@@ -207,7 +207,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
 
         $fields->fill($item->toArray(), $this->getCaster()->cast($item));
 
-        if($handler = Attributes::for($this, SaveHandler::class)->first()) {
+        if ($handler = Attributes::for($this, SaveHandler::class)->first()) {
             $item = $this->resolveSaveHandler($handler, $item, $fields);
             $this->setItem($item);
 
@@ -253,7 +253,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         $resource = $this;
 
         $initial = clone $item;
-        $data = Field::silentApply(static function () use($item, $fields, $resource): array {
+        $data = Field::silentApply(static function () use ($item, $fields, $resource): array {
             $fields->each(static fn (FieldContract $field): mixed => $field->beforeApply($item));
             $fields->each(static fn (FieldContract $field): mixed => $field->apply($resource->fieldApply($field), $item));
             $fields->each(static fn (FieldContract $field): mixed => $field->afterApply($item));

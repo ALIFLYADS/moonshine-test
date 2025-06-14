@@ -37,15 +37,15 @@ it('primitive values', function (): void {
     $requestData = [
         'title' => 'Hello world',
         'data' => [
-            ['title' => 'Inner Hello world']
-        ]
+            ['title' => 'Inner Hello world'],
+        ],
     ];
 
     fakeRequest(parameters: $requestData);
 
     $data = Field::silentApply(function () use (&$data) {
         $this->fields->onlyFields()->each(function (FieldContract $field) use (&$data): void {
-            $data = $field->apply(fn($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
+            $data = $field->apply(fn ($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
         });
 
         return $data;
@@ -66,7 +66,7 @@ it('relation belongsTo values', function (): void {
 
     $data = Field::silentApply(function () use (&$data) {
         $this->relationFields->onlyFields()->each(function (FieldContract $field) use (&$data): void {
-            $field->apply(fn($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
+            $field->apply(fn ($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
         });
 
         return $data;
@@ -92,7 +92,7 @@ it('relation belongsToMany simple values', function (): void {
     $data = Field::silentApply(function () use (&$data, $fields) {
         $fields->onlyFields()->each(function (FieldContract $field) use (&$data): void {
             $data = $field->beforeApply($data);
-            $data = $field->apply(fn($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
+            $data = $field->apply(fn ($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
             $data = $field->afterApply($data);
         });
 
@@ -125,15 +125,15 @@ it('relation belongsToMany default values', function (): void {
                     'pivot_1' => '1',
                     'pivot_2' => '2',
                     'pivot_3' => '3',
-                ]
+                ],
             ],
             '2' => [
                 'pivot' => [
                     'pivot_1' => '4',
                     'pivot_2' => '5',
                     'pivot_3' => '6',
-                ]
-            ]
+                ],
+            ],
         ],
     ];
 
@@ -142,7 +142,7 @@ it('relation belongsToMany default values', function (): void {
     $data = Field::silentApply(function () use (&$data, $fields) {
         $fields->onlyFields()->each(function (FieldContract $field) use (&$data): void {
             $data = $field->beforeApply($data);
-            $data = $field->apply(fn($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
+            $data = $field->apply(fn ($d, $v, FieldContract $ctx) => data_set($d, $ctx->getColumn(), $v), $data);
             $data = $field->afterApply($data);
         });
 
@@ -163,8 +163,7 @@ it('relation belongsToMany default values', function (): void {
                 'pivot_1' => '4',
                 'pivot_2' => '5',
                 'pivot_3' => '6',
-            ]
-        ]
+            ],
+        ],
     ]);
 });
-

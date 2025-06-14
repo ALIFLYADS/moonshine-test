@@ -16,5 +16,6 @@ final readonly class DestroyHandler
     public function __construct(
         public string $service,
         public ?string $method = null,
-    ) {}
+    ) {
+    }
 }
