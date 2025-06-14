@@ -36,6 +36,7 @@ trait ResourceModelQuery
     protected bool $disableQueryFeatures = false;
 
     /**
+     * @return Collection<array-key, T>|LazyCollection<array-key, T>|CursorPaginator<array-key, T>|Paginator<array-key, T>
      * @throws Throwable
      */
     public function getItems(): Collection|LazyCollection|CursorPaginator|Paginator
