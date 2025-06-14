@@ -7,6 +7,7 @@ namespace MoonShine\Laravel\Fields\Relationships;
 use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
@@ -474,9 +475,15 @@ class RelationRepeater extends ModelRelationField implements
         );
     }
 
-    private function saveRelation(array $items, mixed $model)
+    private function saveRelation(array $items, Model $model): Model
     {
         $items = collect($items);
+
+        if(self::$silentApply === true) {
+            data_set($model, $this->getRelationName(), $items);
+
+            return $model;
+        }
 
         $relationName = $this->getColumn();
 
