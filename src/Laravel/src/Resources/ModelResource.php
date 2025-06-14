@@ -9,10 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Enumerable;
 use Illuminate\Support\Facades\Gate;
+use Leeto\FastAttributes\Attributes;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Core\Exceptions\ResourceException;
+use MoonShine\Laravel\Attributes\DestroyHandler;
+use MoonShine\Laravel\Attributes\MassDestroyHandler;
+use MoonShine\Laravel\Attributes\SaveHandler;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Contracts\Fields\HasOutsideSwitcherContract;
 use MoonShine\Laravel\Contracts\Page\DetailPageContract;
@@ -24,6 +28,7 @@ use MoonShine\Laravel\MoonShineAuth;
 use MoonShine\Laravel\Traits\Resource\ResourceModelQuery;
 use MoonShine\Laravel\TypeCasts\ModelCaster;
 use MoonShine\Support\Enums\Ability;
+use MoonShine\UI\Fields\Field;
 use Throwable;
 
 /**
@@ -117,6 +122,16 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
      */
     public function massDelete(array $ids): void
     {
+        if($handler = Attributes::for($this, MassDestroyHandler::class)->first()) {
+            $service = $this->getCore()->getContainer($handler->service);
+
+            $handler->method === null
+                ? $service($ids)
+                : $service->{$handler->method}($ids);
+
+            return;
+        }
+
         $this->beforeMassDeleting($ids);
 
         $this->getDataInstance()
@@ -124,9 +139,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             ->whereIn($this->getDataInstance()->getKeyName(), $ids)
             ->get()
             ->each(function (mixed $item): bool {
-                $item = $this->beforeDeleting($item);
-
-                return (bool) tap($item->delete(), fn (): mixed => $this->afterDeleted($item));
+                return $this->delete($item);
             });
 
         $this->afterMassDeleted($ids);
@@ -139,11 +152,19 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
      */
     public function delete(mixed $item, ?FieldsContract $fields = null): bool
     {
-        $item = $this->beforeDeleting($item);
-
         $fields ??= $this->getFormFields()->onlyFields(withApplyWrappers: true);
 
         $fields->fill($item->toArray(), $this->getCaster()->cast($item));
+
+        if($handler = Attributes::for($this, DestroyHandler::class)->first()) {
+            $service = $this->getCore()->getContainer($handler->service);
+
+            return $handler->method === null
+                ? $service($item)
+                : $service->{$handler->method}($item);
+        }
+
+        $item = $this->beforeDeleting($item);
 
         $relationDestroyer = static function (ModelRelationField $field) use ($item): void {
             $relationItems = $item->{$field->getRelationName()};
@@ -151,7 +172,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             ! $field->isToOne() ?: $relationItems = collect([$relationItems]);
 
             $relationItems->each(
-                static fn (mixed $relationItem): mixed => $field->afterDestroy($relationItem)
+                static fn (mixed $relationItem): mixed => $field->afterDestroy($relationItem),
             );
         };
 
@@ -188,6 +209,13 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
 
         $fields->fill($item->toArray(), $this->getCaster()->cast($item));
 
+        if($handler = Attributes::for($this, SaveHandler::class)->first()) {
+            $item = $this->resolveSaveHandler($handler, $item, $fields);
+            $this->setItem($item);
+
+            return $item;
+        }
+
         try {
             $fields->each(static fn (FieldContract $field): mixed => $field->beforeApply($item));
 
@@ -214,6 +242,30 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         $this->setItem($item);
 
         return $item;
+    }
+
+    /**
+     * @param TData $item
+     * @param Fields $fields
+     * @return TData
+     */
+    private function resolveSaveHandler(SaveHandler $handler, mixed $item, FieldsContract $fields): mixed
+    {
+        $service = $this->getCore()->getContainer($handler->service);
+        $resource = $this;
+
+        $initial = clone $item;
+        $data = Field::silentApply(static function () use($item, $fields, $resource): array {
+            $fields->each(static fn (FieldContract $field): mixed => $field->beforeApply($item));
+            $fields->each(static fn (FieldContract $field): mixed => $field->apply($resource->fieldApply($field), $item));
+            $fields->each(static fn (FieldContract $field): mixed => $field->afterApply($item));
+
+            return $item->toArray();
+        });
+
+        return $handler->method === null
+            ? $service($initial, $data)
+            : $service->{$handler->method}($initial, $data);
     }
 
     public function fieldApply(FieldContract $field): Closure

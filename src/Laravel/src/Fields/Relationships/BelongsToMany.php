@@ -516,11 +516,18 @@ class BelongsToMany extends ModelRelationField implements
         $item = $data;
 
         $checkedKeys = $this->getCheckedKeys();
+        $simpleSync = $this->isSelectMode() || $this->isTree() || $this->isHorizontalMode() || $this->getFields()->isEmpty();
 
-        if ($this->isSelectMode() || $this->isTree() || $this->isHorizontalMode() || $this->getFields()->isEmpty()) {
+        if ($simpleSync && self::$silentApply === true) {
+            data_set($item, $this->getRelationName(), $checkedKeys);
+
+            return $item;
+        }
+
+        if ($simpleSync && self::$silentApply === false) {
             $item->{$this->getRelationName()}()->sync($checkedKeys);
 
-            return $data;
+            return $item;
         }
 
         $applyValues = [];
@@ -549,9 +556,13 @@ class BelongsToMany extends ModelRelationField implements
             }
         }
 
-        $item->{$this->getRelationName()}()->sync($applyValues);
+        if (self::$silentApply === true) {
+            data_set($item, $this->getRelationName(), $applyValues);
+        } else {
+            $item->{$this->getRelationName()}()->sync($applyValues);
+        }
 
-        return $data;
+        return $item;
     }
 
     /**

@@ -116,6 +116,12 @@ class BelongsTo extends ModelRelationField implements
                 return $item;
             }
 
+            if(self::$silentApply) {
+                data_set($item, $this->getColumn(), $value);
+
+                return $item;
+            }
+
             if ($value === false && $this->isNullable()) {
                 return $item
                     ->{$this
