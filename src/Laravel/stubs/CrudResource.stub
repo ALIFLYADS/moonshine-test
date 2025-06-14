@@ -13,7 +13,7 @@ use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Laravel\Pages\Page;
 
 /**
- * @extends CrudResource<mixed, {indexPage}, {formPage}, {detailPage}>
+ * @extends CrudResource<array, {indexPage}, {formPage}, {detailPage}>
  */
 class DummyClass extends CrudResource
 {
@@ -33,17 +33,17 @@ class DummyClass extends CrudResource
         ];
     }
 
-    public function getItems(): mixed
+    public function getItems(): array
     {
         return [];
     }
 
-    public function findItem(bool $orFail = false): mixed
+    public function findItem(bool $orFail = false): array
     {
         return [];
     }
 
-    public function save(mixed $item, ?FieldsContract $fields = null): mixed
+    public function save(mixed $item, ?FieldsContract $fields = null): array
     {
         return $item;
     }
