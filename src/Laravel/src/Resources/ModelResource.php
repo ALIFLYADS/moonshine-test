@@ -139,9 +139,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             ->whereIn($this->getDataInstance()->getKeyName(), $ids)
             ->get()
             ->each(function (mixed $item): bool {
-                $item = $this->beforeDeleting($item);
-
-                return (bool) tap($item->delete(), fn (): mixed => $this->afterDeleted($item));
+                return $this->delete($item);
             });
 
         $this->afterMassDeleted($ids);
