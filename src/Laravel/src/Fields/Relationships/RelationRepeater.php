@@ -470,7 +470,7 @@ class RelationRepeater extends ModelRelationField implements
                 static fn ($data): mixed => data_set($data, $field->getColumn(), $values[$field->getColumn()] ?? ''),
                 $values
             ),
-            response: fn (array $values, mixed $data) => $this->saveRelation($values, $data),
+            response: fn (array $values, mixed $data): Model => $this->saveRelation($values, $data),
             fill: true,
         );
     }
@@ -479,7 +479,7 @@ class RelationRepeater extends ModelRelationField implements
     {
         $items = collect($items);
 
-        if(self::$silentApply === true) {
+        if(self::$silentApply) {
             data_set($model, $this->getRelationName(), $items);
 
             return $model;

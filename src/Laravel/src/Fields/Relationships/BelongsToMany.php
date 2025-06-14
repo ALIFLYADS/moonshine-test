@@ -518,7 +518,7 @@ class BelongsToMany extends ModelRelationField implements
         $checkedKeys = $this->getCheckedKeys();
         $simpleSync = $this->isSelectMode() || $this->isTree() || $this->isHorizontalMode() || $this->getFields()->isEmpty();
 
-        if ($simpleSync && self::$silentApply === true) {
+        if ($simpleSync && self::$silentApply) {
             data_set($item, $this->getRelationName(), $checkedKeys);
 
             return $item;
@@ -556,7 +556,7 @@ class BelongsToMany extends ModelRelationField implements
             }
         }
 
-        if (self::$silentApply === true) {
+        if (self::$silentApply) {
             data_set($item, $this->getRelationName(), $applyValues);
         } else {
             $item->{$this->getRelationName()}()->sync($applyValues);
