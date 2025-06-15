@@ -114,7 +114,7 @@ class Slug extends Text
 
     protected function resolveOnApply(): ?Closure
     {
-        return function ($item) {
+        return function (Model $item): Model {
             $item->{$this->getColumn()} = $this->getRequestValue() !== false
                 ? $this->getRequestValue()
                 : $this->generateSlug($item->{$this->getFrom()});

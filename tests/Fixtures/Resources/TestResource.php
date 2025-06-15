@@ -201,11 +201,6 @@ class TestResource extends AbstractTestingResource
         return parent::getUriKey();
     }
 
-    protected function metrics(): array
-    {
-        return $this->testMetrics;
-    }
-
     public function setSimplePaginate(): void
     {
         $this->simplePaginate = true;

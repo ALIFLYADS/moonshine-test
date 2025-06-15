@@ -109,7 +109,7 @@ class BelongsTo extends ModelRelationField implements
 
     protected function resolveOnApply(): ?Closure
     {
-        return function (Model $item) {
+        return function (Model $item): Model {
             $value = $this->getRequestValue();
 
             if ($value === false && ! $this->isNullable()) {

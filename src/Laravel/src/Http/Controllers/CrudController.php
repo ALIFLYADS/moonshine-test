@@ -70,7 +70,7 @@ final class CrudController extends MoonShineController
         );
 
         return $resource->modifyResponse(
-            $resource->getItem()
+            $resource->getItemOrFail()
         );
     }
 

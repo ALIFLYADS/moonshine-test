@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace MoonShine\Contracts\Core;
 
 use Closure;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
-use Traversable;
 
 /**
  * @template TData
@@ -17,7 +20,6 @@ use Traversable;
  * @template-covariant TFormPage of null|CrudPageContract
  * @template-covariant TDetailPage of null|CrudPageContract
  * @template TFields of FieldsContract
- * @template-covariant TItems of Traversable
  *
  * @extends CrudResourceWithPagesContract<TData, TIndexPage, TFormPage, TDetailPage>
  * @extends CrudResourceWithFieldsContract<TFields>
@@ -55,32 +57,32 @@ interface CrudResourceContract extends
     public function getCaster(): DataCasterContract;
 
     /**
-     * @return ?DataWrapperContract<TData>
+     * @return null|DataWrapperContract<TData>
      */
     public function getCastedData(): ?DataWrapperContract;
 
     /**
-     * @return ?TData
+     * @return DataWrapperContract<TData>
      */
-    public function getDataInstance(): mixed;
+    public function getDataInstance(): DataWrapperContract;
 
     /**
-     * @param  ?TData  $item
+     * @param  null|DataWrapperContract<TData>  $item
      */
-    public function setItem(mixed $item): static;
+    public function setItem(?DataWrapperContract $item): static;
 
     /**
-     * @return ?TData
+     * @return null|DataWrapperContract<TData>
      */
-    public function getItem(): mixed;
+    public function getItem(): ?DataWrapperContract;
 
     /**
-     * @return TData
+     * @return DataWrapperContract<TData>
      */
-    public function getItemOrFail(): mixed;
+    public function getItemOrFail(): DataWrapperContract;
 
     /**
-     * @return null|Closure(iterable $items, TableBuilderContract $table): iterable
+     * @return null|Closure(iterable<TData> $items, TableBuilderContract $table): iterable<TData>
      */
     public function getItemsResolver(): ?Closure;
 
@@ -93,21 +95,21 @@ interface CrudResourceContract extends
     public function isStopGettingItemFromUrl(): bool;
 
     /**
-     * @return TData
+     * @return DataWrapperContract<TData>
      */
-    public function getItemOrInstance(): mixed;
+    public function getItemOrInstance(): DataWrapperContract;
 
     public function isItemExists(): bool;
 
     /**
-     * @return TItems
+     * @return iterable<TData>|Collection<array-key, TData>|LazyCollection<array-key, TData>|CursorPaginator<array-key, TData>|Paginator<array-key, TData>
      */
-    public function getItems(): mixed;
+    public function getItems(): iterable|Collection|LazyCollection|CursorPaginator|Paginator;
 
     /**
-     * @return ?TData
+     * @return null|DataWrapperContract<TData>
      */
-    public function findItem(bool $orFail = false): mixed;
+    public function findItem(bool $orFail = false): ?DataWrapperContract;
 
     /**
      * @param  array<int|string>  $ids
@@ -115,19 +117,19 @@ interface CrudResourceContract extends
     public function massDelete(array $ids): void;
 
     /**
-     * @param  TData  $item
+     * @param  DataWrapperContract<TData>  $item
      * @param ?TFields $fields
      *
      */
-    public function delete(mixed $item, ?FieldsContract $fields = null): bool;
+    public function delete(DataWrapperContract $item, ?FieldsContract $fields = null): bool;
 
     /**
-     * @param  TData  $item
+     * @param  DataWrapperContract<TData>  $item
      * @param ?TFields $fields
      *
-     * @return TData
+     * @return DataWrapperContract<TData>
      */
-    public function save(mixed $item, ?FieldsContract $fields = null): mixed;
+    public function save(DataWrapperContract $item, ?FieldsContract $fields = null): DataWrapperContract;
 
     public function isRecentlyCreated(): bool;
 

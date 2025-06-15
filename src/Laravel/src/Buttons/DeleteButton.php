@@ -59,7 +59,7 @@ final class DeleteButton
             ->canSee(
                 static fn (mixed $item, ?DataWrapperContract $data): bool => $data?->getKey()
                     && $resource->hasAction(Action::DELETE)
-                    && $resource->setItem($item)->can(Ability::DELETE)
+                    && $resource->setItem($data)->can(Ability::DELETE)
             )
             ->error()
             ->icon('trash')

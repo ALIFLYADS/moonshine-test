@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Gate;
 use Leeto\FastAttributes\Attributes;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Attributes\DestroyHandler;
@@ -37,7 +38,7 @@ use Throwable;
  * @template-covariant TFormPage of null|FormPageContract = null
  * @template-covariant TDetailPage of null|DetailPageContract = null
  *
- * @extends CrudResource<TData, TIndexPage, TFormPage, TDetailPage, Fields, Enumerable>
+ * @extends CrudResource<TData, TIndexPage, TFormPage, TDetailPage, Fields>
  */
 abstract class ModelResource extends CrudResource implements WithQueryBuilderContract
 {
@@ -72,9 +73,14 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         return new $this->model();
     }
 
-    public function getDataInstance(): mixed
+    /**
+     * @return DataWrapperContract<TData>
+     */
+    public function getDataInstance(): DataWrapperContract
     {
-        return $this->getModel();
+        return $this->getCaster()->cast(
+            $this->getModel()
+        );
     }
 
     /**
@@ -104,7 +110,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
 
         $checkCustomRules = moonshineConfig()
             ->getAuthorizationRules()
-            ->every(fn ($rule) => $rule($this, $user, $ability, $item));
+            ->every(fn ($rule) => $rule($this, $user, $ability, $item->getOriginal()));
 
         if (! $checkCustomRules) {
             return false;
@@ -114,7 +120,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             return true;
         }
 
-        return Gate::forUser($user)->allows($ability->value, $item);
+        return Gate::forUser($user)->allows($ability->value, $item->getOriginal());
     }
 
     /**
@@ -135,31 +141,32 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         $this->beforeMassDeleting($ids);
 
         $this->getDataInstance()
+            ->getOriginal()
             ->newModelQuery()
-            ->whereIn($this->getDataInstance()->getKeyName(), $ids)
+            ->whereIn($this->getDataInstance()->getOriginal()->getKeyName(), $ids)
             ->get()
-            ->each(fn (mixed $item): bool => $this->delete($item));
+            ->each(fn (Model $item): bool => $this->delete($this->getCaster()->cast($item)));
 
         $this->afterMassDeleted($ids);
     }
 
     /**
-     * @param TData $item
+     * @param DataWrapperContract<TData> $item
      * @param ?Fields $fields
      * @throws Throwable
      */
-    public function delete(mixed $item, ?FieldsContract $fields = null): bool
+    public function delete(DataWrapperContract $item, ?FieldsContract $fields = null): bool
     {
         $fields ??= $this->getFormFields()->onlyFields(withApplyWrappers: true);
 
-        $fields->fill($item->toArray(), $this->getCaster()->cast($item));
+        $fields->fill($item->toArray(), $item);
 
         if ($handler = Attributes::for($this, DestroyHandler::class)->first()) {
             $service = $this->getCore()->getContainer($handler->service);
 
             return $handler->method === null
-                ? $service($item)
-                : $service->{$handler->method}($item);
+                ? $service($item->getOriginal())
+                : $service->{$handler->method}($item->getOriginal());
         }
 
         $item = $this->beforeDeleting($item);
@@ -190,22 +197,22 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             $this->getOutsideFields()->each($relationDestroyer);
         }
 
-        return (bool) tap($item->delete(), fn (): mixed => $this->afterDeleted($item));
+        return (bool) tap($item->getOriginal()->delete(), fn (): DataWrapperContract => $this->afterDeleted($item));
     }
 
     /**
-     * @param TData $item
+     * @param DataWrapperContract<TData> $item
      * @param ?Fields $fields
-     * @return TData
+     * @return DataWrapperContract<TData>
      *
      * @throws ResourceException
      * @throws Throwable
      */
-    public function save(mixed $item, ?FieldsContract $fields = null): mixed
+    public function save(DataWrapperContract $item, ?FieldsContract $fields = null): DataWrapperContract
     {
         $fields ??= $this->getFormFields()->onlyFields(withApplyWrappers: true);
 
-        $fields->fill($item->toArray(), $this->getCaster()->cast($item));
+        $fields->fill($item->toArray(), $item);
 
         if ($handler = Attributes::for($this, SaveHandler::class)->first()) {
             $item = $this->resolveSaveHandler($handler, $item, $fields);
@@ -215,21 +222,21 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         }
 
         try {
-            $fields->each(static fn (FieldContract $field): mixed => $field->beforeApply($item));
+            $fields->each(static fn (FieldContract $field): mixed => $field->beforeApply($item->getOriginal()));
 
-            if (! $item->exists) {
+            if ($item->getKey() === null) {
                 $item = $this->beforeCreating($item);
             }
 
-            if ($item->exists) {
+            if ($item->getKey() !== null) {
                 $item = $this->beforeUpdating($item);
             }
 
             $fields->withoutOutside()
-                ->each(fn (FieldContract $field): mixed => $field->apply($this->fieldApply($field), $item));
+                ->each(fn (FieldContract $field): mixed => $field->apply($this->fieldApply($field), $item->getOriginal()));
 
-            if ($item->save()) {
-                $this->isRecentlyCreated = $item->wasRecentlyCreated;
+            if ($item->getOriginal()->save()) {
+                $this->isRecentlyCreated = $item->getOriginal()->wasRecentlyCreated;
 
                 $item = $this->afterSave($item, $fields);
             }
@@ -243,11 +250,11 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
     }
 
     /**
-     * @param TData $item
+     * @param DataWrapperContract<TData> $item
      * @param Fields $fields
-     * @return TData
+     * @return DataWrapperContract<TData>
      */
-    private function resolveSaveHandler(SaveHandler $handler, mixed $item, FieldsContract $fields): mixed
+    private function resolveSaveHandler(SaveHandler $handler, DataWrapperContract $item, FieldsContract $fields): DataWrapperContract
     {
         $service = $this->getCore()->getContainer($handler->service);
         $resource = $this;
@@ -261,9 +268,11 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             return $item->toArray();
         });
 
-        return $handler->method === null
-            ? $service($initial, $data)
-            : $service->{$handler->method}($initial, $data);
+        $result = $handler->method === null
+            ? $service($initial->getOriginal(), $data)
+            : $service->{$handler->method}($initial->getOriginal(), $data);
+
+        return $this->getCaster()->cast($result);
     }
 
     public function fieldApply(FieldContract $field): Closure
@@ -286,18 +295,18 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
     }
 
     /**
-     * @param TData $item
+     * @param DataWrapperContract<TData> $item
      * @param Fields $fields
-     * @return TData
+     * @return DataWrapperContract<TData>
      */
-    protected function afterSave(mixed $item, FieldsContract $fields): mixed
+    protected function afterSave(DataWrapperContract $item, FieldsContract $fields): DataWrapperContract
     {
         $wasRecentlyCreated = $this->isRecentlyCreated();
 
-        $fields->each(static fn (FieldContract $field): mixed => $field->afterApply($item));
+        $fields->each(static fn (FieldContract $field): mixed => $field->afterApply($item->getOriginal()));
 
-        if ($item->isDirty()) {
-            $item->save();
+        if ($item->getOriginal()->isDirty()) {
+            $item->getOriginal()->save();
         }
 
         if ($wasRecentlyCreated) {

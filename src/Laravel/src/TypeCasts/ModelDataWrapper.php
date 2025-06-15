@@ -32,4 +32,24 @@ final readonly class ModelDataWrapper implements DataWrapperContract
     {
         return $this->model->toArray();
     }
+
+    public function __get(string $name): mixed
+    {
+        return $this->model->{$name};
+    }
+
+    public function __call(string $name, array $arguments)
+    {
+        return $this->model->{$name}($arguments);
+    }
+
+    public function __set(string $name, $value): void
+    {
+        $this->model->{$name} = $value;
+    }
+
+    public function __isset(string $name): bool
+    {
+        return $this->model->hasAttribute($name);
+    }
 }

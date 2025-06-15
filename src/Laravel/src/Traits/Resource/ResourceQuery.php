@@ -6,22 +6,24 @@ namespace MoonShine\Laravel\Traits\Resource;
 
 use Attribute;
 use Closure;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use Leeto\FastAttributes\Attributes;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Support\Attributes\SearchUsingFullText;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\UI\Contracts\RangeFieldContract;
-use Traversable;
 
 /**
  * @template T
- * @template-covariant TItems of Traversable
  */
 trait ResourceQuery
 {
-    /** @var ?T */
-    protected mixed $item = null;
+    /** @var null|DataWrapperContract<T> */
+    protected ?DataWrapperContract $item = null;
 
     protected string $sortColumn = '';
 
@@ -48,14 +50,14 @@ trait ResourceQuery
     protected iterable $queryParams = [];
 
     /**
-     * @return TItems
+     * @return iterable<T>|Collection<array-key, T>|LazyCollection<array-key, T>|CursorPaginator<array-key, T>|Paginator<array-key, T>
      */
-    abstract public function getItems(): mixed;
+    abstract public function getItems(): iterable|Collection|LazyCollection|CursorPaginator|Paginator;
 
     /**
-     * @return T
+     * @return null|DataWrapperContract<T>
      */
-    abstract public function findItem(bool $orFail = false): mixed;
+    abstract public function findItem(bool $orFail = false): ?DataWrapperContract;
 
     public function setItemID(int|string|false|null $itemID): static
     {
@@ -95,7 +97,7 @@ trait ResourceQuery
     }
 
     /**
-     * @return ?T
+     * @return null|DataWrapperContract<T>
      */
     protected function itemOr(Closure $callback): mixed
     {
@@ -109,9 +111,9 @@ trait ResourceQuery
     }
 
     /**
-     * @param  ?T  $item
+     * @param  null|DataWrapperContract<T>  $item
      */
-    public function setItem(mixed $item): static
+    public function setItem(?DataWrapperContract $item): static
     {
         $this->item = $item;
 
@@ -124,9 +126,9 @@ trait ResourceQuery
     }
 
     /**
-     * @return ?T
+     * @return null|DataWrapperContract<T>
      */
-    public function getItem(): mixed
+    public function getItem(): ?DataWrapperContract
     {
         if (! \is_null($this->item)) {
             return $this->item;
@@ -142,9 +144,9 @@ trait ResourceQuery
     }
 
     /**
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    public function getItemOrInstance(): mixed
+    public function getItemOrInstance(): DataWrapperContract
     {
         if (! \is_null($this->item)) {
             return $this->item;
@@ -160,9 +162,9 @@ trait ResourceQuery
     }
 
     /**
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    public function getItemOrFail(): mixed
+    public function getItemOrFail(): DataWrapperContract
     {
         if (! \is_null($this->item)) {
             return $this->item;

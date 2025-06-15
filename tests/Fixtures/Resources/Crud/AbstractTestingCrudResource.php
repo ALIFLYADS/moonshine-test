@@ -7,6 +7,7 @@ namespace MoonShine\Tests\Fixtures\Resources\Crud;
 use Closure;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Core\TypeCasts\MixedDataCaster;
 use MoonShine\Laravel\Exceptions\MoonShineNotFoundException;
@@ -40,14 +41,14 @@ abstract class AbstractTestingCrudResource extends CrudResource
     public function massDelete(array $ids): void
     {
         foreach ($ids as $id) {
-            $this->delete(['id' => $id]);
+            $this->delete($this->getCaster()->cast(['id' => $id]));
         }
     }
 
-    public function delete(mixed $item, ?FieldsContract $fields = null): bool
+    public function delete(DataWrapperContract $item, ?FieldsContract $fields = null): bool
     {
-        if (\array_key_exists($item['id'], $this->items)) {
-            unset($this->items[$item['id']]);
+        if (\array_key_exists($item->getKey(), $this->items)) {
+            unset($this->items[$item->getKey()]);
 
             return true;
         }
@@ -58,11 +59,11 @@ abstract class AbstractTestingCrudResource extends CrudResource
     /**
      * @throws Throwable
      */
-    public function save(mixed $item, ?FieldsContract $fields = null): array
+    public function save(DataWrapperContract $item, ?FieldsContract $fields = null): DataWrapperContract
     {
         $fields ??= $this->getFormFields();
 
-        $fields->fill($item, $this->getCaster()->cast($item));
+        $fields->fill($item->toArray(), $item);
 
         $data = [];
 
@@ -73,25 +74,27 @@ abstract class AbstractTestingCrudResource extends CrudResource
             ];
         }
 
-        if ($item['id'] ?? false) {
-            $this->items[$item['id']] = [
-                'id' => $item['id'],
+        if ($item->getKey() !== null) {
+            $this->items[$item->getKey()] = $this->getCaster()->cast([
+                'id' => $item->getKey(),
                 ...$data,
-            ];
+            ]);
 
             $this->isRecentlyCreated = false;
 
-            return $data;
+            return $this->getCaster()->cast(
+                $data
+            );
         }
 
         $this->isRecentlyCreated = true;
 
-        $data = [
+        $data = $this->getCaster()->cast([
             'id' => $this->newId(),
             ...$data,
-        ];
+        ]);
 
-        $this->items[$data['id']] = $data;
+        $this->items[$data->getKey()] = $data;
 
         return $data;
     }
@@ -114,7 +117,7 @@ abstract class AbstractTestingCrudResource extends CrudResource
         yield from $this->items;
     }
 
-    public function findItem(bool $orFail = false): mixed
+    public function findItem(bool $orFail = false): ?DataWrapperContract
     {
         if (\array_key_exists($this->getItemID(), $this->items)) {
             return $this->items[$this->getItemID()];
