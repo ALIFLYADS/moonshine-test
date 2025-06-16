@@ -643,7 +643,7 @@ class HasMany extends ModelRelationField implements
 
     protected function resolveOnApply(): ?Closure
     {
-        return static fn ($item) => $item;
+        return static fn (Model $item): Model => $item;
     }
 
     /**

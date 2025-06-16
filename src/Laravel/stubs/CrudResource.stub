@@ -10,6 +10,8 @@ use {detail-page-namespace};
 
 use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+use Illuminate\Support\Collection;
 use MoonShine\Laravel\Pages\Page;
 
 /**
@@ -33,22 +35,24 @@ class DummyClass extends CrudResource
         ];
     }
 
-    public function getItems(): array
+    public function getItems(): Collection
     {
-        return [];
+        return new Collection([]);
     }
 
-    public function findItem(bool $orFail = false): array
+    public function findItem(bool $orFail = false): ?DataWrapperContract
     {
-        return [];
+        return $this->getCaster()->cast([]);
     }
 
-    public function save(mixed $item, ?FieldsContract $fields = null): array
+    public function save(DataWrapperContract $item, ?FieldsContract $fields = null): DataWrapperContract
     {
+        $this->isRecentlyCreated = true;
+
         return $item;
     }
 
-    public function delete(mixed $item, ?FieldsContract $fields = null): bool
+    public function delete(DataWrapperContract $item, ?FieldsContract $fields = null): bool
     {
         return true;
     }

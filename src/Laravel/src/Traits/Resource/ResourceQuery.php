@@ -6,21 +6,24 @@ namespace MoonShine\Laravel\Traits\Resource;
 
 use Attribute;
 use Closure;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use Leeto\FastAttributes\Attributes;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Support\Attributes\SearchUsingFullText;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\UI\Contracts\RangeFieldContract;
-use Traversable;
+use Throwable;
 
 /**
  * @template T
- * @template-covariant TItems of Traversable
  */
 trait ResourceQuery
 {
-    /** @var ?T */
+    /** @var null|T */
     protected mixed $item = null;
 
     protected string $sortColumn = '';
@@ -48,14 +51,14 @@ trait ResourceQuery
     protected iterable $queryParams = [];
 
     /**
-     * @return TItems
+     * @return iterable<T>|Collection<array-key, T>|LazyCollection<array-key, T>|CursorPaginator<array-key, T>|Paginator<array-key, T>
      */
-    abstract public function getItems(): mixed;
+    abstract public function getItems(): iterable|Collection|LazyCollection|CursorPaginator|Paginator;
 
     /**
-     * @return T
+     * @return null|DataWrapperContract<T>
      */
-    abstract public function findItem(bool $orFail = false): mixed;
+    abstract public function findItem(bool $orFail = false): ?DataWrapperContract;
 
     public function setItemID(int|string|false|null $itemID): static
     {
@@ -95,7 +98,7 @@ trait ResourceQuery
     }
 
     /**
-     * @return ?T
+     * @return null|T
      */
     protected function itemOr(Closure $callback): mixed
     {
@@ -109,7 +112,7 @@ trait ResourceQuery
     }
 
     /**
-     * @param  ?T  $item
+     * @param  null|T  $item
      */
     public function setItem(mixed $item): static
     {
@@ -124,7 +127,7 @@ trait ResourceQuery
     }
 
     /**
-     * @return ?T
+     * @return null|T
      */
     public function getItem(): mixed
     {
@@ -137,7 +140,7 @@ trait ResourceQuery
         }
 
         return $this->itemOr(
-            fn () => $this->findItem(),
+            fn () => $this->findItem()?->getOriginal(),
         );
     }
 
@@ -155,12 +158,13 @@ trait ResourceQuery
         }
 
         return $this->itemOr(
-            fn () => $this->findItem() ?? $this->getDataInstance(),
+            fn () => $this->findItem()?->getOriginal() ?? $this->getDataInstance(),
         );
     }
 
     /**
      * @return T
+     * @throws Throwable
      */
     public function getItemOrFail(): mixed
     {
@@ -169,7 +173,7 @@ trait ResourceQuery
         }
 
         return $this->itemOr(
-            fn () => $this->findItem(orFail: true),
+            fn () => $this->findItem(orFail: true)->getOriginal(),
         );
     }
 

@@ -8,9 +8,11 @@ use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ApplyContract;
 use MoonShine\Core\Exceptions\ResourceException;
 use MoonShine\Laravel\Contracts\HasQueryTagsContract;
@@ -36,10 +38,10 @@ trait ResourceModelQuery
     protected bool $disableQueryFeatures = false;
 
     /**
-     * @return Collection<array-key, T>|LazyCollection<array-key, T>|CursorPaginator<array-key, T>|Paginator<array-key, T>
+     * @return iterable<T>|Collection<array-key, T>|LazyCollection<array-key, T>|CursorPaginator<array-key, T>|Paginator<array-key, T>
      * @throws Throwable
      */
-    public function getItems(): Collection|LazyCollection|CursorPaginator|Paginator
+    public function getItems(): iterable|Collection|LazyCollection|CursorPaginator|Paginator
     {
         return $this->isPaginationUsed()
             ? $this->paginate()
@@ -76,19 +78,28 @@ trait ResourceModelQuery
     }
 
     /**
-     * @return T
+     * @param  bool  $orFail
+     *
+     * @return ($orFail is true ? DataWrapperContract<T> : null|DataWrapperContract<T>)
+     * @throws ModelNotFoundException<T>
      */
-    public function findItem(bool $orFail = false): mixed
+    public function findItem(bool $orFail = false): ?DataWrapperContract
     {
         $builder = $this->modifyItemQueryBuilder(
             $this->getModel()->newQuery(),
         );
 
         if ($orFail) {
-            return $builder->findOrFail($this->getItemID());
+            return $this->getCaster()->cast(
+                $builder->findOrFail($this->getItemID())
+            );
         }
 
-        return $builder->find($this->getItemID());
+        $item = $builder->find($this->getItemID());
+
+        return $item !== null ? $this->getCaster()->cast(
+            $builder->find($this->getItemID())
+        ) : null;
     }
 
     protected function modifyItemQueryBuilder(Builder $builder): Builder
@@ -169,7 +180,7 @@ trait ResourceModelQuery
 
     public function isItemExists(): bool
     {
-        return ! \is_null($this->getItem()) && $this->getItem()->exists;
+        return ! \is_null($this->getCastedData()?->getKey());
     }
 
     public function hasWith(): bool

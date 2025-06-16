@@ -4,72 +4,74 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Traits\Resource;
 
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+
 /**
  * @template T
  */
 trait ResourceEvents
 {
     /**
-     * @param T $item
+     * @param DataWrapperContract<T> $item
      *
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    protected function beforeCreating(mixed $item): mixed
+    protected function beforeCreating(DataWrapperContract $item): DataWrapperContract
     {
         return $item;
     }
 
 
     /**
-     * @param T $item
+     * @param DataWrapperContract<T> $item
      *
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    protected function afterCreated(mixed $item): mixed
+    protected function afterCreated(DataWrapperContract $item): DataWrapperContract
     {
         return $item;
     }
 
 
     /**
-     * @param T $item
+     * @param DataWrapperContract<T> $item
      *
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    protected function beforeUpdating(mixed $item): mixed
+    protected function beforeUpdating(DataWrapperContract $item): DataWrapperContract
     {
         return $item;
     }
 
 
     /**
-     * @param T $item
+     * @param DataWrapperContract<T> $item
      *
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    protected function afterUpdated(mixed $item): mixed
+    protected function afterUpdated(DataWrapperContract $item): DataWrapperContract
     {
         return $item;
     }
 
 
     /**
-     * @param T $item
+     * @param DataWrapperContract<T> $item
      *
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    protected function beforeDeleting(mixed $item): mixed
+    protected function beforeDeleting(DataWrapperContract $item): DataWrapperContract
     {
         return $item;
     }
 
 
     /**
-     * @param T $item
+     * @param DataWrapperContract<T> $item
      *
-     * @return T
+     * @return DataWrapperContract<T>
      */
-    protected function afterDeleted(mixed $item): mixed
+    protected function afterDeleted(DataWrapperContract $item): DataWrapperContract
     {
         return $item;
     }

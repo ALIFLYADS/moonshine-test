@@ -57,7 +57,9 @@ class UpdateFieldController extends MoonShineController
     {
         try {
             $resource->save(
-                $resource->getItemOrFail(),
+                $resource->getCaster()->cast(
+                    $resource->getItemOrFail()
+                ),
                 Fields::make([$field])
             );
         } catch (ResourceException $e) {

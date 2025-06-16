@@ -225,7 +225,7 @@ describe('with base crud resource', function () {
 
         expect(iterator_to_array($crudResource->getItems()))
             ->toHaveCount(1)
-            ->and($crudResource->findItem(true))
+            ->and($crudResource->findItem(true)?->toArray())
             ->toEqual([
                 'id' => $comment['id'],
                 'user_id' => 10,
@@ -253,7 +253,7 @@ function createComment(TestCommentCrudResource $resource, $saveData)
 
     $resource->setItemID($resource->getLastId());
 
-    return $resource->findItem(true);
+    return $resource->findItem(true)->getOriginal();
 }
 
 

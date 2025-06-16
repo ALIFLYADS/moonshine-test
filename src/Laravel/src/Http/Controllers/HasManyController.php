@@ -48,7 +48,7 @@ final class HasManyController extends MoonShineController
             ->setItemID($request->input('_key', false))
             ->getItemOrInstance();
 
-        $update = $item->exists;
+        $update = $item->getKey() !== null;
         $relation = $parent?->{$field->getRelationName()}();
 
         $field->fillCast($parent, $request->getResource()?->getCaster());

@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Resources;
 
 use Closure;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use MoonShine\Contracts\Core\CrudPageContract;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
@@ -33,17 +38,17 @@ use MoonShine\Laravel\Traits\Resource\ResourceQuery;
 use MoonShine\Laravel\Traits\Resource\ResourceWithAuthorization;
 use MoonShine\Laravel\Traits\Resource\ResourceWithButtons;
 use MoonShine\Laravel\Traits\Resource\ResourceWithFields;
-use Traversable;
+use Throwable;
 
 /**
  * @template TData of mixed
  * @template-covariant TIndexPage of null|CrudPageContract = null
  * @template-covariant TFormPage of null|CrudPageContract = null
  * @template-covariant TDetailPage of null|CrudPageContract = null
+ * @template TException of Throwable = \Throwable
  * @template TFields of FieldsContract = \MoonShine\Laravel\Collections\Fields
- * @template-covariant TItems of Traversable = \Illuminate\Support\Enumerable
  *
- * @implements CrudResourceContract<TData, TIndexPage, TFormPage, TDetailPage, TFields, TItems>
+ * @implements CrudResourceContract<TData, TIndexPage, TFormPage, TDetailPage, TException, TFields>
  * @extends Resource<CrudPageContract>
  */
 abstract class CrudResource extends Resource implements
@@ -72,7 +77,7 @@ abstract class CrudResource extends Resource implements
     /** @use ResourceEvents<TData> */
     use ResourceEvents;
 
-    /** @use ResourceQuery<TData, TItems> */
+    /** @use ResourceQuery<TData> */
     use ResourceQuery;
 
     protected string $column = 'id';
@@ -94,31 +99,34 @@ abstract class CrudResource extends Resource implements
     protected bool $detailInModal = false;
 
     /**
-     * @return ?TData
+     * @param bool $orFail
+     * @return ($orFail is true ? DataWrapperContract<TData> : null|DataWrapperContract<TData>)
+     *
+     * @throws TException
      */
-    abstract public function findItem(bool $orFail = false): mixed;
+    abstract public function findItem(bool $orFail = false): ?DataWrapperContract;
 
     /**
-     * @return TItems
+     * @return iterable<TData>|Collection<array-key, TData>|LazyCollection<array-key, TData>|CursorPaginator<array-key, TData>|Paginator<array-key, TData>
      */
-    abstract public function getItems(): mixed;
+    abstract public function getItems(): iterable|Collection|LazyCollection|CursorPaginator|Paginator;
 
     /**
-     * @param  array<int, int>  $ids
+     * @param  array<int|string>  $ids
      */
     abstract public function massDelete(array $ids): void;
 
     /**
-     * @param  TData  $item
+     * @param  DataWrapperContract<TData>  $item
      */
-    abstract public function delete(mixed $item, ?FieldsContract $fields = null): bool;
+    abstract public function delete(DataWrapperContract $item, ?FieldsContract $fields = null): bool;
 
     /**
-     * @param  TData  $item
+     * @param  DataWrapperContract<TData>  $item
      *
-     * @return TData
+     * @return DataWrapperContract<TData>
      */
-    abstract public function save(mixed $item, ?FieldsContract $fields = null): mixed;
+    abstract public function save(DataWrapperContract $item, ?FieldsContract $fields = null): DataWrapperContract;
 
     public function isRecentlyCreated(): bool
     {
@@ -229,13 +237,18 @@ abstract class CrudResource extends Resource implements
         return new MixedDataCaster($this->casterKeyName);
     }
 
+    /**
+     * @return DataWrapperContract<TData>|null
+     */
     public function getCastedData(): ?DataWrapperContract
     {
         if (\is_null($this->getItem())) {
             return null;
         }
 
-        return $this->getCaster()->cast($this->getItem());
+        return $this->getCaster()->cast(
+            $this->getItem()
+        );
     }
 
     /**
@@ -279,7 +292,7 @@ abstract class CrudResource extends Resource implements
     }
 
     /**
-     * @return null|Closure(iterable $items, TableBuilderContract $table): iterable
+     * @return null|Closure(iterable<TData> $items, TableBuilderContract $table): iterable<TData>
      */
     public function getItemsResolver(): ?Closure
     {
@@ -287,17 +300,17 @@ abstract class CrudResource extends Resource implements
     }
 
     /**
-     * @param  TData  $item
+     * @param  DataWrapperContract<TData>  $item
      */
-    public function modifyResponse(mixed $item): mixed
+    public function modifyResponse(DataWrapperContract $item): Jsonable
     {
-        return $item;
+        return $item->getOriginal();
     }
 
     /**
      * @param  iterable<TData>  $items
      */
-    public function modifyCollectionResponse(mixed $items): mixed
+    public function modifyCollectionResponse(mixed $items): Jsonable
     {
         return $items;
     }
