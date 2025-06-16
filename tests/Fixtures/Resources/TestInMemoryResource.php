@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
-
 use Illuminate\Support\Collection;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
@@ -33,7 +32,7 @@ final class TestInMemoryResource extends CrudResource
     {
         $item = $this->getItems()->firstWhere('id', $this->getItemID());
 
-        if($item === null && $orFail) {
+        if ($item === null && $orFail) {
             throw new \Exception('Item not found');
         }
 
@@ -61,7 +60,7 @@ final class TestInMemoryResource extends CrudResource
     public function delete(DataWrapperContract $item, ?FieldsContract $fields = null): bool
     {
         $this->items = array_values(
-            array_filter($this->items, static fn(array $el) => $el['id'] !== $item->getKey())
+            array_filter($this->items, static fn (array $el) => $el['id'] !== $item->getKey())
         );
 
         return true;
@@ -83,7 +82,8 @@ final class TestInMemoryResource extends CrudResource
 
         $fields->onlyFields()->each(function (Field $field) use (&$result) {
             $result = $field->apply(
-                fn(array $data, mixed $value, Field $ctx) => data_set($data, $ctx->getColumn(), $value), $result
+                fn (array $data, mixed $value, Field $ctx) => data_set($data, $ctx->getColumn(), $value),
+                $result
             );
         });
 

@@ -19,18 +19,18 @@ it('successful save', function () {
     $prev = new MixedDataWrapper(['id' => 1, 'title' => 'prev'], 1);
 
     $resource->items = [
-        $prev
+        $prev,
     ];
 
     fakeRequest(parameters: [
         'id' => $prev->getKey(),
-        'title' => 'new'
+        'title' => 'new',
     ]);
 
     expect($resource->save($prev)->toArray())
         ->toBe([
             'id' => '1',
-            'title' => 'new'
+            'title' => 'new',
         ]);
 });
 

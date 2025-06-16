@@ -34,16 +34,16 @@ final readonly class MixedDataWrapper implements DataWrapperContract, ArrayAcces
 
     public function offsetExists(mixed $offset): bool
     {
-        if(\is_array($this->data)) {
+        if (\is_array($this->data)) {
             return isset($this->data[$offset]);
         }
 
-        return \property_exists($this->data, $offset);
+        return property_exists($this->data, $offset);
     }
 
     public function offsetGet(mixed $offset): mixed
     {
-        if(\is_array($this->data)) {
+        if (\is_array($this->data)) {
             return $this->data[$offset];
         }
 
@@ -51,8 +51,10 @@ final readonly class MixedDataWrapper implements DataWrapperContract, ArrayAcces
     }
 
     public function offsetSet(mixed $offset, mixed $value): void
-    {}
+    {
+    }
 
     public function offsetUnset(mixed $offset): void
-    {}
+    {
+    }
 }

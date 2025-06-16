@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Contracts\Core;
 
-use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use Illuminate\Contracts\Support\Jsonable;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 
 /**
  * @internal
