@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
@@ -77,7 +78,10 @@ trait ResourceModelQuery
     }
 
     /**
-     * @return null|DataWrapperContract<T>
+     * @param  bool  $orFail
+     *
+     * @return ($orFail is true ? DataWrapperContract<T> : null|DataWrapperContract<T>)
+     * @throws ModelNotFoundException<T>
      */
     public function findItem(bool $orFail = false): ?DataWrapperContract
     {

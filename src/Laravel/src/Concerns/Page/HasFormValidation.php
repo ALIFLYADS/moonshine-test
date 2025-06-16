@@ -32,7 +32,7 @@ trait HasFormValidation
     public function getRules(): array
     {
         return $this->rules(
-            $this->getResource()->getItemOrInstance()->getOriginal()
+            $this->getResource()->getItemOrInstance()
         );
     }
 

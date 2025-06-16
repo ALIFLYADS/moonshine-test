@@ -13,13 +13,15 @@ use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\TableBuilderContract;
+use Throwable;
 
 /**
  * @template TData
  * @template-covariant TIndexPage of null|CrudPageContract
  * @template-covariant TFormPage of null|CrudPageContract
  * @template-covariant TDetailPage of null|CrudPageContract
- * @template TFields of FieldsContract
+ * @template TException of Throwable = \Throwable
+ * @template TFields of FieldsContract = FieldsContract
  *
  * @extends CrudResourceWithPagesContract<TData, TIndexPage, TFormPage, TDetailPage>
  * @extends CrudResourceWithFieldsContract<TFields>
@@ -62,24 +64,26 @@ interface CrudResourceContract extends
     public function getCastedData(): ?DataWrapperContract;
 
     /**
-     * @return DataWrapperContract<TData>
+     * @return TData
      */
-    public function getDataInstance(): DataWrapperContract;
+    public function getDataInstance(): mixed;
 
     /**
-     * @param  null|DataWrapperContract<TData>  $item
+     * @param  null|TData  $item
      */
-    public function setItem(?DataWrapperContract $item): static;
+    public function setItem(mixed $item): static;
 
     /**
-     * @return null|DataWrapperContract<TData>
+     * @return null|TData
      */
-    public function getItem(): ?DataWrapperContract;
+    public function getItem(): mixed;
 
     /**
-     * @return DataWrapperContract<TData>
+     * @return TData
+     *
+     * @throws TException
      */
-    public function getItemOrFail(): DataWrapperContract;
+    public function getItemOrFail(): mixed;
 
     /**
      * @return null|Closure(iterable<TData> $items, TableBuilderContract $table): iterable<TData>
@@ -95,9 +99,9 @@ interface CrudResourceContract extends
     public function isStopGettingItemFromUrl(): bool;
 
     /**
-     * @return DataWrapperContract<TData>
+     * @return TData
      */
-    public function getItemOrInstance(): DataWrapperContract;
+    public function getItemOrInstance(): mixed;
 
     public function isItemExists(): bool;
 
@@ -107,7 +111,10 @@ interface CrudResourceContract extends
     public function getItems(): iterable|Collection|LazyCollection|CursorPaginator|Paginator;
 
     /**
-     * @return null|DataWrapperContract<TData>
+     * @param bool $orFail
+     *
+     * @return ($orFail is true ? DataWrapperContract<TData> : null|DataWrapperContract<TData>)
+     * @throws TException
      */
     public function findItem(bool $orFail = false): ?DataWrapperContract;
 
@@ -118,14 +125,14 @@ interface CrudResourceContract extends
 
     /**
      * @param  DataWrapperContract<TData>  $item
-     * @param ?TFields $fields
+     * @param null|TFields $fields
      *
      */
     public function delete(DataWrapperContract $item, ?FieldsContract $fields = null): bool;
 
     /**
      * @param  DataWrapperContract<TData>  $item
-     * @param ?TFields $fields
+     * @param null|TFields $fields
      *
      * @return DataWrapperContract<TData>
      */

@@ -34,7 +34,7 @@ final class AsyncSearchController extends MoonShineController
             return response()->json();
         }
 
-        $model = $resource->getDataInstance()->getOriginal();
+        $model = $resource->getDataInstance();
 
         $searchColumn = $field->getAsyncSearchColumn() ?? $resource->getColumn();
         $query = $resource->getQuery();

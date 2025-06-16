@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Resources;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Enumerable;
 use Illuminate\Support\Facades\Gate;
@@ -38,7 +39,7 @@ use Throwable;
  * @template-covariant TFormPage of null|FormPageContract = null
  * @template-covariant TDetailPage of null|DetailPageContract = null
  *
- * @extends CrudResource<TData, TIndexPage, TFormPage, TDetailPage, Fields>
+ * @extends CrudResource<TData, TIndexPage, TFormPage, TDetailPage, ModelNotFoundException<TData>, Fields>
  */
 abstract class ModelResource extends CrudResource implements WithQueryBuilderContract
 {
@@ -74,13 +75,11 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
     }
 
     /**
-     * @return DataWrapperContract<TData>
+     * @return TData
      */
-    public function getDataInstance(): DataWrapperContract
+    public function getDataInstance(): mixed
     {
-        return $this->getCaster()->cast(
-            $this->getModel()
-        );
+        return $this->getModel();
     }
 
     /**
@@ -110,7 +109,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
 
         $checkCustomRules = moonshineConfig()
             ->getAuthorizationRules()
-            ->every(fn ($rule) => $rule($this, $user, $ability, $item->getOriginal()));
+            ->every(fn ($rule) => $rule($this, $user, $ability, $item));
 
         if (! $checkCustomRules) {
             return false;
@@ -120,7 +119,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             return true;
         }
 
-        return Gate::forUser($user)->allows($ability->value, $item->getOriginal());
+        return Gate::forUser($user)->allows($ability->value, $item);
     }
 
     /**
@@ -141,9 +140,8 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         $this->beforeMassDeleting($ids);
 
         $this->getDataInstance()
-            ->getOriginal()
             ->newModelQuery()
-            ->whereIn($this->getDataInstance()->getOriginal()->getKeyName(), $ids)
+            ->whereIn($this->getDataInstance()->getKeyName(), $ids)
             ->get()
             ->each(fn (Model $item): bool => $this->delete($this->getCaster()->cast($item)));
 
@@ -215,10 +213,10 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         $fields->fill($item->toArray(), $item);
 
         if ($handler = Attributes::for($this, SaveHandler::class)->first()) {
-            $item = $this->resolveSaveHandler($handler, $item, $fields);
-            $this->setItem($item);
+            $result = $this->resolveSaveHandler($handler, $item, $fields);
+            $this->setItem($result);
 
-            return $item;
+            return $this->getCastedData();
         }
 
         try {
@@ -244,7 +242,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             throw new ResourceException($queryException->getMessage(), previous: $queryException);
         }
 
-        $this->setItem($item);
+        $this->setItem($item->getOriginal());
 
         return $item;
     }
@@ -252,9 +250,9 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
     /**
      * @param DataWrapperContract<TData> $item
      * @param Fields $fields
-     * @return DataWrapperContract<TData>
+     * @return TData
      */
-    private function resolveSaveHandler(SaveHandler $handler, DataWrapperContract $item, FieldsContract $fields): DataWrapperContract
+    private function resolveSaveHandler(SaveHandler $handler, DataWrapperContract $item, FieldsContract $fields): Model
     {
         $service = $this->getCore()->getContainer($handler->service);
         $resource = $this;
@@ -268,11 +266,9 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
             return $item->toArray();
         });
 
-        $result = $handler->method === null
+        return $handler->method === null
             ? $service($initial->getOriginal(), $data)
             : $service->{$handler->method}($initial->getOriginal(), $data);
-
-        return $this->getCaster()->cast($result);
     }
 
     public function fieldApply(FieldContract $field): Closure

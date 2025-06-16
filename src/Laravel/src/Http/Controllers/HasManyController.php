@@ -89,9 +89,9 @@ final class HasManyController extends MoonShineController
         };
 
         $formName = "{$resource->getUriKey()}-unique-" . ($item->getKey() ?? "create");
-        $redirectRoute = $field->getRedirectAfter($parent->getOriginal());
+        $redirectRoute = $field->getRedirectAfter($parent);
 
-        return (string) FormBuilder::make($action($item->getOriginal()))
+        return (string) FormBuilder::make($action($item))
             /** @phpstan-ignore-next-line  */
             ->fields($getFields)
             ->reactiveUrl(
@@ -117,7 +117,7 @@ final class HasManyController extends MoonShineController
                     array_filter([
                         $relation?->getForeignKeyName() => $parent?->getKey(),
                         ...$relation instanceof MorphOneOrMany
-                            ? [$relation->getMorphType() => $parent?->getOriginal()?->getMorphClass()]
+                            ? [$relation->getMorphType() => $parent?->getMorphClass()]
                             : [],
                     ], static fn ($value) => filled($value)),
                     $resource->getCaster()

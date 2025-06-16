@@ -38,16 +38,17 @@ use MoonShine\Laravel\Traits\Resource\ResourceQuery;
 use MoonShine\Laravel\Traits\Resource\ResourceWithAuthorization;
 use MoonShine\Laravel\Traits\Resource\ResourceWithButtons;
 use MoonShine\Laravel\Traits\Resource\ResourceWithFields;
-use Traversable;
+use Throwable;
 
 /**
  * @template TData of mixed
  * @template-covariant TIndexPage of null|CrudPageContract = null
  * @template-covariant TFormPage of null|CrudPageContract = null
  * @template-covariant TDetailPage of null|CrudPageContract = null
+ * @template TException of Throwable = \Throwable
  * @template TFields of FieldsContract = \MoonShine\Laravel\Collections\Fields
  *
- * @implements CrudResourceContract<TData, TIndexPage, TFormPage, TDetailPage, TFields>
+ * @implements CrudResourceContract<TData, TIndexPage, TFormPage, TDetailPage, TException, TFields>
  * @extends Resource<CrudPageContract>
  */
 abstract class CrudResource extends Resource implements
@@ -98,7 +99,10 @@ abstract class CrudResource extends Resource implements
     protected bool $detailInModal = false;
 
     /**
-     * @return null|DataWrapperContract<TData>
+     * @param bool $orFail
+     * @return ($orFail is true ? DataWrapperContract<TData> : null|DataWrapperContract<TData>)
+     *
+     * @throws TException
      */
     abstract public function findItem(bool $orFail = false): ?DataWrapperContract;
 
@@ -242,15 +246,17 @@ abstract class CrudResource extends Resource implements
             return null;
         }
 
-        return $this->getItem();
+        return $this->getCaster()->cast(
+            $this->getItem()
+        );
     }
 
     /**
-     * @return DataWrapperContract<TData>
+     * @return TData
      */
-    public function getDataInstance(): DataWrapperContract
+    public function getDataInstance(): mixed
     {
-        return $this->getCaster()->cast([]);
+        return [];
     }
 
     public function getColumn(): string

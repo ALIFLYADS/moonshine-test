@@ -70,7 +70,9 @@ final class CrudController extends MoonShineController
         );
 
         return $resource->modifyResponse(
-            $resource->getItemOrFail()
+            $resource->getCaster()->cast(
+                $resource->getItemOrFail()
+            )
         );
     }
 
@@ -106,7 +108,11 @@ final class CrudController extends MoonShineController
         $redirectRoute = $request->input('_redirect', $resource->getRedirectAfterDelete());
 
         try {
-            $resource->delete($resource->getItemOrFail());
+            $resource->delete(
+                $resource->getCaster()->cast(
+                    $resource->getItemOrFail()
+                )
+            );
         } catch (Throwable $e) {
             return $resource->modifyErrorResponse(
                 $this->reportAndResponse($request->ajax(), $e, $redirectRoute),
@@ -197,7 +203,11 @@ final class CrudController extends MoonShineController
         };
 
         try {
-            $item = $resource->save($item);
+            $item = $resource->save(
+                $resource->getCaster()->cast(
+                    $item
+                )
+            );
         } catch (Throwable $e) {
             return $resource->modifyErrorResponse(
                 $this->reportAndResponse($request->ajax(), $e, $redirectRoute($resource)),
@@ -205,7 +215,7 @@ final class CrudController extends MoonShineController
             );
         }
 
-        $resource->setItem($item);
+        $resource->setItem($item->getOriginal());
 
         if ($request->ajax() || $request->wantsJson()) {
             $data = [];

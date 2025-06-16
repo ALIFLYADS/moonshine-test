@@ -63,7 +63,7 @@ final class DetailButton
             ->canSee(
                 static fn (mixed $item, ?DataWrapperContract $data): bool => $data?->getKey()
                     && $resource->hasAction(Action::VIEW)
-                    && $resource->setItem($data)->can(Ability::VIEW)
+                    && $resource->setItem($item)->can(Ability::VIEW)
             )
             ->icon('eye')
             ->class('js-detail-button')

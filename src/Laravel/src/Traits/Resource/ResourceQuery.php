@@ -16,14 +16,15 @@ use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Support\Attributes\SearchUsingFullText;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\UI\Contracts\RangeFieldContract;
+use Throwable;
 
 /**
  * @template T
  */
 trait ResourceQuery
 {
-    /** @var null|DataWrapperContract<T> */
-    protected ?DataWrapperContract $item = null;
+    /** @var null|T */
+    protected mixed $item = null;
 
     protected string $sortColumn = '';
 
@@ -97,7 +98,7 @@ trait ResourceQuery
     }
 
     /**
-     * @return null|DataWrapperContract<T>
+     * @return null|T
      */
     protected function itemOr(Closure $callback): mixed
     {
@@ -111,9 +112,9 @@ trait ResourceQuery
     }
 
     /**
-     * @param  null|DataWrapperContract<T>  $item
+     * @param  null|T  $item
      */
-    public function setItem(?DataWrapperContract $item): static
+    public function setItem(mixed $item): static
     {
         $this->item = $item;
 
@@ -126,9 +127,9 @@ trait ResourceQuery
     }
 
     /**
-     * @return null|DataWrapperContract<T>
+     * @return null|T
      */
-    public function getItem(): ?DataWrapperContract
+    public function getItem(): mixed
     {
         if (! \is_null($this->item)) {
             return $this->item;
@@ -139,14 +140,14 @@ trait ResourceQuery
         }
 
         return $this->itemOr(
-            fn () => $this->findItem(),
+            fn () => $this->findItem()?->getOriginal(),
         );
     }
 
     /**
-     * @return DataWrapperContract<T>
+     * @return T
      */
-    public function getItemOrInstance(): DataWrapperContract
+    public function getItemOrInstance(): mixed
     {
         if (! \is_null($this->item)) {
             return $this->item;
@@ -157,21 +158,22 @@ trait ResourceQuery
         }
 
         return $this->itemOr(
-            fn () => $this->findItem() ?? $this->getDataInstance(),
+            fn () => $this->findItem()?->getOriginal() ?? $this->getDataInstance(),
         );
     }
 
     /**
-     * @return DataWrapperContract<T>
+     * @return T
+     * @throws Throwable
      */
-    public function getItemOrFail(): DataWrapperContract
+    public function getItemOrFail(): mixed
     {
         if (! \is_null($this->item)) {
             return $this->item;
         }
 
         return $this->itemOr(
-            fn () => $this->findItem(orFail: true),
+            fn () => $this->findItem(orFail: true)->getOriginal(),
         );
     }
 

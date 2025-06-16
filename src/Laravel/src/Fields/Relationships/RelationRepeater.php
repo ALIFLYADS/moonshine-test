@@ -399,7 +399,6 @@ class RelationRepeater extends ModelRelationField implements
         foreach ($requestValues as $index => $values) {
             $values = $this->getResource()
                 ?->getDataInstance()
-                ?->getOriginal()
                 ?->forceFill($values) ?? $values;
 
             $requestValues[$index] = $values;

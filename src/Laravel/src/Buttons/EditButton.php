@@ -70,7 +70,7 @@ final class EditButton
                 ->canSee(
                     static fn (mixed $item, ?DataWrapperContract $data): bool => $data?->getKey()
                         && $resource->hasAction(Action::UPDATE)
-                        && $resource->setItem($data)->can(Ability::UPDATE)
+                        && $resource->setItem($item)->can(Ability::UPDATE)
                 )
                 ->class('js-edit-button')
                 ->showInLine();
