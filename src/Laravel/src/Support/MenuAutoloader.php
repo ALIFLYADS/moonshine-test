@@ -68,7 +68,7 @@ final readonly class MenuAutoloader implements MenuAutoloaderContract
         ): void {
             $skip = Attributes::for($item, SkipMenu::class);
 
-            if (! \is_null($skip->first())) {
+            if (! \is_null($skip->first()) || $item->skipMenu()) {
                 return;
             }
 
@@ -76,12 +76,12 @@ final readonly class MenuAutoloader implements MenuAutoloaderContract
             $canSee = Attributes::for($item, CanSee::class)->first();
             $order = Attributes::for($item, Order::class)->first();
 
-            $label = $group?->label;
-            $icon = $group?->icon;
-            $position = $order?->value;
+            $label = $group->label ?? $item->getGroup();
+            $icon = $group->icon ?? $item->getGroupIcon();
+            $position = $order->value ?? $item->getPosition();
 
             $namespace = $item::class;
-            $data = ['filler' => $namespace, 'canSee' => $canSee?->method, 'position' => $position];
+            $data = ['filler' => $namespace, 'canSee' => $canSee->method ?? 'canSee', 'position' => $position];
 
             if ($label !== null) {
                 $existingGroup = $items[$label] ?? null;
@@ -94,7 +94,7 @@ final readonly class MenuAutoloader implements MenuAutoloaderContract
 
                 $items[$label] = [
                     'position' => $position,
-                    'group' => ['class' => $namespace, 'label' => $label, 'icon' => $icon, 'canSee' => $canSee?->method, 'translatable' => $group?->translatable],
+                    'group' => ['class' => $namespace, 'label' => $label, 'icon' => $icon, 'canSee' => $canSee->method ?? 'canSee', 'translatable' => $group?->translatable],
                     'items' => $existingItems->all(),
                 ];
 
@@ -172,9 +172,8 @@ final readonly class MenuAutoloader implements MenuAutoloaderContract
     private function toMenuItem(string $filler, ?string $canSee = null): MenuItem
     {
         $resolved = app($filler);
-        $label = $resolved->getTitle();
 
-        return MenuItem::make($label, $filler)
+        return MenuItem::make($filler)
             ->when($canSee, fn (MenuItem $item): MenuItem => $item->canSee($this->canSee($resolved, $canSee)));
     }
 

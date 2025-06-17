@@ -8,6 +8,8 @@ use Closure;
 
 interface HasLabelContract
 {
+    public function hasLabel(): bool;
+
     public function getLabel(): string;
 
     public function setLabel(Closure|string $label): static;

@@ -13,6 +13,7 @@ use MoonShine\Core\Pages\Pages;
 use MoonShine\Core\Traits\WithAssets;
 use MoonShine\Core\Traits\WithCore;
 use MoonShine\Core\Traits\WithUriKey;
+use MoonShine\Support\Concerns\MenuFillerConcern;
 
 /**
  * @template TPage of PageContract = PageContract
@@ -24,6 +25,7 @@ abstract class Resource implements ResourceContract
     use WithCore;
     use WithUriKey;
     use WithAssets;
+    use MenuFillerConcern;
 
     protected string $title = '';
 
