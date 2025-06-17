@@ -22,7 +22,7 @@ it('empty menu elements', function (): void {
 });
 
 it('add menu elements', function (): void {
-    $this->menuManager->add(MenuItem::make('Item', '/'));
+    $this->menuManager->add(MenuItem::make('/', 'Item'));
 
     expect($this->menuManager->all())
         ->toHaveCount(1)
@@ -37,12 +37,12 @@ it('add menu elements', function (): void {
 
 it('add before menu elements', function (): void {
     $this->menuManager->add([
-        MenuItem::make('Item 1', '/item1'),
-        MenuItem::make('Item 2', '/item2'),
-        MenuItem::make('Item 3', '/item3'),
+        MenuItem::make('/item1', 'Item 1'),
+        MenuItem::make('/item2', 'Item 2'),
+        MenuItem::make('/item3', 'Item 3'),
     ]);
 
-    $item = MenuItem::make('Item 2_0', '/item2_0');
+    $item = MenuItem::make('/item2_0', 'Item 2_0');
 
     $this->menuManager->addBefore(static fn (MenuItem $el) => $el->getUrl() === '/item2', $item);
 
@@ -54,12 +54,12 @@ it('add before menu elements', function (): void {
 
 it('add after menu elements', function (): void {
     $this->menuManager->add([
-        MenuItem::make('Item 1', '/item1'),
-        MenuItem::make('Item 2', '/item2'),
-        MenuItem::make('Item 3', '/item3'),
+        MenuItem::make('/item1', 'Item 1'),
+        MenuItem::make('/item2', 'Item 2'),
+        MenuItem::make('/item3', 'Item 3'),
     ]);
 
-    $item = MenuItem::make('Item 2_0', '/item2_0');
+    $item = MenuItem::make('/item2_0', 'Item 2_0');
 
     $this->menuManager->addAfter(static fn (MenuItem $el) => $el->getUrl() === '/item2', [$item]);
 
@@ -71,9 +71,9 @@ it('add after menu elements', function (): void {
 
 it('remove menu elements', function (): void {
     $this->menuManager->add([
-        MenuItem::make('Item 1', '/item1'),
-        MenuItem::make('Item 2', '/item2'),
-        MenuItem::make('Item 3', '/item3'),
+        MenuItem::make('/item1', 'Item 1'),
+        MenuItem::make('/item2', 'Item 2'),
+        MenuItem::make('/item3', 'Item 3'),
     ]);
 
     $this->menuManager->remove(static fn (MenuItem $el) => $el->getUrl() === '/item2');
@@ -87,22 +87,22 @@ it('remove menu elements', function (): void {
 
 it('replace items', function (): void {
     $this->menuManager->add([
-        MenuItem::make('Item 1', '/item1'),
-        MenuItem::make('Item 2', '/item2'),
-        MenuItem::make('Item 3', '/item3'),
+        MenuItem::make('/item1', 'Item 1'),
+        MenuItem::make('/item2', 'Item 2'),
+        MenuItem::make('/item3', 'Item 3'),
     ]);
 
     expect($this->menuManager->all())
         ->toHaveCount(3)
-        ->and($this->menuManager->all([MenuItem::make('Item 1', '/item1')]))
+        ->and($this->menuManager->all([MenuItem::make('/item1', 'Item 1')]))
         ->toHaveCount(1);
 });
 
 it('only visible items', function (): void {
     $this->menuManager->add([
-        MenuItem::make('Item 1', '/item1'),
-        MenuItem::make('Item 2', '/item2')->canSee(static fn () => false),
-        MenuItem::make('Item 3', '/item3'),
+        MenuItem::make('/item1', 'Item 1'),
+        MenuItem::make('/item2', 'Item 2')->canSee(static fn () => false),
+        MenuItem::make('/item3', 'Item 3'),
     ]);
 
     expect($this->menuManager->all())
@@ -113,9 +113,9 @@ it('only visible items', function (): void {
 it('check active element', function (): void {
     fakeRequest('/item2');
 
-    $item1 = MenuItem::make('Item 1', '/item1');
-    $item2 = MenuItem::make('Item 2', '/item2');
-    $item3 = MenuItem::make('Item 2', '/item2?query=1');
+    $item1 = MenuItem::make('/item1', 'Item 1');
+    $item2 = MenuItem::make('/item2', 'Item 2');
+    $item3 = MenuItem::make('/item2?query=1', 'Item 2');
 
     expect($item1->isActive())
         ->toBeFalse()
@@ -124,9 +124,9 @@ it('check active element', function (): void {
         ->and($item3->isActive())
         ->toBeTrue();
 
-    $item1 = MenuItem::make('Item 1', 'http://localhost/item1');
-    $item2 = MenuItem::make('Item 2', 'http://localhost/item2');
-    $item3 = MenuItem::make('Item 3', 'http://localhost/item2?query=1');
+    $item1 = MenuItem::make('http://localhost/item1', 'Item 1');
+    $item2 = MenuItem::make('http://localhost/item2', 'Item 2');
+    $item3 = MenuItem::make('http://localhost/item2?query=1', 'Item 3');
 
     expect($item1->isActive())
         ->toBeFalse()
@@ -136,9 +136,9 @@ it('check active element', function (): void {
         ->toBeTrue();
 
 
-    $item1 = MenuItem::make('Item 1', 'http://localhost/item1')->whenActive(static fn () => true);
-    $item2 = MenuItem::make('Item 2', 'http://localhost/item2');
-    $item3 = MenuItem::make('Item 3', 'http://localhost/item2?query=1');
+    $item1 = MenuItem::make('http://localhost/item1', 'Item 1')->whenActive(static fn () => true);
+    $item2 = MenuItem::make('http://localhost/item2', 'Item 2');
+    $item3 = MenuItem::make('http://localhost/item2?query=1', 'Item 3');
 
 
     expect($item1->isActive())
@@ -150,8 +150,8 @@ it('check active element', function (): void {
 
     fakeRequest('/admin/test-image-resource/index-page?query=1');
 
-    $item1 = MenuItem::make('Item 1', TestCommentResource::class);
-    $item2 = MenuItem::make('Item 2', TestImageResource::class);
+    $item1 = MenuItem::make(TestCommentResource::class, 'Item 1');
+    $item2 = MenuItem::make(TestImageResource::class, 'Item 2');
 
     expect($item1->isActive())
         ->toBeFalse()
@@ -162,14 +162,14 @@ it('check active element', function (): void {
 it('check active when home', function (): void {
     fakeRequest('/item');
 
-    $item = MenuItem::make('Item 1', fn () => config('app.url'));
+    $item = MenuItem::make(fn () => config('app.url'), 'Item 1');
 
     expect($item->isActive())
         ->toBeFalse();
 
     fakeRequest();
 
-    $item = MenuItem::make('Item 1', fn () => config('app.url'));
+    $item = MenuItem::make(fn () => config('app.url'), 'Item 1');
 
     expect($item->isActive())
         ->toBeTrue();

@@ -20,6 +20,7 @@ use MoonShine\Core\Traits\WithAssets;
 use MoonShine\Core\Traits\WithCore;
 use MoonShine\Core\Traits\WithUriKey;
 use MoonShine\Core\Traits\WithViewRenderer;
+use MoonShine\Support\Concerns\MenuFillerConcern;
 use MoonShine\Support\Enums\Layer;
 use MoonShine\Support\Enums\PageType;
 
@@ -35,6 +36,7 @@ abstract class Page implements PageContract
     use WithUriKey;
     use WithAssets;
     use WithViewRenderer;
+    use MenuFillerConcern;
 
     protected string $title = '';
 

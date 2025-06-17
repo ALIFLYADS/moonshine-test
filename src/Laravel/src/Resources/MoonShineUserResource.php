@@ -13,12 +13,12 @@ use MoonShine\Support\Attributes\Icon;
 use MoonShine\Support\Enums\Action;
 use MoonShine\Support\ListOf;
 
-#[Icon('users')]
-#[Group('moonshine::ui.resource.system', 'users', translatable: true)]
-#[Order(1)]
 /**
  * @extends ModelResource<MoonshineUser, MoonShineUserIndexPage, MoonShineUserFormPage, null>
  */
+#[Icon('users')]
+#[Group('moonshine::ui.resource.system', 'users', translatable: true)]
+#[Order(0)]
 class MoonShineUserResource extends ModelResource
 {
     protected string $model = MoonshineUser::class;

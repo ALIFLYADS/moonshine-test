@@ -20,7 +20,7 @@ it('find resource by uri key', function (): void {
 
 it('menu', function (): void {
     $this->menuManager->add([
-        MenuItem::make('Resource', $this->resource),
+        MenuItem::make($this->resource, 'Resource'),
     ]);
 
     expect($this->menuManager->all())->toBeCollection()

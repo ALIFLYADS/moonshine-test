@@ -29,14 +29,8 @@ class AppLayout extends BaseLayout
     {
         return [
             MenuGroup::make(static fn () => __('moonshine::ui.resource.system'), [
-                MenuItem::make(
-                    static fn () => __('moonshine::ui.resource.admins_title'),
-                    MoonShineUserResource::class
-                ),
-                MenuItem::make(
-                    static fn () => __('moonshine::ui.resource.role_title'),
-                    MoonShineUserRoleResource::class
-                ),
+                MenuItem::make(MoonShineUserResource::class),
+                MenuItem::make(MoonShineUserRoleResource::class),
             ]),
         ];
     }

@@ -10,11 +10,11 @@ use MoonShine\Laravel\Layouts\BlankLayout;
 use MoonShine\MenuManager\Attributes\SkipMenu;
 use MoonShine\UI\Components\FlexibleRender;
 
-#[SkipMenu]
-#[Layout(BlankLayout::class)]
 /**
  * @method static static make(int $code, string $message)
  */
+#[SkipMenu]
+#[Layout(BlankLayout::class)]
 class ErrorPage extends Page
 {
     private int $code;
