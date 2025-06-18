@@ -30,6 +30,7 @@ use MoonShine\UI\Contracts\HasDefaultValueContract;
 use MoonShine\UI\Contracts\HasUpdateOnPreviewContract;
 use MoonShine\UI\Contracts\RemovableContract;
 use MoonShine\UI\Fields\Field;
+use MoonShine\UI\Fields\File;
 use MoonShine\UI\Fields\Json;
 use MoonShine\UI\Fields\Preview;
 use MoonShine\UI\Traits\Fields\HasVerticalMode;
@@ -286,9 +287,21 @@ class RelationRepeater extends ModelRelationField implements
         );
     }
 
+    /**
+     * @throws Throwable
+     */
     protected function resolveOldValue(mixed $old): mixed
     {
         foreach ($this->getFields() as $field) {
+            if ($field instanceof File) {
+                $column = $field->getColumn();
+
+                $old = array_map(static fn(array $data): array => [
+                    ...$data,
+                    $column => $data[$field->getHiddenColumn()] ?? null,
+                ], $old);
+            }
+
             if ($field instanceof Json) {
                 foreach ($old as $index => $value) {
                     $column = $field->getColumn();
