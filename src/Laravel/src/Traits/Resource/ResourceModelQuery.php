@@ -29,6 +29,9 @@ use Throwable;
  */
 trait ResourceModelQuery
 {
+    /**
+     * @var string[]
+     */
     protected array $with = [];
 
     protected ?Builder $queryBuilder = null;

@@ -8,9 +8,9 @@ use MoonShine\Tests\Fixtures\Models\Item;
 use MoonShine\Tests\Fixtures\Resources\TestResource;
 use MoonShine\Tests\Fixtures\Resources\TestResourceBuilder;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Fields\Fieldset;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Position;
-use MoonShine\UI\Fields\StackFields;
 use MoonShine\UI\Fields\Text;
 
 uses()->group('resources-feature');
@@ -27,7 +27,7 @@ beforeEach(function (): void {
         ->setTestIndexFields([
             ID::make()->sortable(),
             Text::make('Name title', 'name'),
-            StackFields::make()->fields([
+            Fieldset::make()->fields([
                 Text::make('Index field'),
             ]),
         ])

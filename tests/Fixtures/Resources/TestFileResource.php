@@ -2,6 +2,7 @@
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Tests\Fixtures\Models\FileModel;
 use MoonShine\UI\Fields\File;
@@ -32,7 +33,7 @@ class TestFileResource extends AbstractTestingResource
         return $this->indexFields();
     }
 
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return [];
     }

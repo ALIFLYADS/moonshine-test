@@ -11,7 +11,7 @@ use {form-page-namespace};
 use {detail-page-namespace};
 
 use MoonShine\Laravel\Resources\ModelResource;
-use MoonShine\Laravel\Pages\Page;
+use MoonShine\Contracts\Core\PageContract;
 
 /**
  * @extends ModelResource<{model}, {indexPage}, {formPage}, {detailPage}>
@@ -23,7 +23,7 @@ class DummyClass extends ModelResource
     protected string $title = 'DummyTitle';
     {properties}
     /**
-     * @return list<Page>
+     * @return list<class-string<PageContract>>
      */
     protected function pages(): array
     {

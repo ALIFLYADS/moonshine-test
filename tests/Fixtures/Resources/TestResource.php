@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+
 class TestResource extends AbstractTestingResource
 {
     private array $testRules = [];
@@ -137,7 +139,7 @@ class TestResource extends AbstractTestingResource
         return $this;
     }
 
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return $this->testRules;
     }

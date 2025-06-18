@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Concerns\Page;
 
 use Illuminate\Contracts\Validation\Rule;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use Stringable;
 
 /**
@@ -19,12 +20,12 @@ trait HasFormValidation
     /**
      * Get an array of validation rules for resource related model
      *
-     * @param T $item
+     * @param DataWrapperContract<T> $item
      *
      * @return array<string, string[]|string|list<Rule>|list<Stringable>>
      * @see https://laravel.com/docs/validation#available-validation-rules
      */
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return [];
     }
@@ -32,7 +33,9 @@ trait HasFormValidation
     public function getRules(): array
     {
         return $this->rules(
-            $this->getResource()->getItemOrInstance()
+            $this->getResource()->getCaster()->cast(
+                $this->getResource()->getItemOrInstance()
+            )
         );
     }
 

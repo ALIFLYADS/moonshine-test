@@ -10,7 +10,7 @@ use MoonShine\Contracts\Core\PageContract;
 class DummyClass extends Resource
 {
     /**
-     * @return list<PageContract>
+     * @return list<class-string<PageContract>>
      */
     protected function pages(): array
     {

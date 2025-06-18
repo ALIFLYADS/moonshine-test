@@ -8,7 +8,6 @@ use MoonShine\Tests\Fixtures\Models\Category;
 use MoonShine\Tests\Fixtures\Resources\TestCategoryResource;
 use MoonShine\Tests\Fixtures\Resources\TestItemResource;
 use MoonShine\UI\Fields\Fieldset;
-use MoonShine\UI\Fields\StackFields;
 
 uses()->group('async-search-controller');
 uses()->group('fieldset');
@@ -26,7 +25,7 @@ it('async search in form', function () {
     $item->refresh();
     $resource = app(TestCategoryResource::class);
 
-    $field = StackFields::make()->fields([
+    $field = Fieldset::make()->fields([
         BelongsToMany::make('Categories', resource: $resource)
             ->fillData($item),
     ]);

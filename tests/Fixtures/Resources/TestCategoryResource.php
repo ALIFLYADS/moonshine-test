@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Laravel\Fields\Relationships\HasOne;
 use MoonShine\Tests\Fixtures\Models\Category;
 use MoonShine\UI\Components\Layout\Box;
@@ -66,7 +67,7 @@ class TestCategoryResource extends AbstractTestingResource
         ];
     }
 
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return [];
     }

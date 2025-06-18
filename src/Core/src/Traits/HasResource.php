@@ -30,7 +30,7 @@ trait HasResource
     }
 
     /**
-     * @return ?T
+     * @return T
      */
     public function getResource(): ?ResourceContract
     {

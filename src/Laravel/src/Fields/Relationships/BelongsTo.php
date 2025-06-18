@@ -149,7 +149,7 @@ class BelongsTo extends ModelRelationField implements
         return $value;
     }
 
-    public function prepareReactivityValue(mixed $value, mixed &$casted, array &$except): mixed
+    public function prepareReactivityValue(mixed $value, mixed &$casted, array &$except): ?Model
     {
         $value = data_get($value, 'value', $value);
 
@@ -157,10 +157,7 @@ class BelongsTo extends ModelRelationField implements
         $model = $this->makeRelatedModel($value, related: $this->getRelation()?->getRelated());
         $casted?->setRelation($this->getRelationName(), $model);
 
-        /**
-         * TODO(4.0) return $model
-         */
-        return $value;
+        return $model;
     }
 
     /**

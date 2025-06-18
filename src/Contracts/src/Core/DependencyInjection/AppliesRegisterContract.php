@@ -8,7 +8,7 @@ use MoonShine\Contracts\UI\ApplyContract;
 use MoonShine\Contracts\UI\FormElementContract;
 
 /**
- * @template-covariant I
+ * @template-covariant I of AppliesRegisterContract = AppliesRegisterContract
  * @mixin I
  */
 interface AppliesRegisterContract

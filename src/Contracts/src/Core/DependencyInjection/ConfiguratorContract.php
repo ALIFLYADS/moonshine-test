@@ -11,7 +11,7 @@ use MoonShine\Contracts\UI\FormContract;
 use MoonShine\Contracts\UI\LayoutContract;
 
 /**
- * @template-covariant I of ConfiguratorContract
+ * @template-covariant I of ConfiguratorContract = ConfiguratorContract
  * @mixin I
  */
 interface ConfiguratorContract extends ArrayAccess
@@ -51,6 +51,9 @@ interface ConfiguratorContract extends ArrayAccess
 
     public function getLocaleKey(): string;
 
+    /**
+     * @return non-empty-string
+     */
     public function getDisk(): string;
 
     /**

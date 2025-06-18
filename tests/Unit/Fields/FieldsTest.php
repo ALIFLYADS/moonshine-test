@@ -1,5 +1,6 @@
 <?php
 
+use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Contracts\UI\HasFieldsContract;
 use MoonShine\Laravel\Collections\Fields;
 use MoonShine\Laravel\Fields\Relationships\HasOne;
@@ -12,7 +13,7 @@ use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Field;
-use MoonShine\UI\Fields\StackFields;
+use MoonShine\UI\Fields\Fieldset;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 
@@ -27,7 +28,7 @@ beforeEach(function () {
                     LineBreak::make()->name('line-break'),
                     FormBuilder::make()->name('inner-form')->fields([
                         Switcher::make('Switcher'),
-                        StackFields::make()->fields([
+                        Fieldset::make()->fields([
                             Text::make('Text')->sortable(),
                             Text::make('Email')->showWhen('column', '=', 'value'),
                         ]),
@@ -96,7 +97,12 @@ describe('fields', function () {
             'email' => 'value',
         ];
 
-        expect($this->collection->withoutOutside()->fillCloned($values))
+        $fields = $this->collection
+            ->withoutOutside()
+            ->onlyFields()
+            ->fillCloned($values);
+
+        expect($fields)
             ->each(static fn ($expect) => $expect->toValue()->toBe('value'))
         ;
     });

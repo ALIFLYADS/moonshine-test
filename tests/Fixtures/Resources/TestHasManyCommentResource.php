@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Tests\Fixtures\Models\Comment;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
@@ -40,7 +41,7 @@ class TestHasManyCommentResource extends AbstractTestingResource
         return $this->indexFields();
     }
 
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return  [
             'content' => 'required',

@@ -8,14 +8,14 @@ use Closure;
 use MoonShine\Support\Enums\HttpMethod;
 
 /**
- * @template-covariant T of ComponentContract
+ * @template-covariant T of ComponentContract|null
  */
 interface HasModalContract
 {
     public function isInModal(): bool;
 
     /**
-     * @return ?T
+     * @return T
      */
     public function getModal(): ?ComponentContract;
 
