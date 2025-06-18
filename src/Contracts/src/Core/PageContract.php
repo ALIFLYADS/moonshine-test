@@ -12,11 +12,6 @@ use MoonShine\Contracts\UI\LayoutContract;
 use MoonShine\Support\Enums\Layer;
 use MoonShine\Support\Enums\PageType;
 
-/**
- * @template-covariant  I of PageContract
-
- * @mixin I
- */
 interface PageContract extends
     HasCoreContract,
     HasComponentsContract,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Tests\Fixtures\Models\Cover;
 use MoonShine\UI\Fields\ID;
@@ -36,7 +37,7 @@ class TestCoverResource extends AbstractTestingResource
         return $this->indexFields();
     }
 
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return [];
     }

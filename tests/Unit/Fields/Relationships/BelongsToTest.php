@@ -23,7 +23,7 @@ beforeEach(function (): void {
     $this->item = Item::factory()
         ->create();
 
-    $this->field = BelongsTo::make('User', resource: MoonShineUserResource::class);
+    $this->field = BelongsTo::make('User', 'moonshineUser', resource: MoonShineUserResource::class);
 });
 
 describe('common field methods', function () {
@@ -81,13 +81,12 @@ describe('reactive', function () {
     it('prepare value', function (): void {
         $except = [];
         $value = $this->user->first();
+        $this->field->fillData($this->item);
         $this->field->setValue($this->user->first());
 
         $expect = $this->field->prepareReactivityValue($value->getKey(), $this->item, $except);
 
-        expect($expect)
-            ->toBe($value->getKey())
-        ;
+        expect($expect?->getKey())->toBe($value->getKey());
     });
 
     it('get value', function (): void {

@@ -12,7 +12,7 @@ use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Field;
-use MoonShine\UI\Fields\StackFields;
+use MoonShine\UI\Fields\Fieldset;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 
@@ -26,7 +26,7 @@ beforeEach(function (): void {
                     LineBreak::make()->name('line-break'),
                     FormBuilder::make()->name('inner-form')->fields([
                         Switcher::make('Switcher'),
-                        StackFields::make()->fields([
+                        Fieldset::make()->fields([
                             Text::make('Text'),
                             Text::make('Email'),
                         ]),

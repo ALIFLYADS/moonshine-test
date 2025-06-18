@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Tests\Fixtures\Resources;
 
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Laravel\Fields\Relationships\MorphTo;
 use MoonShine\Tests\Fixtures\Models\Category;
 use MoonShine\Tests\Fixtures\Models\ImageModel;
@@ -53,7 +54,7 @@ class TestImageResource extends AbstractTestingResource
         return $this->exportFields();
     }
 
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return [];
     }

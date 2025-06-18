@@ -7,6 +7,7 @@ namespace MoonShine\Laravel\Pages\MoonShineUser;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
@@ -29,7 +30,7 @@ use MoonShine\UI\Fields\PasswordRepeat;
 use MoonShine\UI\Fields\Text;
 
 /**
- * @extends FormPage<MoonShineUser, MoonShineUserResource>
+ * @extends FormPage<MoonShineUserResource, MoonShineUser>
  */
 final class MoonShineUserFormPage extends FormPage
 {
@@ -87,7 +88,7 @@ final class MoonShineUserFormPage extends FormPage
         ];
     }
 
-    protected function rules(mixed $item): array
+    protected function rules(DataWrapperContract $item): array
     {
         return [
             'name' => 'required',
@@ -97,11 +98,11 @@ final class MoonShineUserFormPage extends FormPage
                 'bail',
                 'required',
                 'email',
-                Rule::unique('moonshine_users')->ignoreModel($item),
+                Rule::unique('moonshine_users')->ignoreModel($item->getOriginal()),
             ],
             'avatar' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,gif'],
             'password' => [
-                ...$item->exists ? ['sometimes', 'nullable'] : ['required'],
+                ...$item->getKey() !== null ? ['sometimes', 'nullable'] : ['required'],
                 PasswordRule::defaults(),
                 'confirmed',
             ],

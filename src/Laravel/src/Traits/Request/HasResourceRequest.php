@@ -12,7 +12,7 @@ use MoonShine\Contracts\Core\ResourceContract;
 trait HasResourceRequest
 {
     /**
-     * @return ?T
+     * @return null|T
      */
     public function getResource(): ?ResourceContract
     {

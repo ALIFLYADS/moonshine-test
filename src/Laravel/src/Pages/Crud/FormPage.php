@@ -36,8 +36,8 @@ use MoonShine\UI\Fields\Hidden;
 use Throwable;
 
 /**
- * @template TData of mixed
  * @template TResource of CrudResource = \MoonShine\Laravel\Resources\ModelResource
+ * @template TData of mixed = \Illuminate\Database\Eloquent\Model
  * @extends CrudPage<TResource>
  */
 class FormPage extends CrudPage implements FormPageContract

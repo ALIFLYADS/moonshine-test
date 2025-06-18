@@ -12,7 +12,7 @@ use MoonShine\Laravel\Resources\CrudResource;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use Illuminate\Support\Collection;
-use MoonShine\Laravel\Pages\Page;
+use MoonShine\Contracts\Core\PageContract;
 
 /**
  * @extends CrudResource<array, {indexPage}, {formPage}, {detailPage}>
@@ -24,7 +24,7 @@ class DummyClass extends CrudResource
     protected string $title = 'DummyTitle';
     {properties}
     /**
-     * @return list<Page>
+     * @return list<class-string<PageContract>>
      */
     protected function pages(): array
     {
@@ -35,6 +35,9 @@ class DummyClass extends CrudResource
         ];
     }
 
+    /**
+     * @return Collection<array-key, array>
+     */
     public function getItems(): Collection
     {
         return new Collection([]);
