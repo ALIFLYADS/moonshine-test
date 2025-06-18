@@ -22,7 +22,7 @@ abstract class CrudPage extends Page implements CrudPageContract
 
     public function isAsync(): bool
     {
-        if($this->isAsync === false) {
+        if ($this->isAsync === false) {
             return false;
         }
 
