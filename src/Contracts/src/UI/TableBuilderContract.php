@@ -7,7 +7,6 @@ namespace MoonShine\Contracts\UI;
 use Closure;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Conditionable;
-use MoonShine\Contracts\Core\Paginator\PaginatorContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
 use MoonShine\Contracts\UI\Collection\TableRowsContract;

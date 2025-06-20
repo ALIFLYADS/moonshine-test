@@ -10,7 +10,6 @@ use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\Core\TypeCasts\DataCasterContract;
-use MoonShine\Contracts\UI\Collection\ActionButtonsContract;
 use MoonShine\Support\DTOs\AsyncCallback;
 use MoonShine\Support\Enums\FormMethod;
 
