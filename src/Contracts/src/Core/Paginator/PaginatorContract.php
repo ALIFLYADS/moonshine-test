@@ -12,6 +12,9 @@ use IteratorAggregate;
 use JsonSerializable;
 use Stringable;
 
+/**
+ * @template TData of mixed
+ */
 interface PaginatorContract extends
     Arrayable,
     JsonSerializable,
@@ -26,6 +29,9 @@ interface PaginatorContract extends
 
     public function getLinks(): PaginatorLinksContract;
 
+    /**
+     * @return Collection<array-key, TData>
+     */
     public function getData(): Collection;
 
     public function getOriginalData(): Collection;

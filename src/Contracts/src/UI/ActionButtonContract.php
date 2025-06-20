@@ -13,6 +13,8 @@ use MoonShine\Support\DTOs\AsyncCallback;
 use MoonShine\Support\Enums\HttpMethod;
 
 /**
+ * @template TData of mixed = mixed
+ * @template TWrapper of DataWrapperContract<TData> = DataWrapperContract
  * @template TModal of  ComponentContract = ComponentContract
  * @template TOffCanvas of  ComponentContract = ComponentContract
  *
@@ -26,12 +28,17 @@ interface ActionButtonContract extends
     HasLabelContract,
     HasOffCanvasContract,
     HasModalContract,
-    HasIconContract
+    HasIconContract,
+    WithBadgeContract
 {
+    /**
+     * @param  TData  $data
+     *
+     */
     public function getUrl(mixed $data = null): string;
 
     /**
-     * @param  (Closure(mixed $original, ?DataWrapperContract $casted, static $ctx): string)|string  $url
+     * @param  (Closure(TData $original, null|TWrapper $casted, static $ctx): string)|string  $url
      */
     public function setUrl(Closure|string $url): static;
 
@@ -46,8 +53,15 @@ interface ActionButtonContract extends
 
     public function getBulkForComponent(): ?string;
 
+    /**
+     * @return null|TWrapper
+     */
     public function getData(): ?DataWrapperContract;
 
+    /**
+     * @param  null|TWrapper  $data
+     *
+     */
     public function setData(?DataWrapperContract $data = null): static;
 
     /**
@@ -56,7 +70,7 @@ interface ActionButtonContract extends
     public function onBeforeSet(Closure $onBeforeSet): static;
 
     /**
-     * @param  Closure(?DataWrapperContract $data, ActionButtonContract $ctx): void  $onAfterSet
+     * @param  Closure(null|TWrapper $data, ActionButtonContract $ctx): void  $onAfterSet
      */
     public function onAfterSet(Closure $onAfterSet): static;
 
@@ -66,8 +80,10 @@ interface ActionButtonContract extends
 
     public function showInLine(): static;
 
+    public function blank(): static;
+
     /**
-     * @param array|(Closure(mixed $original): array) $params = []
+     * @param array|(Closure(TData $original): array) $params = []
      */
     public function method(
         string $method,
@@ -99,13 +115,23 @@ interface ActionButtonContract extends
 
     public function isAsync(): bool;
 
+    public function purgeAsync(): void;
+
+    public function withQueryParams(): static;
+
+    public function hasComponent(): bool;
+
+    public function getComponent(): ?ComponentContract;
+
     public function download(): static;
+
+    public function rawMode(): self;
+
+    public function isRaw(): bool;
 
     public function withoutLoading(Closure|bool|null $condition = null): static;
 
     public function content(Closure|string $content): static;
-
-    public function badge(Closure|string|int|float|null $value): static;
 
     public function primary(Closure|bool|null $condition = null): static;
 

@@ -19,6 +19,11 @@ interface HasAsyncContract
         ?AsyncCallback $callback = null,
     ): static;
 
+    /**
+     * @param  Closure(static $ctx): static  $callback
+     */
+    public function whenAsync(Closure $callback): static;
+
     public function getAsyncUrl(): ?string;
 
     public function getAsyncEvents(): string|null;

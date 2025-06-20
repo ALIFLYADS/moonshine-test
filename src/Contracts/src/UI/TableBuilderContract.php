@@ -14,36 +14,105 @@ use MoonShine\Contracts\UI\Collection\TableRowsContract;
 use MoonShine\Support\Enums\ClickAction;
 
 /**
+ * @template TData of mixed = mixed
  * @mixin Conditionable
  * @mixin HasFieldsContract
  * @mixin HasCasterContract
  */
 interface TableBuilderContract extends
     ComponentContract,
+    HasButtonsContract,
     HasAsyncContract
 {
+    /**
+     * @param  TableRowsContract|Closure(TableRowsContract $default): TableRowsContract  $rows
+     */
+    public function rows(TableRowsContract|Closure $rows): self;
+
     public function getRows(): TableRowsContract;
 
-    public function paginator(PaginatorContract $paginator): static;
+    /**
+     * @param  TableRowsContract|Closure(TableRowContract $default): TableRowsContract  $rows
+     */
+    public function headRows(TableRowsContract|Closure $rows): self;
 
-    public function hasPaginator(): bool;
+    /**
+     * @param  TableRowsContract|Closure(TableRowContract $default): TableRowsContract  $rows
+     */
+    public function footRows(TableRowsContract|Closure $rows): self;
 
-    public function isSimplePaginator(): bool;
-
-    public function getPaginator(bool $async = false): ?PaginatorContract;
-
-    public function getButtons(DataWrapperContract $data): ActionButtonsContract;
-
-    public function buttons(iterable $buttons = []): static;
-
-    public function hasButtons(): bool;
-
-    public function getBulkButtons(): ActionButtonsContract;
-
-    public function getItems(): Collection;
-
+    /**
+     * @param  list<TData>  $items
+     *
+     */
     public function items(iterable $items = []): static;
 
+    /**
+     * @return Collection<array-key, TData>
+     */
+    public function getItems(): Collection;
+
+    /**
+     * @param  Closure(null|DataWrapperContract<TData> $data, int $row, int $cell, static $table): array  $callback
+     */
+    public function tdAttributes(Closure $callback): static;
+
+    /**
+     * @param null|DataWrapperContract<TData> $data
+     * @return  array<string, string>
+     */
+    public function getTdAttributes(?DataWrapperContract $data, int $row, int $cell): array;
+
+    /**
+     * @param  Closure(null|DataWrapperContract<TData> $data, int $row, static $table): array  $callback
+     */
+    public function trAttributes(Closure $callback): static;
+
+    /**
+     * @param null|DataWrapperContract<TData> $data
+     * @return  array<string, string>
+     */
+    public function getTrAttributes(?DataWrapperContract $data, int $row): array;
+
+    /**
+     * @param  array<string, string>  $attributes
+     */
+    public function headAttributes(array $attributes): self;
+
+    /**
+     * @param  array<string, string>  $attributes
+     */
+    public function bodyAttributes(array $attributes): self;
+
+    /**
+     * @param  array<string, string>  $attributes
+     */
+    public function footAttributes(array $attributes): self;
+
+    public function getCellsCount(): int;
+
+    /**
+     * @param  Closure(self): array  $callback
+     */
+    public function topLeft(Closure $callback): self;
+
+    /**
+     * @param  Closure(self): array  $callback
+     */
+    public function topRight(Closure $callback): self;
+
+    /**
+     * @param  ?Closure(ActionButtonsContract): ActionButtonsContract  $modifyButtons
+     */
+    public function getBulkRow(?Closure $modifyButtons = null): ?TableRowContract;
+
+    /**
+     * States
+     */
+
+    /**
+     * @param  array<string, string>  $attributes
+     */
     public function creatable(
         bool $reindex = true,
         ?int $limit = null,
@@ -75,15 +144,7 @@ interface TableBuilderContract extends
 
     public function isVertical(): bool;
 
-    /**
-     * @param  Closure(?DataWrapperContract $data, int $row, int $cell, static $table): array  $callback
-     */
-    public function tdAttributes(Closure $callback): static;
-
-    /**
-     * @param  Closure(?DataWrapperContract $data, int $row, static $table): array  $callback
-     */
-    public function trAttributes(Closure $callback): static;
+    public function inside(string $entity): self;
 
     public function reindex(bool $prepared = false): static;
 
@@ -120,6 +181,12 @@ interface TableBuilderContract extends
     public function columnSelection(): static;
 
     public function isColumnSelection(): bool;
+
+    public function lazy(): static;
+
+    public function isLazy(): bool;
+
+    public function statesToArray(): array;
 
     public function clickAction(?ClickAction $action = null, ?string $selector = null): static;
 
