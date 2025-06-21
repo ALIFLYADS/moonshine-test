@@ -128,22 +128,9 @@ class FormPage extends CrudPage implements FormPageContract
      */
     protected function mainLayer(): array
     {
-        $resource = $this->getResource();
-        $item = $resource->getCastedData();
-
-        $action = $resource->getRoute(
-            $resource->isItemExists() ? 'crud.update' : 'crud.store',
-            $item?->getKey()
-        );
-
-        // Reset form problem
-        $isAsync = $this->isAsync();
-
-        if (request()->boolean('_async_form')) {
-            $isAsync = true;
-        }
-
-        return $this->getFormComponents($action, $item, $isAsync);
+        return [
+            $this->getFormComponent()
+        ];
     }
 
     /**
@@ -207,32 +194,46 @@ class FormPage extends CrudPage implements FormPageContract
         return array_merge($components, $this->getEmptyModals());
     }
 
-    /**
-     * @return list<ComponentContract>
-     *@throws Throwable
-     */
-    protected function getFormComponents(
-        string $action,
-        ?DataWrapperContract $item,
-        bool $isAsync = true,
-    ): array {
+    public function getFormComponent(bool $withoutFragment = false): ComponentContract
+    {
         $resource = $this->getResource();
+        $item = $resource->getCastedData();
+        $fields = $this->getResource()->getFormFields();
 
-        return [
-            Fragment::make([
-                $this->getFormComponent(
-                    $action,
-                    $item,
-                    $this->getResource()->getFormFields(),
-                    $isAsync
-                ),
-            ])
-                ->name('crud-form')
-                ->updateWith(['resourceItem' => $resource->getItemID()]),
-        ];
+        $action = $resource->getRoute(
+            $resource->isItemExists() ? 'crud.update' : 'crud.store',
+            $item?->getKey()
+        );
+
+        // Reset form problem
+        $isAsync = $this->isAsync();
+
+        if (request()->boolean('_async_form')) {
+            $isAsync = true;
+        }
+
+        $component = $this->getForm(
+            $action,
+            $item,
+            $fields,
+            $isAsync
+        );
+
+        if ($withoutFragment) {
+            return $component;
+        }
+
+        return Fragment::make([$component])
+            ->name('crud-form')
+            ->updateWith(['resourceItem' => $resource->getItemID()]);
     }
 
-    protected function getFormComponent(
+    /**
+     * @param  non-empty-string  $action
+     * @param  DataWrapperContract<TData>|null  $item
+     *
+     */
+    protected function getForm(
         string $action,
         ?DataWrapperContract $item,
         Fields $fields,

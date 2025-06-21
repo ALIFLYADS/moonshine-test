@@ -104,12 +104,9 @@ class DetailPage extends CrudPage implements DetailPageContract
      */
     protected function mainLayer(): array
     {
-        $resource = $this->getResource();
-        $item = $resource->getCastedData();
-
         return [
             Box::make([
-                ...$this->getDetailComponents($item),
+                $this->getDetailComponent(),
                 LineBreak::make(),
                 ...$this->getTopButtons(),
             ]),
@@ -175,9 +172,18 @@ class DetailPage extends CrudPage implements DetailPageContract
         return array_merge($components, $this->getEmptyModals());
     }
 
-    protected function getDetailComponent(?DataWrapperContract $item, Fields $fields): ComponentContract
+    protected function modifyDetailComponent(ComponentContract $component): ComponentContract
     {
-        return $this->modifyDetailComponent(
+        return $component;
+    }
+
+    public function getDetailComponent(bool $withoutFragment = false): ComponentContract
+    {
+        $resource = $this->getResource();
+        $item = $resource->getCastedData();
+        $fields = $this->getResource()->getDetailFields();
+
+        $component = $this->modifyDetailComponent(
             TableBuilder::make($fields)
                 ->cast($this->getResource()->getCaster())
                 ->items([$item])
@@ -189,26 +195,12 @@ class DetailPage extends CrudPage implements DetailPageContract
                 ->preview()
                 ->class('table-divider')
         );
-    }
 
-    protected function modifyDetailComponent(ComponentContract $component): ComponentContract
-    {
-        return $component;
-    }
+        if ($withoutFragment) {
+            return $component;
+        }
 
-    /**
-     * @return list<ComponentContract>
-     * @throws MoonShineComponentException
-     * @throws PageException
-     * @throws Throwable
-     */
-    protected function getDetailComponents(?DataWrapperContract $item): array
-    {
-        return [
-            Fragment::make([
-                $this->getDetailComponent($item, $this->getResource()->getDetailFields()),
-            ])->name('crud-detail'),
-        ];
+        return Fragment::make([$component])->name('crud-detail');
     }
 
     /**

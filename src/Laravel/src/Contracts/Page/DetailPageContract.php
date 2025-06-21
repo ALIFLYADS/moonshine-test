@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Contracts\Page;
 
 use MoonShine\Contracts\Core\CrudPageContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
+use MoonShine\Contracts\UI\ComponentContract;
 
 /**
  * @template TFields of FieldsContract
@@ -14,4 +15,5 @@ use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
  */
 interface DetailPageContract extends CrudPageContract
 {
+    public function getDetailComponent(bool $withoutFragment = false): ComponentContract;
 }
