@@ -68,7 +68,7 @@ class MakePageCommand extends MoonShineCommand
         if ($this->option('crud')) {
             $name = $stubsPath->name;
 
-            if($this->option('dir') === null) {
+            if ($this->option('dir') === null) {
                 $dir = "Resources/$className/Pages";
             }
 
