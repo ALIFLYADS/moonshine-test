@@ -24,7 +24,7 @@ final class ResourceCommandTest extends TestCase
 
         $name = 'DeleteMeResource';
         $file = "$name.php";
-        $path = __DIR__ . "/../../../app/MoonShine/Resources/$file";
+        $path = __DIR__ . "/../../../app/MoonShine/Resources/DeleteMe/$file";
         $layoutPath = $reflector->getFileName();
 
         @unlink($path);
@@ -54,10 +54,10 @@ final class ResourceCommandTest extends TestCase
     {
         $name = 'DeleteMeResource';
         $file = "$name.php";
-        $path = __DIR__ . "/../../../app/MoonShine/Resources/$file";
-        $path1 = __DIR__ . "/../../../app/MoonShine/Pages/DeleteMe/DeleteMeIndexPage.php";
-        $path2 = __DIR__ . "/../../../app/MoonShine/Pages/DeleteMe/DeleteMeFormPage.php";
-        $path3 = __DIR__ . "/../../../app/MoonShine/Pages/DeleteMe/DeleteMeDetailPage.php";
+        $path = __DIR__ . "/../../../app/MoonShine/Resources/DeleteMe/$file";
+        $path1 = __DIR__ . "/../../../app/MoonShine/Resources/DeleteMe/Pages/DeleteMeIndexPage.php";
+        $path2 = __DIR__ . "/../../../app/MoonShine/Resources/DeleteMe/Pages/DeleteMeFormPage.php";
+        $path3 = __DIR__ . "/../../../app/MoonShine/Resources/DeleteMe/Pages/DeleteMeDetailPage.php";
 
         @unlink($path);
         @unlink($path1);
@@ -100,7 +100,7 @@ final class ResourceCommandTest extends TestCase
         $dir = 'Test';
         $name = 'DeleteMeResource';
         $file = "$name.php";
-        $path = __DIR__ . "/../../../app/MoonShine/Resources/$dir/$file";
+        $path = __DIR__ . "/../../../app/MoonShine/Resources/DeleteMe/$dir/$file";
 
         @unlink($path);
 
