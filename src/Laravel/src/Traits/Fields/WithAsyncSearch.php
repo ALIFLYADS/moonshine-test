@@ -161,7 +161,7 @@ trait WithAsyncSearch
 
     /**
      * @param  string|null  $column
-     * @param  ?Closure(Builder $query, RelationModelFieldRequest $request, string $term, FieldContract $field): static  $searchQuery
+     * @param  ?Closure(Builder $query, string $term, RelationModelFieldRequest $request, FieldContract $field): static  $searchQuery
      * @param  ?Closure(mixed $data, FieldContract $field): static  $formatted
      */
     public function asyncSearch(
@@ -199,7 +199,7 @@ trait WithAsyncSearch
     }
 
     /**
-     * @param  ?Closure(Builder $query, RelationModelFieldRequest $request, string $term, FieldContract $field): static  $searchQuery
+     * @param  ?Closure(Builder $query, string $term, RelationModelFieldRequest $request, FieldContract $field): static  $searchQuery
      */
     public function associatedWith(string $column, ?Closure $searchQuery = null): static
     {
