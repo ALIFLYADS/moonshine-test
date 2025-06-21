@@ -57,8 +57,8 @@ final class AsyncSearchController extends MoonShineController
             $query = value(
                 $field->getAsyncSearchQuery(),
                 $query,
-                $request,
                 $term,
+                $request,
                 $field
             );
         }
