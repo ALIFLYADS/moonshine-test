@@ -65,7 +65,7 @@ return [
         'guard' => 'moonshine',
         'model' => MoonshineUser::class,
         'middleware' => [
-            Authenticate::class
+            Authenticate::class,
         ],
         'pipelines' => [],
     ],
