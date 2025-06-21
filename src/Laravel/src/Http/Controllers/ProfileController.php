@@ -35,11 +35,13 @@ class ProfileController extends MoonShineController
                 ->json(message: $message, messageType: $type)
                 ->events([
                     AlpineJs::event(
-                        JsEvent::FRAGMENT_UPDATED, 'sidebar-content',
+                        JsEvent::FRAGMENT_UPDATED,
+                        'sidebar-content',
                     ),
                     AlpineJs::event(
-                        JsEvent::FRAGMENT_UPDATED, 'topbar-actions',
-                    )
+                        JsEvent::FRAGMENT_UPDATED,
+                        'topbar-actions',
+                    ),
                 ]);
         }
 
