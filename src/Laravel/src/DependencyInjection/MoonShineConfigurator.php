@@ -278,7 +278,9 @@ final class MoonShineConfigurator implements ConfiguratorContract
      */
     public function getAuthMiddleware(): array
     {
-        return $this->get('auth.middleware', []);
+        $middleware = $this->get('auth.middleware', []);
+
+        return \is_string($middleware) ? [$middleware] : $middleware;
     }
 
     public function getPagePrefix(): string
