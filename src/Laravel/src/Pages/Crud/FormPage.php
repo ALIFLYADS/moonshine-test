@@ -129,7 +129,7 @@ class FormPage extends CrudPage implements FormPageContract
     protected function mainLayer(): array
     {
         return [
-            $this->getFormComponent()
+            $this->getFormComponent(),
         ];
     }
 
