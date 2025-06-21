@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Commands;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+
 use function Laravel\Prompts\{suggest};
 
 use MoonShine\Laravel\MoonShineAuth;

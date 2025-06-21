@@ -62,12 +62,12 @@ final class Paginator implements PaginatorContract, HasCoreContract, HasViewRend
     {
         if ($this->path !== $path) {
             $changeUrl = function (?string $link) use ($path): ?string {
-                $current = \strtok($this->path, '?');
-                $new = \strtok($path, '?');
+                $current = strtok($this->path, '?');
+                $new = strtok($path, '?');
                 $query = Str::of($path)->contains('?') ? Str::of($path)->after('?')->value() : '';
 
                 return $link
-                    ? \trim(str_replace($current, $new, $link) . '&' . $query, '&')
+                    ? trim(str_replace($current, $new, $link) . '&' . $query, '&')
                     : $link;
             };
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Commands;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-
 use Illuminate\Support\Str;
+
 use function Laravel\Prompts\{outro, select, text};
 
 use MoonShine\Laravel\Support\StubsPath;

@@ -29,7 +29,7 @@ abstract class Page extends CorePage implements WithResponseModifierContract
         $withoutQuery = trim(parse_url($this->getUrl(), PHP_URL_PATH), '/');
         $currentPath = trim($this->getCore()->getRequest()->getPath(), '/');
 
-        if ($this->isCheckUrl() && ! \str_contains($currentPath, $withoutQuery)) {
+        if ($this->isCheckUrl() && ! str_contains($currentPath, $withoutQuery)) {
             oops404();
         }
 
