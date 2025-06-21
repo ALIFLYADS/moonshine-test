@@ -31,7 +31,7 @@ if (moonshineConfig()->isUseRoutes()) {
             Route::controller(AuthenticateController::class)->group(static function (): void {
                 Route::get('/login', 'login')->name('login');
                 Route::post('/authenticate', 'authenticate')->name('authenticate');
-                Route::get('/logout', 'logout')->name('logout');
+                Route::delete('/logout', 'logout')->name('logout');
             });
         }
 
