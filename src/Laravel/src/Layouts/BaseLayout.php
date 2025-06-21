@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Layouts;
 
 use MoonShine\Contracts\UI\ComponentContract;
+use MoonShine\Laravel\Components\Fragment;
 use MoonShine\Laravel\Components\Layout\Locales;
 use MoonShine\Laravel\Components\Layout\Notifications;
 use MoonShine\Laravel\Components\Layout\Profile;
@@ -91,7 +92,7 @@ abstract class BaseLayout extends AbstractLayout
     protected function getSidebarComponent(): Sidebar
     {
         return Sidebar::make([
-            Div::make([
+            Fragment::make([
                 Div::make([
                     $this->getLogoComponent()->minimized(),
                 ])->class('menu-heading-logo'),
@@ -103,9 +104,9 @@ abstract class BaseLayout extends AbstractLayout
                         Burger::make(),
                     ])->class('menu-heading-burger'),
                 ])->class('menu-heading-actions'),
-            ])->class('menu-heading'),
+            ])->class('menu-heading')->name('sidebar-top'),
 
-            Div::make([
+            Fragment::make([
                 ...$this->sidebarSlot(),
                 Menu::make(),
                 When::make(
@@ -117,7 +118,7 @@ abstract class BaseLayout extends AbstractLayout
             ])->customAttributes([
                 'class' => 'menu',
                 ':class' => "asideMenuOpen && '_is-opened'",
-            ]),
+            ])->name('sidebar-content'),
         ])->collapsed();
     }
 
@@ -132,15 +133,15 @@ abstract class BaseLayout extends AbstractLayout
     protected function getTopBarComponent(): Topbar
     {
         return TopBar::make([
-            Div::make([
+            Fragment::make([
                 $this->getLogoComponent()->minimized(),
-            ])->class('menu-logo'),
+            ])->class('menu-logo')->name('topbar-logo'),
 
-            Div::make([
+            Fragment::make([
                 Menu::make()->top(),
-            ])->class('menu-navigation'),
+            ])->class('menu-navigation')->name('topbar-menu'),
 
-            Div::make([
+            Fragment::make([
                 ...$this->topBarSlot(),
                 When::make(
                     fn (): bool => $this->isProfileEnabled(),
@@ -155,7 +156,7 @@ abstract class BaseLayout extends AbstractLayout
                 Div::make([
                     Burger::make(),
                 ])->class('menu-burger'),
-            ])->class('menu-actions'),
+            ])->class('menu-actions')->name('topbar-actions'),
         ])->customAttributes([
             ':class' => "asideMenuOpen && '_is-opened'",
         ]);
