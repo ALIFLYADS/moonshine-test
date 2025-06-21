@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Commands;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
+use Illuminate\Support\Str;
 use function Laravel\Prompts\{outro, select, text};
 
 use MoonShine\Laravel\Support\StubsPath;
@@ -29,16 +30,16 @@ class MakeResourceCommand extends MoonShineCommand
             required: true,
         );
 
-        $className = str($className)
+        $className = Str::of($className)
             ->ucfirst()
             ->remove('resource', false)
             ->value();
 
         $model = $this->qualifyModel($this->option('model') ?? $className);
-        $title = $this->option('title') ?? str($className)->singular()->plural()->value();
+        $title = $this->option('title') ?? Str::of($className)->singular()->plural()->value();
 
         $stubsPath = new StubsPath("{$className}Resource", 'php');
-        $name = str($stubsPath->name)
+        $name = Str::of($stubsPath->name)
             ->remove('resource', false)
             ->value();
 

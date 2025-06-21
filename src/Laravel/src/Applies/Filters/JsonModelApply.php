@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Applies\Filters;
 
 use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use MoonShine\Contracts\UI\ApplyContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\UI\Fields\Json;
@@ -19,8 +20,7 @@ class JsonModelApply implements ApplyContract
     public function apply(FieldContract $field): Closure
     {
         return static function (Builder $query) use ($field): void {
-            $values = collect($field->getRequestValue())
-                ->filter();
+            $values = Collection::make($field->getRequestValue())->filter();
 
             if ($values->isNotEmpty()) {
                 $query->where(static function (Builder $q) use ($values, $field): void {

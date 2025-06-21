@@ -7,6 +7,8 @@ namespace MoonShine\Laravel\Fields\Relationships;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\Laravel\Exceptions\ModelRelationFieldException;
 use MoonShine\Support\DTOs\Select\Options;
 use MoonShine\UI\Exceptions\FieldException;
@@ -36,7 +38,7 @@ class MorphTo extends BelongsTo
     {
         $this->asyncSearch();
 
-        $this->searchColumns = collect($types)
+        $this->searchColumns = Collection::make($types)
             ->mapWithKeys(
                 static fn (
                     string|array $searchColumn,
@@ -45,7 +47,7 @@ class MorphTo extends BelongsTo
             )
             ->toArray();
 
-        $this->types = collect($types)
+        $this->types = Collection::make($types)
             ->mapWithKeys(
                 static fn (
                     string|array $searchColumn,
@@ -97,7 +99,7 @@ class MorphTo extends BelongsTo
     public function getRequestTypeValue(): string
     {
         return request()->getScalar(
-            (string) str($this->getNameDot())->replace(
+            (string) Str::of($this->getNameDot())->replace(
                 $this->getColumn(),
                 $this->getMorphType()
             ),
@@ -143,7 +145,7 @@ class MorphTo extends BelongsTo
         $column = $this->getSearchColumn($value::class);
         $type = $item->{$this->getMorphType()};
 
-        $preview = str($this->types[$type] ?? $type)
+        $preview = Str::of($this->types[$type] ?? $type)
             ->append('(')
             ->append(data_get($value, $column))
             ->append(')')
@@ -187,7 +189,7 @@ class MorphTo extends BelongsTo
             'typeValue' => addslashes($this->getTypeValue()),
             'column' => $this->getColumn(),
             'morphType' => $this->getMorphType(),
-            'morphTypeName' => str($this->getNameAttribute())->replace($this->getColumn(), $this->getMorphType()),
+            'morphTypeName' => Str::of($this->getNameAttribute())->replace($this->getColumn(), $this->getMorphType()),
         ];
     }
 }

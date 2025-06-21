@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOneOrMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use MoonShine\Contracts\Core\HasResourceContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
@@ -61,7 +62,7 @@ abstract class ModelRelationField extends Field implements HasResourceContract
         parent::__construct($label, $relationName, $formatted);
 
         if (\is_null($relationName)) {
-            $relationName = str($this->getLabel())
+            $relationName = Str::of($this->getLabel())
                 ->camel()
                 ->when(
                     $this->isToOne(),
@@ -74,7 +75,7 @@ abstract class ModelRelationField extends Field implements HasResourceContract
 
         if ($this->isToOne() && ! $this->isOutsideComponent()) {
             $this->setColumn(
-                str($this->getRelationName())
+                Str::of($this->getRelationName())
                     ->singular()
                     ->snake()
                     ->append('_id')
@@ -125,9 +126,9 @@ abstract class ModelRelationField extends Field implements HasResourceContract
 
         /** @var ?ModelResource $resource */
         $resource = $classString
-            ? moonshine()->getResources()->findByClass($classString)
-            : moonshine()->getResources()->findByUri(
-                str($this->getRelationName())
+            ? $this->getCore()->getResources()->findByClass($classString)
+            : $this->getCore()->getResources()->findByUri(
+                Str::of($this->getRelationName())
                     ->singular()
                     ->append('Resource')
                     ->kebab()
@@ -136,7 +137,7 @@ abstract class ModelRelationField extends Field implements HasResourceContract
 
         if (\is_null($resource) && $this->isMorph()) {
             /** @var ModelResource $resource */
-            $resource = moonshine()->getResources()->findByUri(
+            $resource = $this->getCore()->getResources()->findByUri(
                 moonshineRequest()->getResourceUri(),
             );
         }

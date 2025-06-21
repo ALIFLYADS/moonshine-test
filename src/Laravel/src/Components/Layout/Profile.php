@@ -60,7 +60,7 @@ final class Profile extends MoonShineComponent
 
     public function getAvatarPlaceholder(): string
     {
-        return $this->defaultAvatar ?? moonshineAssets()->getAsset('vendor/moonshine/avatar.jpg');
+        return $this->defaultAvatar ?? $this->getAssetManager()->getAsset('vendor/moonshine/avatar.jpg');
     }
 
     private function getDefaultName(): string
@@ -111,7 +111,7 @@ final class Profile extends MoonShineComponent
             return $avatar;
         }
 
-        return Storage::disk(moonshineConfig()->getDisk())->url($avatar);
+        return Storage::disk($this->getCore()->getConfig()->getDisk())->url($avatar);
     }
 
     /**
@@ -152,10 +152,10 @@ final class Profile extends MoonShineComponent
             : value($this->avatar, $this);
 
         return [
-            'route' => $this->route ?? toPage(
-                moonshineConfig()->getPage('profile', ProfilePage::class),
+            'route' => $this->route ?? $this->getCore()->getRouter()->getEndpoints()->toPage(
+                $this->getCore()->getConfig()->getPage('profile', ProfilePage::class),
             ),
-            'logOutRoute' => $this->logOutRoute ?? rescue(fn (): string => moonshineRouter()->to('logout'), '', report: false),
+            'logOutRoute' => $this->logOutRoute ?? rescue(fn (): string =>$this->getCore()->getRouter()->to('logout'), '', report: false),
             'avatar' => $avatar,
             'nameOfUser' => $nameOfUser,
             'username' => $username,

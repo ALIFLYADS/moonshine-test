@@ -20,7 +20,7 @@ trait ResourceWithParent
             return $this->parentId;
         }
 
-        $parentResource = moonshine()
+        $parentResource = $this->getCore()
             ->getResources()->findByClass(
                 $this->getParentResourceClassName()
             );

@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
+use Illuminate\Support\Str;
 use Leeto\FastAttributes\Attributes;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Laravel\Collections\Fields;
@@ -193,7 +194,7 @@ trait ResourceQuery
                 column: [0 => 'columns']
             );
 
-            $terms = str($term)
+            $terms = Str::of($term)
                 ->squish()
                 ->value();
 
@@ -254,7 +255,7 @@ trait ResourceQuery
 
     public function getQueryParams(): Collection
     {
-        return collect($this->queryParams);
+        return new Collection($this->queryParams);
     }
 
     protected function getItemsPerPage(): int
@@ -371,7 +372,7 @@ trait ResourceQuery
         ) {
             $this->setQueryParams(
                 $this->getQueryParams()->merge(
-                    collect(moonshineCache()->get($this->getQueryCacheKey(), []))->filter(
+                    Collection::make(moonshineCache()->get($this->getQueryCacheKey(), []))->filter(
                         fn ($value, $key): bool => ! $this->getQueryParams()->has($key),
                     )->toArray(),
                 ),

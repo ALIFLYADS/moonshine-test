@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Core\Traits;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use MoonShine\Contracts\Core\DependencyInjection\RequestContract;
 
@@ -42,7 +43,7 @@ trait InteractsWithRequest
     {
         $url = $this->getUrl();
 
-        return collect($patterns)->contains(static fn ($pattern) => Str::is($pattern, $url));
+        return Collection::make($patterns)->contains(static fn ($pattern) => Str::is($pattern, $url));
     }
 
     public function getUrlWithQuery(array $query): string

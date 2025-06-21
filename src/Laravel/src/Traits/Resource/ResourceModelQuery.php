@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ApplyContract;
 use MoonShine\Core\Exceptions\ResourceException;
@@ -223,7 +224,7 @@ trait ResourceModelQuery
         );
 
         /** @var ?QueryTag $tag */
-        $tag = collect($tags)
+        $tag = Collection::make($tags)
             ->first(
                 static fn (QueryTag $tag): bool => $tag->isActive(),
             );
@@ -254,8 +255,8 @@ trait ResourceModelQuery
     {
         $this->newQuery()->where(function (Builder $builder) use ($terms): void {
             foreach ($this->getSearchColumns() as $key => $column) {
-                if (str($column)->contains('.')) {
-                    $column = str($column)
+                if (Str::of($column)->contains('.')) {
+                    $column = Str::of($column)
                         ->explode('.')
                         ->tap(static function (Collection $data) use (&$key): void {
                             $key = $data->first();
@@ -270,7 +271,7 @@ trait ResourceModelQuery
                         method_exists($this->getDataInstance(), $key),
                         static fn (Builder $query) => $query->orWhereHas(
                             $key,
-                            static fn (Builder $q) => collect($column)->each(static fn ($item) => $q->where(
+                            static fn (Builder $q) => Collection::make($column)->each(static fn ($item) => $q->where(
                                 static fn (Builder $qq) => $qq->orWhere(
                                     $item,
                                     DBOperators::byModel($qq->getModel())->like(),
@@ -278,7 +279,7 @@ trait ResourceModelQuery
                                 ),
                             )),
                         ),
-                        static fn (Builder $query) => collect($column)->each(static fn ($item) => $query->orWhere(
+                        static fn (Builder $query) => Collection::make($column)->each(static fn ($item) => $query->orWhere(
                             static fn (Builder $qq) => $qq->orWhereJsonContains($key, [$item => $terms]),
                         )),
                     );

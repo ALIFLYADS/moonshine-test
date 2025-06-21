@@ -6,6 +6,7 @@ namespace MoonShine\Core\Traits;
 
 use Closure;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Support\Collection;
 use MoonShine\Contracts\Core\HasCanSeeContract;
 use MoonShine\Contracts\Core\HasComponentsContract;
 use MoonShine\Contracts\UI\ComponentContract;
@@ -33,7 +34,7 @@ trait WithViewRenderer
 
     public function getTranslates(): array
     {
-        return collect($this->translates)
+        return Collection::make($this->translates)
             ->mapWithKeys(fn (string $key, string $name) => [$name => $this->getCore()->getTranslator()->get($key)])
             ->toArray();
     }

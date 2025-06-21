@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Core;
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use MoonShine\Contracts\Core\DependencyInjection\EndpointsContract;
 use MoonShine\Contracts\Core\DependencyInjection\RouterContract;
@@ -39,7 +40,7 @@ abstract class AbstractRouter implements RouterContract, Stringable
 
     public function getName(string $name = ''): string
     {
-        return str($this->getRawName())
+        return Str::of($this->getRawName())
             ->prepend(self::ROUTE_PREFIX . '.')
             ->when(
                 $name,

@@ -36,7 +36,7 @@ final class LoginLayout extends BaseLayout
     {
         return $this->title ?? __(
             'moonshine::ui.login.title',
-            ['moonshine_title' => moonshineConfig()->getTitle()],
+            ['moonshine_title' => $this->getCore()->getConfig()->getTitle()],
         );
     }
 

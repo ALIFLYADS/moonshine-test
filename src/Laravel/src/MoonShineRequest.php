@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Laravel\Traits\Request\HasPageRequest;
 use MoonShine\Laravel\Traits\Request\HasResourceRequest;
@@ -34,7 +35,7 @@ class MoonShineRequest extends Request
             return null;
         }
 
-        return str($parentResource)
+        return Str::of($parentResource)
             ->replace('-' . $this->getParentRelationId(), '')
             ->camel()
             ->value();
@@ -45,7 +46,7 @@ class MoonShineRequest extends Request
         return
             \is_null($parentResource = $this->getParentResourceId())
                 ? null
-                : str($parentResource)->after('-')->value();
+                : Str::of($parentResource)->after('-')->value();
     }
 
     public function getComponentName(): string
@@ -61,7 +62,7 @@ class MoonShineRequest extends Request
 
     public function isOnResourceRoute(): bool
     {
-        return str($this->url())->contains('resource/');
+        return Str::of($this->url())->contains('resource/');
     }
 
     public function getFragmentLoad(): ?string

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Str;
 use MoonShine\Laravel\Fields\Relationships\HasMany;
 use MoonShine\Laravel\Models\MoonshineUser;
 use MoonShine\Tests\Fixtures\Resources\TestImageResource;
@@ -71,5 +72,5 @@ it('correct relation name with key string', function (string $id): void {
     expect(moonshineRequest()->getParentRelationId())
         ->toBe($id)
         ->and(moonshineRequest()->getParentRelationName())
-        ->toBe((string) str($relationName)->camel());
+        ->toBe((string) Str::of($relationName)->camel());
 })->with(['01J95W9RR73FH93AFCP0YP2VP1', 'ab193d8c-09d5-4185-a62d-d93ee1dd3bfe']);

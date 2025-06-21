@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace MoonShine\ColorManager;
 
+use Illuminate\Support\Str;
+
 final class ColorMutator
 {
     public static function toHEX(string $value): string
     {
-        $value = str($value);
+        $result = Str::of($value);
 
-        if ($value->contains('#')) {
-            return $value->value();
+        if ($result->contains('#')) {
+            return $result->value();
         }
 
-        return $value
+        return $result
             ->explode(',')
             ->map(static function ($v): string {
                 $v = dechex((int) trim($v));
@@ -31,10 +33,10 @@ final class ColorMutator
 
     public static function toRGB(string $value): string
     {
-        $value = str($value);
+        $result = Str::of($value);
 
-        if ($value->contains('#')) {
-            $dec = hexdec((string) $value->remove('#')->value());
+        if ($result->contains('#')) {
+            $dec = hexdec((string) $result->remove('#')->value());
             $rgb = [
                 'red' => 0xFF & ($dec >> 0x10),
                 'green' => 0xFF & ($dec >> 0x8),
@@ -44,11 +46,11 @@ final class ColorMutator
             return implode(',', $rgb);
         }
 
-        if ($value->contains('rgb')) {
-            return $value->remove(['rgb', '(', ')'])
+        if ($result->contains('rgb')) {
+            return $result->remove(['rgb', '(', ')'])
                 ->value();
         }
 
-        return $value->value();
+        return $result->value();
     }
 }

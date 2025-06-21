@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Traits\Fields;
 
 use Closure;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use MoonShine\UI\Components\ActionButton;
@@ -65,7 +66,7 @@ trait WithRelatedLink
 
         $resource = $this->getNowOnResource() ?? moonshineRequest()->getResource();
 
-        $relationName = str((string) $resource?->getUriKey())
+        $relationName = Str::of((string) $resource?->getUriKey())
             ->remove('-resource')
             ->replace('-', '_');
 

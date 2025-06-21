@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Collection;
 use MoonShine\Support\ListOf;
 
 uses()->group('support');
@@ -64,9 +65,9 @@ it('except type', function () {
     $listOf = $this->listOfObjects->except(SomeTypeSub2::class, SomeTypeSub3::class)->toArray();
     expect($listOf)
         ->toHaveCount(1)
-        ->and(collect($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1))
+        ->and(Collection::make($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1))
         ->toBeTrue()
-        ->and(collect($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2 || $item instanceof SomeTypeSub3))
+        ->and(Collection::make($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2 || $item instanceof SomeTypeSub3))
         ->toBeFalse();
 });
 
@@ -74,7 +75,7 @@ it('except closure', function () {
     $listOf = $this->listOfObjects->except(fn ($item) => \get_class($item) === SomeTypeSub2::class)->toArray();
     expect($listOf)
         ->toHaveCount(2)
-        ->and(collect($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2))
+        ->and(Collection::make($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2))
         ->toBeFalse();
 });
 
@@ -83,9 +84,9 @@ it('except mixed', function () {
     $listOf = $this->listOfObjects->except(fn ($item) => $item instanceof SomeTypeSub2, SomeTypeSub3::class)->toArray();
     expect($listOf)
         ->toHaveCount(1)
-        ->and(collect($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1))
+        ->and(Collection::make($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1))
         ->toBeTrue()
-        ->and(collect($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2 || $item instanceof SomeTypeSub3))
+        ->and(Collection::make($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2 || $item instanceof SomeTypeSub3))
         ->toBeFalse();
 });
 
@@ -119,9 +120,9 @@ it('only type', function () {
     $listOf = $this->listOfObjects->only(SomeTypeSub1::class, SomeTypeSub2::class)->toArray();
     expect($listOf)
         ->toHaveCount(2)
-        ->and(collect($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub3))
+        ->and(Collection::make($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub3))
         ->toBeFalse()
-        ->and(collect($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1 || $item instanceof SomeTypeSub2))
+        ->and(Collection::make($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1 || $item instanceof SomeTypeSub2))
         ->toBeTrue();
 });
 
@@ -129,9 +130,9 @@ it('only closure', function () {
     $listOf = $this->listOfObjects->only(fn ($item) => \get_class($item) === SomeTypeSub1::class)->toArray();
     expect($listOf)
         ->toHaveCount(1)
-        ->and(collect($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2 || $item instanceof SomeTypeSub3))
+        ->and(Collection::make($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2 || $item instanceof SomeTypeSub3))
         ->toBeFalse()
-        ->and(collect($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1))
+        ->and(Collection::make($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1))
         ->toBeTrue();
 });
 
@@ -139,8 +140,8 @@ it('only mixed', function () {
     $listOf = $this->listOfObjects->only(fn ($item) => \get_class($item) === SomeTypeSub1::class, SomeTypeSub3::class)->toArray();
     expect($listOf)
         ->toHaveCount(2)
-        ->and(collect($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2))
+        ->and(Collection::make($listOf)->contains(fn ($item) => $item instanceof SomeTypeSub2))
         ->toBeFalse()
-        ->and(collect($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1 || $item instanceof SomeTypeSub3))
+        ->and(Collection::make($listOf)->every(fn ($item) => $item instanceof SomeTypeSub1 || $item instanceof SomeTypeSub3))
         ->toBeTrue();
 });

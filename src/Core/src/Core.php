@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Core;
 
 use Closure;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Conditionable;
 use MoonShine\Contracts\AssetManager\AssetManagerContract;
 use MoonShine\Contracts\Core\DependencyInjection\CacheAttributesContract;
@@ -239,7 +240,7 @@ abstract class Core implements CoreContract, StatefulContract
     {
         return Pages::make(
             $this->resolveInstances(
-                collect($this->pages)->except('error')
+                Collection::make($this->pages)->except('error')
             )
         );
     }

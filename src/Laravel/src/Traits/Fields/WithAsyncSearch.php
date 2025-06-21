@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Http\Requests\Relations\RelationModelFieldRequest;
 use MoonShine\Support\DTOs\Select\Option;
@@ -67,7 +68,7 @@ trait WithAsyncSearch
             $value = Arr::first($value);
         }
 
-        $value = str($value)
+        $value = Str::of($value)
             ->replaceFirst($this->withImage['dir'], '')
             ->trim('/')
             ->prepend($this->withImage['dir'] . '/')
@@ -79,7 +80,7 @@ trait WithAsyncSearch
     public function getValuesWithProperties(bool $onlyCustom = false): Collection
     {
         if (! $this->isWithImage()) {
-            return collect();
+            return new Collection([]);
         }
 
         return $this->getMemoizeValues()->mapWithKeys(function (Model $item) use ($onlyCustom): array {

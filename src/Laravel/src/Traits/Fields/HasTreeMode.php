@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Traits\Fields;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\UI\Fields\Checkbox;
 use Throwable;
 
@@ -61,7 +62,7 @@ trait HasTreeMode
                     ->setNameAttribute($this->getNameAttribute((string) $item->getKey()))
                     ->setValue($item->getKey());
 
-                $this->treeHtml .= str((string) $element)->wrap(
+                $this->treeHtml .= Str::of((string) $element)->wrap(
                     "<li style='margin-left: " . ($offset * 30) . "px'>",
                     "</li>"
                 );
@@ -70,7 +71,7 @@ trait HasTreeMode
             }
         }
 
-        return str($this->treeHtml)->wrap(
+        return Str::of($this->treeHtml)->wrap(
             "<ul class='tree-list'>",
             "</ul>"
         )->value();

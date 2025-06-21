@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Support\Traits;
 
 use Closure;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\UI\ComponentAttributesBagContract;
 use MoonShine\Contracts\UI\FieldContract;
 use Throwable;
@@ -105,7 +106,7 @@ trait WithComponentAttributes
 
         return $this->customAttributes([
             'data-name' => $this->getNameAttribute(),
-            'data-column' => str($this->getColumn())->explode('.')->last(),
+            'data-column' => Str::of($this->getColumn())->explode('.')->last(),
             'data-level' => $level,
         ]);
     }
@@ -137,7 +138,7 @@ trait WithComponentAttributes
         $data = [];
 
         foreach ($parameters as $parameter) {
-            $data[] = str($parameter)->isJson() ? $parameter : "`$parameter`";
+            $data[] = Str::of($parameter)->isJson() ? $parameter : "`$parameter`";
         }
 
         $data = implode(",", $data);

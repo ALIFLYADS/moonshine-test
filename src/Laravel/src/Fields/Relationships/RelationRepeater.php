@@ -490,7 +490,7 @@ class RelationRepeater extends ModelRelationField implements
 
     private function saveRelation(array $items, Model $model): Model
     {
-        $items = collect($items);
+        $items = new Collection($items);
 
         if (self::$silentApply) {
             data_set($model, $this->getRelationName(), $items);

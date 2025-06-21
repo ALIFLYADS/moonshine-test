@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Support\Components;
 
+use Illuminate\Support\Str;
 use Illuminate\View\ComponentAttributeBag;
 use MoonShine\Contracts\UI\ComponentAttributesBagContract;
 
@@ -31,7 +32,7 @@ final class MoonShineComponentAttributeBag extends ComponentAttributeBag impleme
 
     private function unique(string $old, string $new, string $separator = ' '): string
     {
-        return str($old)
+        return Str::of($old)
             ->append($separator)
             ->append($new)
             ->trim($separator)

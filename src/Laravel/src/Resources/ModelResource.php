@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Leeto\FastAttributes\Attributes;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
@@ -171,7 +172,7 @@ abstract class ModelResource extends CrudResource implements WithQueryBuilderCon
         $relationDestroyer = static function (ModelRelationField $field) use ($item): void {
             $relationItems = $item->{$field->getRelationName()};
 
-            ! $field->isToOne() ?: $relationItems = collect([$relationItems]);
+            ! $field->isToOne() ?: $relationItems = new Collection([$relationItems]);
 
             $relationItems->each(
                 static fn (mixed $relationItem): mixed => $field->afterDestroy($relationItem),

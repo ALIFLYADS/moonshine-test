@@ -31,7 +31,7 @@ trait WithRelatedValues
 
     protected function getMemoizeValues(): Collection
     {
-        return $this->memoizeValues ?? collect();
+        return $this->memoizeValues ?? new Collection();
     }
 
     public function valuesQuery(Closure $callback): static

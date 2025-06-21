@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\Traits\Fields;
 
 use Closure;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\UI\Fields\Checkbox;
 use Throwable;
 
@@ -62,10 +63,10 @@ trait HasHorizontalMode
                 ->setNameAttribute($this->getNameAttribute((string) $item->getKey()))
                 ->setValue($item->getKey());
 
-            $this->listHtml .= str((string) $element)->wrap("<li>", "</li>");
+            $this->listHtml .= Str::of((string) $element)->wrap("<li>", "</li>");
         }
 
-        return str($this->listHtml)->wrap(
+        return Str::of($this->listHtml)->wrap(
             "<ul class='horizontal-list' style='grid-template-columns: repeat(auto-fill, minmax($this->minColWidth, $this->maxColWidth))'>",
             "</ul>"
         )->value();

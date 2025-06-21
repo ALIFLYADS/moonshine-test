@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\Alert;
@@ -113,8 +114,8 @@ function renderBlade(string $alias, array $parameters = [], array $attributes = 
         return $str;
     };
 
-    $params = collect($parameters)->implode(fn ($k, $v) => \is_array($k) ? " :$v=\"{$array($k)}\"" : " $v='$k' ");
-    $attr = collect($attributes)->implode(fn ($k, $v) => " $v='$k' ");
+    $params = Collection::make($parameters)->implode(fn ($k, $v) => \is_array($k) ? " :$v=\"{$array($k)}\"" : " $v='$k' ");
+    $attr = Collection::make($attributes)->implode(fn ($k, $v) => " $v='$k' ");
 
     return Blade::render("<x-$alias $params $attr>$slot</x-$alias>");
 }

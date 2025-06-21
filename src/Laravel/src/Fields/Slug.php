@@ -37,7 +37,7 @@ class Slug extends Text
                 $fields,
                 fn ($fields): ?FieldContract => $fields
                 ->findByColumn($this->getColumn())
-                ?->setValue(str($title->toValue())->slug($this->getSeparator())->value())
+                ?->setValue(Str::of($title->toValue())->slug($this->getSeparator())->value())
             );
         });
     }
@@ -65,7 +65,7 @@ class Slug extends Text
 
     public function getLocale(): string
     {
-        return $this->locale ?? moonshineConfig()->getLocale();
+        return $this->locale ?? $this->getCore()->getConfig()->getLocale();
     }
 
     public function getSeparator(): string

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use MoonShine\ImportExport\ExportHandler;
 use MoonShine\ImportExport\ImportHandler;
@@ -53,7 +54,7 @@ function testBelongsToManyValue(TestResource $resource, Item $item, array $data,
     $item->refresh();
 
     expect($item->categories->pluck('id', 'id')->sort()->toArray())
-        ->toBe(collect($keys)->sort()->toArray());
+        ->toBe(Collection::make($keys)->sort()->toArray());
 }
 
 it('apply as base', function () {

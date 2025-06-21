@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Traits\Resource;
 
+use Illuminate\Support\Collection;
 use MoonShine\Support\Enums\Action;
 use MoonShine\Support\ListOf;
 
@@ -33,12 +34,12 @@ trait ResourceActions
 
     public function hasAction(Action ...$actions): bool
     {
-        return collect($actions)->every(fn (Action $action): bool => \in_array($action, $this->getActiveActions()));
+        return Collection::make($actions)->every(fn (Action $action): bool => \in_array($action, $this->getActiveActions()));
     }
 
     public function hasAnyAction(Action ...$actions): bool
     {
-        return collect($actions)
+        return Collection::make($actions)
             ->filter(fn (Action $action): bool => \in_array($action, $this->getActiveActions()))
             ->isNotEmpty();
     }

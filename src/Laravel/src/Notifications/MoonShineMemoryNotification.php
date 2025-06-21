@@ -63,7 +63,7 @@ final class MoonShineMemoryNotification implements MoonShineNotificationContract
      */
     public function getAll(): Collection
     {
-        return collect($this->messages);
+        return new Collection($this->messages);
     }
 
     public function readAll(): void

@@ -7,6 +7,7 @@ namespace MoonShine\Support\DTOs\Select;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use JsonException;
 use MoonShine\Support\Enums\ObjectFit;
 use UnitEnum;
@@ -30,7 +31,7 @@ final readonly class Options implements Arrayable
      */
     public function getValues(): Collection
     {
-        return collect($this->values)
+        return Collection::make($this->values)
             ->filter()
             ->map(function (array|string|OptionGroup|Option $labelOrValues, int|string $valueOrLabel): OptionGroup|Option {
                 if ($labelOrValues instanceof Option) {
@@ -94,7 +95,7 @@ final readonly class Options implements Arrayable
             $current = $current->value ?? $current->name ?? null;
         }
 
-        if (\is_string($current) && str($current)->isJson()) {
+        if (\is_string($current) && Str::of($current)->isJson()) {
             $current = json_decode(
                 $current,
                 true,
@@ -138,13 +139,13 @@ final readonly class Options implements Arrayable
 
         $options = $values->mapWithKeys(function (Option|OptionGroup $option): array {
             if ($option instanceof OptionGroup) {
-                return [$option->getLabel() => collect($option->getValues()->toArray())->pluck('label', 'value')->toArray()];
+                return [$option->getLabel() => Collection::make($option->getValues()->toArray())->pluck('label', 'value')->toArray()];
             }
 
             return [$option->getValue() => $option->getLabel()];
         })->toArray();
 
-        $properties = collect($this->flatten())->pluck('properties', 'value')->toArray();
+        $properties = Collection::make($this->flatten())->pluck('properties', 'value')->toArray();
 
         return [
             'options' => $options,

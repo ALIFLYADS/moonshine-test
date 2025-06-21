@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\TypeCasts;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\Core\Paginator\PaginatorCasterContract;
 use MoonShine\Contracts\Core\Paginator\PaginatorContract;
 use MoonShine\Core\Paginator\Paginator;
@@ -18,10 +20,10 @@ final readonly class PaginatorCaster implements PaginatorCasterContract
 
     public function cast(): PaginatorContract
     {
-        $data = collect($this->data)
+        $data = Collection::make($this->data)
             ->except('next_cursor', 'prev_cursor', 'current_page_url')
             ->mapWithKeys(
-                static fn (mixed $value, string $key): array => [(string) str($key)->camel() => $value]
+                static fn (mixed $value, string $key): array => [(string) Str::of($key)->camel() => $value]
             )
             ->toArray();
 

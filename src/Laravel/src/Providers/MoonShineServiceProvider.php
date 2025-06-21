@@ -248,13 +248,15 @@ final class MoonShineServiceProvider extends ServiceProvider
 
     protected function registerApplies(): self
     {
-        appliesRegister()->defaultFor(ModelResource::class);
+        $appliesRegister = $this->app->get(AppliesRegisterContract::class);
 
-        appliesRegister()->for(ModelResource::class)->fields()->push([
+        $appliesRegister->defaultFor(ModelResource::class);
+
+        $appliesRegister->for(ModelResource::class)->fields()->push([
             File::class => FileModelApply::class,
         ]);
 
-        appliesRegister()->for(ModelResource::class)->filters()->push([
+        $appliesRegister->for(ModelResource::class)->filters()->push([
             Date::class => DateModelApply::class,
             Range::class => RangeModelApply::class,
             DateRange::class => DateRangeModelApply::class,

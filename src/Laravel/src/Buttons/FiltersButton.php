@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MoonShine\Laravel\Buttons;
 
+use Illuminate\Support\Collection;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
@@ -23,7 +24,7 @@ final class FiltersButton
     {
         $form = moonshineConfig()->getForm('filters', FiltersForm::class, resource: $resource);
 
-        $count = collect($resource->getFilterParams())
+        $count = Collection::make($resource->getFilterParams())
             ->filter(fn ($value): bool => (new self())->withoutEmptyFilter($value))
             ->count();
 
@@ -48,7 +49,7 @@ final class FiltersButton
     private function withoutEmptyFilter(mixed $value): bool
     {
         if (is_iterable($value) && filled($value)) {
-            return collect($value)
+            return Collection::make($value)
                 ->filter(fn ($v): bool => $this->withoutEmptyFilter($v))
                 ->isNotEmpty();
         }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Support;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\Support\DTOs\AsyncCallback;
 use MoonShine\Support\Enums\HttpMethod;
 use MoonShine\Support\Enums\JsEvent;
@@ -87,7 +89,7 @@ final readonly class AlpineJs
     public static function asyncSelectorsParamsAttributes(array $selectors): array
     {
         return array_filter([
-            'data-async-with-params' => collect($selectors)->map(static fn ($value, $key): string => is_numeric($key) ? $value : "$value/$key")->implode(','),
+            'data-async-with-params' => Collection::make($selectors)->map(static fn ($value, $key): string => is_numeric($key) ? $value : "$value/$key")->implode(','),
         ]);
     }
 
@@ -123,8 +125,8 @@ final readonly class AlpineJs
     public static function prepareEvents(string|array $events): string
     {
         if (\is_array($events)) {
-            return collect($events)
-                ->map(static fn ($value): string => (string) str($value)->lower()->squish())
+            return Collection::make($events)
+                ->map(static fn ($value): string => (string) Str::of($value)->lower()->squish())
                 ->filter()
                 ->implode(',');
         }

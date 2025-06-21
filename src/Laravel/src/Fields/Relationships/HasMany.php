@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOneOrMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
@@ -509,7 +510,7 @@ class HasMany extends ModelRelationField implements
             return true;
         }
 
-        return collect($actions)->every(fn (Action $action): bool => \in_array(
+        return Collection::make($actions)->every(fn (Action $action): bool => \in_array(
             $action,
             $this->activeActions->toArray(),
             true

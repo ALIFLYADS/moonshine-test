@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Traits;
 
 use Closure;
+use Illuminate\Support\Collection;
 use MoonShine\Contracts\UI\ComponentContract;
 
 trait WithComponentsPusher
@@ -24,7 +25,7 @@ trait WithComponentsPusher
      */
     protected function getPushedComponents(): array
     {
-        return collect(static::$pushedComponents)
+        return Collection::make(static::$pushedComponents)
             ->map(
                 fn (Closure|ComponentContract $component) => $component instanceof Closure
                 ? value($component, $this)

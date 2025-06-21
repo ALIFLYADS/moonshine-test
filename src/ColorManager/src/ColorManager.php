@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\ColorManager;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Illuminate\Support\Traits\Conditionable;
 use MoonShine\Contracts\ColorManager\ColorManagerContract;
@@ -198,7 +200,7 @@ final class ColorManager implements ColorManagerContract
         $dark = $arguments['dark'] ?? $arguments[2] ?? false;
 
         $this->set(
-            name: str($name)
+            name: Str::of($name)
                 ->kebab()
                 ->when(
                     $shade,
@@ -214,7 +216,7 @@ final class ColorManager implements ColorManagerContract
 
     public function toHtml(): string
     {
-        $values = static fn (array $data) => collect($data)
+        $values = static fn (array $data) => Collection::make($data)
             ->implode(static fn (string $value, string $name): string => "--$name:$value;", PHP_EOL);
 
         return <<<HTML

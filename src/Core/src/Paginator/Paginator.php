@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Core\Paginator;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\Core\HasCoreContract;
 use MoonShine\Contracts\Core\HasViewRendererContract;
 use MoonShine\Contracts\Core\Paginator\PaginatorContract;
@@ -49,24 +50,24 @@ final class Paginator implements PaginatorContract, HasCoreContract, HasViewRend
 
     public function getData(): Collection
     {
-        return collect($this->data);
+        return new Collection($this->data);
     }
 
     public function getOriginalData(): Collection
     {
-        return collect($this->originalData);
+        return new Collection($this->originalData);
     }
 
     private function changeLinkUrls(string $path): void
     {
         if ($this->path !== $path) {
             $changeUrl = function (?string $link) use ($path): ?string {
-                $current = strtok($this->path, '?');
-                $new = strtok($path, '?');
-                $query = str($path)->contains('?') ? str($path)->after('?')->value() : '';
+                $current = \strtok($this->path, '?');
+                $new = \strtok($path, '?');
+                $query = Str::of($path)->contains('?') ? Str::of($path)->after('?')->value() : '';
 
                 return $link
-                    ? trim(str_replace($current, $new, $link) . '&' . $query, '&')
+                    ? \trim(str_replace($current, $new, $link) . '&' . $query, '&')
                     : $link;
             };
 
@@ -75,7 +76,7 @@ final class Paginator implements PaginatorContract, HasCoreContract, HasViewRend
             $this->prevPageUrl = $changeUrl($this->prevPageUrl);
             $this->lastPageUrl = $changeUrl($this->lastPageUrl);
 
-            $this->links = collect($this->links)
+            $this->links = Collection::make($this->links)
                 ->map(function (array $link) use ($changeUrl): array {
                     $link['url'] = $changeUrl($link['url']);
 

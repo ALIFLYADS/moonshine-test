@@ -100,7 +100,7 @@ final class Search extends MoonShineComponent
 
     protected function getForm(): FormBuilder
     {
-        $value = moonshine()->getRequest()->getScalar($this->key, '');
+        $value = $this->getCore()->getRequest()->getScalar($this->key, '');
 
         $form = FormBuilder::make($this->action, FormMethod::GET)
             ->customAttributes([

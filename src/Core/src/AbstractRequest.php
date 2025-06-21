@@ -68,7 +68,7 @@ class AbstractRequest implements RequestContract
 
     public function getAll(): Collection
     {
-        return collect(
+        return new Collection(
             array_replace_recursive(
                 $this->request->getParsedBody(),
                 $this->request->getUploadedFiles(),

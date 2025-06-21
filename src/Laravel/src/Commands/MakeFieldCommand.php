@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Commands;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 
 use function Laravel\Prompts\{select, text};
@@ -57,7 +58,7 @@ class MakeFieldCommand extends MoonShineCommand
 
     private function findExtends(): array
     {
-        return collect(File::files(__DIR__ . '/../../../UI/src/Fields/'))
+        return Collection::make(File::files(__DIR__ . '/../../../UI/src/Fields/'))
             ->mapWithKeys(
                 static fn (SplFileInfo $file): array => [
                     $file->getFilenameWithoutExtension() => $file->getFilenameWithoutExtension(),

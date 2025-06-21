@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Commands;
 
 use Closure;
+use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
 use function Laravel\Prompts\{outro, text};
@@ -76,7 +77,7 @@ abstract class MoonShineCommand extends Command
                         }
                     }
 
-                    $content = str(implode("\n", $lines));
+                    $content = Str::of(implode("\n", $lines));
                 }
 
                 return $content->replace("];", "{$tab()}MenuItem::make('$title', $class::class),\n{$tab(2)}];");
@@ -98,7 +99,7 @@ abstract class MoonShineCommand extends Command
         $basename = class_basename($class);
         $namespace = $class;
 
-        $content = str(file_get_contents($to));
+        $content = Str::of(file_get_contents($to));
 
         if ($content->contains('->autoload(') || $content->contains('->autoloadMenu(')) {
             return;
@@ -153,11 +154,11 @@ abstract class MoonShineCommand extends Command
 
     protected function makeViewFromStub(string $path, string $name, string $dir = ''): string
     {
-        $suggestView = str($name)
+        $suggestView = Str::of($name)
             ->classBasename()
             ->kebab()
             ->prepend(
-                $path . '.' . str($dir)
+                $path . '.' . Str::of($dir)
                     ->replace('/', '.')
                     ->lower()
                     ->whenNotEmpty(fn (Stringable $str) => $str->append('.')),
@@ -212,7 +213,7 @@ abstract class MoonShineCommand extends Command
         $baseDir = $this->hasOption('base-dir') ? $this->option('base-dir') : null;
         $baseNamespace = $this->hasOption('base-namespace') ? $this->option('base-namespace') : null;
 
-        $toNamespace = static fn (string $str): string => str($str)
+        $toNamespace = static fn (string $str): string => Str::of($str)
             ->trim('\\')
             ->trim('/')
             ->replace('/', '\\')

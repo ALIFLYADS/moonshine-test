@@ -28,7 +28,7 @@ class Fragment extends AbstractWithComponents implements HasAsyncContract
     {
         parent::__construct($components);
 
-        $this->async(static function (Fragment $fragment): RedirectResponse|string {
+        $this->async(function (Fragment $fragment): RedirectResponse|string {
             $page = $fragment->getNowOnPage() ?? moonshineRequest()->findPage();
             $resource = $fragment->getNowOnResource() ?? moonshineRequest()->getResource();
 
@@ -41,14 +41,16 @@ class Fragment extends AbstractWithComponents implements HasAsyncContract
             $params = $fragment->getNowOnQueryParams();
             $itemID = $params['resourceItem'] ?? moonshineRequest()->getItemID();
 
-            return toPage(
+            return $this->getCore()->getRouter()->getEndpoints()->toPage(
                 page: $fragment->getNowOnPage() ?? moonshineRequest()->getPage(),
                 resource: $fragment->getNowOnResource() ?? moonshineRequest()->getResource(),
                 params: array_filter([
                     ...$fragment->getNowOnQueryParams(),
                     'resourceItem' => $itemID,
                 ]),
-                fragment: $fragment->getName()
+                extra: [
+                    'fragment' => $fragment->getName(),
+                ]
             );
         });
     }

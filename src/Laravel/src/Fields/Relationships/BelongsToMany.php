@@ -207,7 +207,7 @@ class BelongsToMany extends ModelRelationField implements
 
     protected function isValueWithModels(mixed $data = null): bool
     {
-        $data = collect($data ?? $this->toValue());
+        $data = new Collection($data ?? $this->toValue());
 
         if ($data->isEmpty()) {
             return false;
@@ -389,7 +389,7 @@ class BelongsToMany extends ModelRelationField implements
 
         $oldPivot = $this->getCore()->getRequest()->getOld($this->getPivotName());
 
-        return collect($old)
+        return Collection::make($old)
             ->map(fn ($key): ?Model => clone $this->makeRelatedModel($key, relations: $oldPivot[$key] ?? [], related: $this->getRelation()?->getRelated()))
             ->values();
     }
@@ -398,7 +398,7 @@ class BelongsToMany extends ModelRelationField implements
     {
         if (\is_array($this->toValue())) {
             $this->setValue(
-                collect($this->toValue())
+                Collection::make($this->toValue())
                     ->map(fn ($key): ?Model => clone $this->makeRelatedModel($key, related: $this->getRelation()?->getRelated()))
                     ->values()
             );
@@ -479,7 +479,7 @@ class BelongsToMany extends ModelRelationField implements
 
     public function getCheckedKeys(): Collection
     {
-        $requestValues = collect($this->getRequestValue() ?: []);
+        $requestValues = new Collection($this->getRequestValue() ?: []);
 
         if ($this->isSelectMode() || $this->isTree() || $this->isHorizontalMode()) {
             return $requestValues;
@@ -606,7 +606,7 @@ class BelongsToMany extends ModelRelationField implements
     public function prepareReactivityValue(mixed $value, mixed &$casted, array &$except): mixed
     {
         $casted = $this->getRelatedModel();
-        $value = collect($value)
+        $value = Collection::make($value)
             ->map(fn ($key): ?Model => clone $this->makeRelatedModel($key, related: $this->getRelation()?->getRelated()))
             ->values();
 

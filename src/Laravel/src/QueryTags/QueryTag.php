@@ -6,6 +6,7 @@ namespace MoonShine\Laravel\QueryTags;
 
 use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\Core\HasCanSeeContract;
 use MoonShine\Contracts\Core\HasCoreContract;
 use MoonShine\Contracts\UI\ActionButtonContract;
@@ -60,7 +61,7 @@ final class QueryTag implements HasCanSeeContract, HasIconContract, HasLabelCont
             return $this->alias;
         }
 
-        return str($this->getLabel())->slug()->value();
+        return Str::of($this->getLabel())->slug()->value();
     }
 
     public function default(Closure|bool|null $condition = null): self

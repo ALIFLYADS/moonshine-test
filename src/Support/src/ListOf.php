@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Support;
 
+use Illuminate\Support\Collection;
+
 /**
  * @template T
  */
@@ -26,7 +28,7 @@ final class ListOf
      */
     private function getItems(): array
     {
-        return collect($this->items)
+        return Collection::make($this->items)
             ->ensure($this->getType())
             ->toArray();
     }
@@ -43,7 +45,7 @@ final class ListOf
      */
     public function except(object|string ...$data): self
     {
-        $condition = static fn (object $item): bool => collect($data)->every(
+        $condition = static fn (object $item): bool => Collection::make($data)->every(
             fn (object|string $i): bool => match (true) {
                 \is_string($i) => $item::class !== $i,
                 \is_callable($i) => ! $i($item),
@@ -51,7 +53,7 @@ final class ListOf
             }
         );
 
-        $this->items = collect($this->items)
+        $this->items = Collection::make($this->items)
             ->filter($condition)
             ->toArray();
 
@@ -65,7 +67,7 @@ final class ListOf
      */
     public function only(object|string ...$data): self
     {
-        $condition = static fn (object $item): bool => collect($data)->contains(
+        $condition = static fn (object $item): bool => Collection::make($data)->contains(
             fn (object|string $i): bool => match (true) {
                 \is_string($i) => $item::class === $i,
                 \is_callable($i) => $i($item),
@@ -73,7 +75,7 @@ final class ListOf
             }
         );
 
-        $this->items = collect($this->items)
+        $this->items = Collection::make($this->items)
         ->filter($condition)
         ->toArray();
 
@@ -85,7 +87,7 @@ final class ListOf
      */
     public function add(object ...$data): self
     {
-        $this->items = collect($this->items)
+        $this->items = Collection::make($this->items)
             ->push(...$data)
             ->toArray();
 
@@ -98,7 +100,7 @@ final class ListOf
     public function prepend(object ...$data): self
     {
         foreach ($data as $item) {
-            $this->items = collect($this->items)
+            $this->items = Collection::make($this->items)
                 ->prepend($item)
                 ->toArray();
         }

@@ -40,12 +40,12 @@ class ErrorPage extends Page
      */
     protected function components(): iterable
     {
-        $logo = moonshineAssets()->getAsset('vendor/moonshine/logo-small.svg');
+        $logo = $this->getAssetManager()->getAsset('vendor/moonshine/logo-small.svg');
 
-        $backUrl = moonshineRouter()->getEndpoints()->home();
+        $backUrl = $this->getCore()->getRouter()->getEndpoints()->home();
 
-        if ($resourceUri = moonshineRouter()->extractResourceUri()) {
-            $backUrl = moonshine()->getResources()->findByUri($resourceUri)?->getUrl() ?? $backUrl;
+        if ($resourceUri = $this->getCore()->getRouter()->extractResourceUri()) {
+            $backUrl = $this->getCore()->getResources()->findByUri($resourceUri)?->getUrl() ?? $backUrl;
         }
 
         $code = $this->code;

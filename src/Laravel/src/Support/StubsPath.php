@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Support;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 final class StubsPath
 {
@@ -22,22 +23,22 @@ final class StubsPath
     ) {
         $this->ext ??= File::extension($this->path);
 
-        $pathWithExt = str($this->path)
+        $pathWithExt = Str::of($this->path)
             ->replace('\\', '/')
             ->replaceLast('.' . $this->ext, '')
             ->append('.' . $this->ext)
             ->value();
 
-        $this->basename = str($pathWithExt)->basename()->value();
+        $this->basename = Str::of($pathWithExt)->basename()->value();
         $this->name = str_replace('.' . $this->ext, '', $this->basename);
 
-        $this->dir = str($pathWithExt)
+        $this->dir = Str::of($pathWithExt)
             ->dirname()
             ->trim('/')
             ->remove('.')
             ->value();
 
-        $this->namespace = str($this->dir)
+        $this->namespace = Str::of($this->dir)
             ->replace('/', '\\')
             ->value();
     }

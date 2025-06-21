@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use MoonShine\Support\Enums\TextWrap;
 use MoonShine\Tests\Fixtures\Resources\TestResourceBuilder;
 use MoonShine\UI\Fields\Field;
@@ -121,7 +122,7 @@ it('add/remove classes', function () {
     $field->class(['test', 'form-control', 'btn-primary', 'btn-primaries', 'primary']);
     $field->removeClass('primary|test');
 
-    expect(str($field->getAttributes()->get('class'))->explode(' '))
+    expect(Str::of($field->getAttributes()->get('class'))->explode(' '))
         ->toContainEqual('form-control', 'btn-primary', 'btn-primaries', 'btn-primary-lg')
         ->not->toContainEqual('primary')
     ;

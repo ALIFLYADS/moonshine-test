@@ -38,7 +38,7 @@ it('to page url', function () {
         ->toContain('/admin/test-resource/custom-page-detail/1')
     ;
 
-    $urlFromHelper = toPage(CustomPageForm::class, $this->resource, params: ['resourceItem' => 1]);
+    $urlFromHelper = $this->moonshineCore->getRouter()->getEndpoints()->toPage(CustomPageForm::class, $this->resource, params: ['resourceItem' => 1]);
     expect($urlFromHelper)
         ->toContain('/admin/test-resource/custom-page-form/1')
         ->toEqual($url)

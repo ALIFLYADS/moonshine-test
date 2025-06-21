@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOneOrMany;
+use Illuminate\Support\Collection;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Contracts\UI\ComponentContract;
@@ -137,7 +138,7 @@ class HasOne extends ModelRelationField implements
     {
         $items = [$this->toValue()];
 
-        return collect($items)
+        return Collection::make($items)
             ->map(fn (Model $item) => data_get($item, $this->getResourceColumn()))
             ->implode(';');
     }
@@ -287,7 +288,7 @@ class HasOne extends ModelRelationField implements
 
         return $this->resolvedComponent = FormBuilder::make($action)
             ->reactiveUrl(
-                static fn (): string => moonshineRouter()
+                fn (): string => $this->getCore()->getRouter()
                     ->getEndpoints()
                     ->reactive(page: $resource->getFormPage(), resource: $resource, extra: ['key' => $item?->getKey()])
             )

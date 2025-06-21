@@ -103,7 +103,7 @@ class LoginFormRequest extends MoonShineFormRequest
     public function getThrottleKey(): string
     {
         return Str::transliterate(
-            str($this->input('username') . '|' . $this->ip())
+            Str::of($this->input('username') . '|' . $this->ip())
                 ->lower()
                 ->value()
         );

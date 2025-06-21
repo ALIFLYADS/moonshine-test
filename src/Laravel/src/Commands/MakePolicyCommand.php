@@ -6,6 +6,8 @@ namespace MoonShine\Laravel\Commands;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use function Laravel\Prompts\{suggest};
 
 use MoonShine\Laravel\MoonShineAuth;
@@ -29,14 +31,14 @@ class MakePolicyCommand extends MoonShineCommand
 
         $className = $this->argument('className') ?? suggest(
             label: 'Model',
-            options: collect((new Finder())->files()->depth(0)->in($modelPath))
+            options: Collection::make((new Finder())->files()->depth(0)->in($modelPath))
                 ->map(static fn ($file) => $file->getBasename('.php'))
                 ->values()
                 ->all(),
             required: true,
         );
 
-        $className = str($className)
+        $className = Str::of($className)
             ->ucfirst()
             ->remove('policy', false)
             ->value();

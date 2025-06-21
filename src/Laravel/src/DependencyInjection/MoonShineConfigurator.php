@@ -380,7 +380,7 @@ final class MoonShineConfigurator implements ConfiguratorContract
 
         return $this->set(
             'pages',
-            collect($pages)
+            Collection::make($pages)
                 ->map(static fn (string $page): string => $page === $old ? $new : $page)
                 ->toArray()
         );

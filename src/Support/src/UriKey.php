@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MoonShine\Support;
 
+use Illuminate\Support\Str;
+
 final readonly class UriKey
 {
     /**
@@ -15,7 +17,7 @@ final readonly class UriKey
 
     public function generate(): string
     {
-        return str($this->class)
+        return Str::of($this->class)
             ->classBasename()
             ->kebab()
             ->value();

@@ -86,7 +86,7 @@ final readonly class MenuAutoloader implements MenuAutoloaderContract
             if ($label !== null) {
                 $existingGroup = $items[$label] ?? null;
 
-                $existingItems = collect($existingGroup['items'] ?? []);
+                $existingItems = new Collection($existingGroup['items'] ?? []);
 
                 if (! $existingItems->pluck('filler')->contains($data['filler'])) {
                     $existingItems->push($data);

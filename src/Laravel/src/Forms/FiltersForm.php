@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MoonShine\Laravel\Forms;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Contracts\UI\FormBuilderContract;
 use MoonShine\Contracts\UI\FormContract;
@@ -153,7 +154,7 @@ final readonly class FiltersForm implements FormContract
 
     private function getFormAction(array $query = []): string
     {
-        return str(request()->url())->when(
+        return Str::of(request()->url())->when(
             $query,
             static fn (Stringable $str): Stringable
                 => $str
