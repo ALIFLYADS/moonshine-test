@@ -42,7 +42,7 @@ class MakeResourceCommand extends MoonShineCommand
             ->remove('resource', false)
             ->value();
 
-        $stubsPath = $this->qualifyStubsDir($stubsPath, 'Resources');
+        $stubsPath = $this->qualifyStubsDir($stubsPath, "Resources/$name");
 
         $this->makeDir($stubsPath->dir);
 
@@ -92,7 +92,7 @@ class MakeResourceCommand extends MoonShineCommand
                 '--without-register' => true,
             ]);
 
-            $pageNamespace = $this->getNamespace("\Pages\\$name\\$name");
+            $pageNamespace = $this->getNamespace("\Resources\\$name\Pages\\$name");
 
             $replace += [
                 '{indexPage}' => "{$name}IndexPage",

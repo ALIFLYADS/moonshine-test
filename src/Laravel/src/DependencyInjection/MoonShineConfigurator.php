@@ -52,6 +52,8 @@ final class MoonShineConfigurator implements ConfiguratorContract
     {
         $base ??= $this->get('namespace');
 
+        $path = str_replace('/', '\\', $path);
+
         return $base . '\\' . trim($path, '\\');
     }
 

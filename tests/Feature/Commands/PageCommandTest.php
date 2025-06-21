@@ -69,9 +69,9 @@ final class PageCommandTest extends TestCase
     public function successfulCrudCreated(): void
     {
         $name = 'DeleteMe';
-        $path1 = __DIR__ . "/../../../app/MoonShine/Pages/$name/{$name}IndexPage.php";
-        $path2 = __DIR__ . "/../../../app/MoonShine/Pages/$name/{$name}FormPage.php";
-        $path3 = __DIR__ . "/../../../app/MoonShine/Pages/$name/{$name}DetailPage.php";
+        $path1 = __DIR__ . "/../../../app/MoonShine/Resources/$name/Pages/{$name}IndexPage.php";
+        $path2 = __DIR__ . "/../../../app/MoonShine/Resources/$name/Pages/{$name}FormPage.php";
+        $path3 = __DIR__ . "/../../../app/MoonShine/Resources/$name/Pages/{$name}DetailPage.php";
 
         @unlink($path1);
         @unlink($path2);

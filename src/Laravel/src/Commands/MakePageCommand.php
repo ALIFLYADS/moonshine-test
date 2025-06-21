@@ -68,13 +68,17 @@ class MakePageCommand extends MoonShineCommand
         if ($this->option('crud')) {
             $name = $stubsPath->name;
 
+            if($this->option('dir') === null) {
+                $dir = "Resources/$className/Pages";
+            }
+
             foreach (['IndexPage', 'FormPage', 'DetailPage'] as $type) {
                 $stubsPath = new StubsPath("$name$type", 'php');
 
                 $stubsPath->prependDir(
-                    $this->getDirectory("$dir/$name"),
+                    $this->getDirectory($dir),
                 )->prependNamespace(
-                    $this->getNamespace("$dir\\$name"),
+                    $this->getNamespace($dir),
                 );
 
                 $this->makePage($stubsPath, "Crud$type", $type, $resource);
