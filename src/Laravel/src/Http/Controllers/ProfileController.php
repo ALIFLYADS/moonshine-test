@@ -7,6 +7,8 @@ namespace MoonShine\Laravel\Http\Controllers;
 use Illuminate\Database\Eloquent\Model;
 use MoonShine\Laravel\Http\Requests\ProfileFormRequest;
 use MoonShine\Laravel\Pages\ProfilePage;
+use MoonShine\Support\AlpineJs;
+use MoonShine\Support\Enums\JsEvent;
 use MoonShine\Support\Enums\ToastType;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -29,7 +31,16 @@ class ProfileController extends MoonShineController
         $type = $success ? ToastType::SUCCESS : ToastType::ERROR;
 
         if ($request->ajax()) {
-            return $this->json(message: $message, messageType: $type);
+            return $this
+                ->json(message: $message, messageType: $type)
+                ->events([
+                    AlpineJs::event(
+                        JsEvent::FRAGMENT_UPDATED, 'sidebar-content',
+                    ),
+                    AlpineJs::event(
+                        JsEvent::FRAGMENT_UPDATED, 'topbar-actions',
+                    )
+                ]);
         }
 
         $this->toast(
