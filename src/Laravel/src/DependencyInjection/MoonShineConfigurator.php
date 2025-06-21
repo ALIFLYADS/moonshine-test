@@ -274,11 +274,11 @@ final class MoonShineConfigurator implements ConfiguratorContract
     }
 
     /**
-     * @return class-string
+     * @return list<class-string>
      */
-    public function getAuthMiddleware(): string
+    public function getAuthMiddleware(): array
     {
-        return $this->get('auth.middleware', '');
+        return $this->get('auth.middleware', []);
     }
 
     public function getPagePrefix(): string
