@@ -70,7 +70,7 @@ final class AsyncSearchController extends MoonShineController
             ? array_keys($values)
             : array_filter(explode(',', (string) $values));
 
-        if($field instanceof BelongsToMany && !$field->isDeduplicate()) {
+        if ($field instanceof BelongsToMany && ! $field->isDeduplicate()) {
             $except = [];
         }
 

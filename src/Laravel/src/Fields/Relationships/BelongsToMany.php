@@ -312,7 +312,7 @@ class BelongsToMany extends ModelRelationField implements
                     ]);
             }
 
-            if($this->isDeduplicate() === false) {
+            if ($this->isDeduplicate() === false) {
                 return $value;
             }
 
@@ -368,7 +368,7 @@ class BelongsToMany extends ModelRelationField implements
 
         return $this->resolvedComponent = TableBuilder::make(items: $values)
             ->when(
-                !$this->isDeduplicate(),
+                ! $this->isDeduplicate(),
                 static fn (TableBuilderContract $table): TableBuilderContract => $table->withoutKey(),
             )
             ->name($this->getTableComponentName())
@@ -508,7 +508,7 @@ class BelongsToMany extends ModelRelationField implements
             return $requestValues;
         }
 
-        if($this->isDeduplicate() === false) {
+        if ($this->isDeduplicate() === false) {
             return $requestValues;
         }
 
@@ -588,16 +588,17 @@ class BelongsToMany extends ModelRelationField implements
         }
 
         $result = (new Collection($applyValues))->mapWithKeys(fn (array $value): array => [
-            $value[$this->getRelatedKeyName()] => data_forget($value, $this->getRelatedKeyName())
+            $value[$this->getRelatedKeyName()] => data_forget($value, $this->getRelatedKeyName()),
         ]);
 
         if (self::$silentApply) {
             data_set($item, $this->getRelationName(), $result->toArray());
-        } elseif($this->isDeduplicate() === false) {
+        } elseif ($this->isDeduplicate() === false) {
             $item->{$this->getRelationName()}()->sync([]);
 
             $result->each(fn (array $value, int|string $key) => $item->{$this->getRelationName()}()->attach(
-                $key, $value
+                $key,
+                $value
             ));
         } else {
             $item->{$this->getRelationName()}()->sync($result);
