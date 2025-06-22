@@ -106,6 +106,20 @@ class BelongsToMany extends ModelRelationField implements
 
     protected ?TableBuilderContract $resolvedComponent = null;
 
+    protected bool $isDeduplicate = true;
+
+    public function deduplication(Closure|bool|null $condition = null): static
+    {
+        $this->isDeduplicate = value($condition, $this) ?? true;
+
+        return $this;
+    }
+
+    public function isDeduplicate(): bool
+    {
+        return $this->isDeduplicate;
+    }
+
     public function onlyCount(): static
     {
         $this->onlyCount = true;
@@ -298,7 +312,12 @@ class BelongsToMany extends ModelRelationField implements
                     ]);
             }
 
-            $checked = $this->toValue()
+            if($this->isDeduplicate() === false) {
+                return $value;
+            }
+
+            $checked = $this
+                ->toValue()
                 ->first(static fn ($item): bool => $item->getKey() === $value->getKey());
 
             return $value
@@ -348,6 +367,10 @@ class BelongsToMany extends ModelRelationField implements
             ->prepend($identityField);
 
         return $this->resolvedComponent = TableBuilder::make(items: $values)
+            ->when(
+                !$this->isDeduplicate(),
+                static fn (TableBuilderContract $table): TableBuilderContract => $table->withoutKey(),
+            )
             ->name($this->getTableComponentName())
             ->customAttributes($this->getAttributes()->jsonSerialize())
             ->fields($fields)
@@ -485,6 +508,10 @@ class BelongsToMany extends ModelRelationField implements
             return $requestValues;
         }
 
+        if($this->isDeduplicate() === false) {
+            return $requestValues;
+        }
+
         return $requestValues->keys();
 
     }
@@ -532,13 +559,15 @@ class BelongsToMany extends ModelRelationField implements
 
         $applyValues = [];
 
-        foreach ($checkedKeys as $key) {
+        foreach ($checkedKeys as $index => $key) {
             foreach ($this->resetPreparedFields()->getPreparedFields() as $field) {
                 if (! $field->isCanApply()) {
                     continue;
                 }
 
-                $field->setNameIndex($key);
+                $field->setNameIndex(
+                    $this->isDeduplicate() === false ? $index : $key
+                );
 
                 $values = $field->getRequestValue() !== false ? $field->getRequestValue() : null;
 
@@ -547,19 +576,31 @@ class BelongsToMany extends ModelRelationField implements
                     $values,
                 );
 
+                $applyValues[$index][$this->getRelatedKeyName()] = $key;
+
                 data_set(
                     /** @phpstan-ignore-next-line  */
-                    $applyValues[$key],
+                    $applyValues[$index],
                     str_replace($this->getPivotAs() . '.', '', $field->getColumn()),
                     data_get($apply, $field->getColumn()),
                 );
             }
         }
 
+        $result = (new Collection($applyValues))->mapWithKeys(fn (array $value): array => [
+            $value[$this->getRelatedKeyName()] => data_forget($value, $this->getRelatedKeyName())
+        ]);
+
         if (self::$silentApply) {
-            data_set($item, $this->getRelationName(), $applyValues);
+            data_set($item, $this->getRelationName(), $result->toArray());
+        } elseif($this->isDeduplicate() === false) {
+            $item->{$this->getRelationName()}()->sync([]);
+
+            $result->each(fn (array $value, int|string $key) => $item->{$this->getRelationName()}()->attach(
+                $key, $value
+            ));
         } else {
-            $item->{$this->getRelationName()}()->sync($applyValues);
+            $item->{$this->getRelationName()}()->sync($result);
         }
 
         return $item;

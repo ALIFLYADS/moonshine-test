@@ -8,6 +8,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use MoonShine\Laravel\Contracts\Fields\HasAsyncSearchContract;
 use MoonShine\Laravel\Contracts\Resource\WithQueryBuilderContract;
+use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use MoonShine\Laravel\Fields\Relationships\MorphTo;
 use MoonShine\Laravel\Http\Requests\Relations\RelationModelFieldRequest;
 use MoonShine\Laravel\Support\DBOperators;
@@ -68,6 +69,10 @@ final class AsyncSearchController extends MoonShineController
         $except = \is_array($values)
             ? array_keys($values)
             : array_filter(explode(',', (string) $values));
+
+        if($field instanceof BelongsToMany && !$field->isDeduplicate()) {
+            $except = [];
+        }
 
         $offset = $request->input('offset', 0);
 
