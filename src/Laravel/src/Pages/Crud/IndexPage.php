@@ -227,7 +227,7 @@ class IndexPage extends CrudPage implements IndexPageContract
                     $this->getTopRightButtons(),
                 ),
             ])
-                ->justifyAlign('between')
+                ->justifyAlign($this->getTopLeftButtons()->onlyVisible()->isEmpty() ? 'end' : 'between')
                 ->itemsAlign('start'),
             LineBreak::make(),
         ];
