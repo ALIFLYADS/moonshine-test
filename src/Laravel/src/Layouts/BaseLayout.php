@@ -56,7 +56,7 @@ abstract class BaseLayout extends AbstractLayout
 
             Fragment::make([
                 Assets::make(),
-            ])->name('assets')
+            ])->name('assets'),
         ])
             ->bodyColor($this->getColorManager()->get('body'))
             ->title($this->getPage()->getTitle() ?: $this->getCore()->getConfig()->getTitle());
