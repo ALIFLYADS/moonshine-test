@@ -35,7 +35,7 @@ final class ColorMutatorTest extends TestCase
             ['243, 243, 243, 0.5'],
             ['oklch(96.42% 0.000 0)'],
             ['oklch(0.9642 0 0)'],
-            ['bad string', '#000000']
+            ['bad string', '#000000'],
         ];
     }
 
