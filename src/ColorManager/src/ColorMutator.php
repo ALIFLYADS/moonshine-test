@@ -42,7 +42,7 @@ final class ColorMutator
                 $hex = preg_replace('/(.)/', '$1$1', $hex);
             }
 
-            $dec = hexdec($hex);
+            $dec = hexdec((string) $hex);
 
             return \sprintf(
                 'rgb(%d,%d,%d)',
@@ -171,7 +171,7 @@ final class ColorMutator
         $g = -1.2684380046 * $l_ + 2.6097574011 * $m_ - 0.3413193965 * $s_;
         $b = -0.0041960863 * $l_ - 0.7034186147 * $m_ + 1.7076147010 * $s_;
 
-        $toSrgb = static fn ($v) => $v <= 0.0031308
+        $toSrgb = static fn ($v): float => $v <= 0.0031308
             ? 12.92 * $v
             : 1.055 * ($v ** (1 / 2.4)) - 0.055;
 
