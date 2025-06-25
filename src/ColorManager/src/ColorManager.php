@@ -180,7 +180,7 @@ final class ColorManager implements ColorManagerContract
         $colors = [];
         $data = $dark ? $this->darkColors : $this->colors;
 
-        $formatRgb = static fn(string $rgb) => str_replace(['rgb(', ')'], ['', ''], $rgb);
+        $formatRgb = static fn(string $rgb): string => str_replace(['rgb(', ')'], ['', ''], $rgb);
 
         foreach ($data as $name => $shades) {
             if (! \is_array($shades)) {
