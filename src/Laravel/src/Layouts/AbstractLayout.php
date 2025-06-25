@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MoonShine\UI;
+namespace MoonShine\Laravel\Layouts;
 
 use MoonShine\AssetManager\Css;
 use MoonShine\AssetManager\Js;
