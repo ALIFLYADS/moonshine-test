@@ -57,7 +57,6 @@ $contextDependenciesMap = [
         'Leeto\FastAttributes',
     ],
     'MoonShine\UI' => [
-        'MoonShine\AssetManager',
         'MoonShine\Core',
         'MoonShine\Contracts',
         'MoonShine\Support',

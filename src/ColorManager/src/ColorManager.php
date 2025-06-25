@@ -180,12 +180,14 @@ final class ColorManager implements ColorManagerContract
         $colors = [];
         $data = $dark ? $this->darkColors : $this->colors;
 
+        $formatRgb = static fn(string $rgb) => str_replace(['rgb(', ')'], ['', ''], $rgb);
+
         foreach ($data as $name => $shades) {
             if (! \is_array($shades)) {
-                $colors[$name] = ColorMutator::toRGB($shades);
+                $colors[$name] = $formatRgb(ColorMutator::toRGB($shades));
             } else {
                 foreach ($shades as $shade => $color) {
-                    $colors["$name-$shade"] = ColorMutator::toRGB($color);
+                    $colors["$name-$shade"] = $formatRgb(ColorMutator::toRGB($color));
                 }
             }
         }

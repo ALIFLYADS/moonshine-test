@@ -11,7 +11,6 @@ use MoonShine\Laravel\Components\Layout\Notifications;
 use MoonShine\Laravel\Components\Layout\Profile;
 use MoonShine\Laravel\Components\Layout\Search;
 use MoonShine\Laravel\DependencyInjection\MoonShine;
-use MoonShine\UI\AbstractLayout;
 use MoonShine\UI\Components\Breadcrumbs;
 use MoonShine\UI\Components\Components;
 use MoonShine\UI\Components\Heading;
