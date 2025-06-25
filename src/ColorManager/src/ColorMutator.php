@@ -11,7 +11,7 @@ final class ColorMutator
         if (str_contains($value, 'oklch')) {
             $rgb = self::fromOKLCH($value);
 
-            return sprintf('#%02x%02x%02x', ...$rgb);
+            return \sprintf('#%02x%02x%02x', ...$rgb);
         }
 
         if (str_contains($value, '#')) {
@@ -24,7 +24,7 @@ final class ColorMutator
             return '#000000';
         }
 
-        return sprintf('#%02x%02x%02x', ...$rgb);
+        return \sprintf('#%02x%02x%02x', ...$rgb);
     }
 
     public static function toRGB(string $value): string
@@ -32,19 +32,19 @@ final class ColorMutator
         if (str_contains($value, 'oklch')) {
             $rgb = self::fromOKLCH($value);
 
-            return sprintf('rgb(%d,%d,%d)', ...$rgb);
+            return \sprintf('rgb(%d,%d,%d)', ...$rgb);
         }
 
         if (str_contains($value, '#')) {
             $hex = ltrim($value, '#');
 
-            if (strlen($hex) === 3) {
+            if (\strlen($hex) === 3) {
                 $hex = preg_replace('/(.)/', '$1$1', $hex);
             }
 
             $dec = hexdec((string) $hex);
 
-            return sprintf(
+            return \sprintf(
                 'rgb(%d,%d,%d)',
                 0xFF & ($dec >> 0x10),
                 0xFF & ($dec >> 0x8),
@@ -55,10 +55,10 @@ final class ColorMutator
         $rgb = self::fromRGB($value);
 
         if (isset($rgb[3])) {
-            return sprintf('rgba(%d,%d,%d,%.2f)', $rgb[0], $rgb[1], $rgb[2], (float) $rgb[3]);
+            return \sprintf('rgba(%d,%d,%d,%.2f)', $rgb[0], $rgb[1], $rgb[2], (float) $rgb[3]);
         }
 
-        return sprintf('rgb(%d,%d,%d)', ...$rgb);
+        return \sprintf('rgb(%d,%d,%d)', ...$rgb);
     }
 
     public static function toOKLCH(string $value): string
@@ -127,14 +127,14 @@ final class ColorMutator
         if (preg_match('/rgba?\s*\(([^)]+)\)/i', $value, $matches)) {
             $channels = preg_split('/\s*,\s*/', trim($matches[1]));
 
-            if (count($channels) >= 3) {
+            if (\count($channels) >= 3) {
                 return $channels;
             }
         }
 
         $channels = preg_split('/[\s,]+/', trim($value));
 
-        if (count($channels) >= 3) {
+        if (\count($channels) >= 3) {
             return $channels;
         }
 
@@ -171,7 +171,7 @@ final class ColorMutator
         $g = -1.2684380046 * $l_ + 2.6097574011 * $m_ - 0.3413193965 * $s_;
         $b = -0.0041960863 * $l_ - 0.7034186147 * $m_ + 1.7076147010 * $s_;
 
-        $toSrgb = static fn($v): float => $v <= 0.0031308
+        $toSrgb = static fn ($v): float => $v <= 0.0031308
             ? 12.92 * $v
             : 1.055 * ($v ** (1 / 2.4)) - 0.055;
 
