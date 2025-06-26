@@ -587,18 +587,18 @@ class BelongsToMany extends ModelRelationField implements
             }
         }
 
-        $result = (new Collection($applyValues))->mapWithKeys(fn (array $value): array => [
+        $result = (new Collection($applyValues))->mapWithKeys(fn (array $value, int $index): array => $this->isDeduplicate() ? [
             $value[$this->getRelatedKeyName()] => data_forget($value, $this->getRelatedKeyName()),
-        ]);
+        ] : [$index => $value]);
 
         if (self::$silentApply) {
             data_set($item, $this->getRelationName(), $result->toArray());
         } elseif ($this->isDeduplicate() === false) {
             $item->{$this->getRelationName()}()->sync([]);
 
-            $result->each(fn (array $value, int|string $key) => $item->{$this->getRelationName()}()->attach(
-                $key,
-                $value
+            $result->each(fn (array $value) => $item->{$this->getRelationName()}()->attach(
+                $value[$this->getRelatedKeyName()],
+                data_forget($value, $this->getRelatedKeyName())
             ));
         } else {
             $item->{$this->getRelationName()}()->sync($result);
